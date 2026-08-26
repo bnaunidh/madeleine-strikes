@@ -61,7 +61,7 @@
   .theme-toggle{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--muted);display:grid;place-items:center;transition:.15s;flex:0 0 auto}
   .theme-toggle:hover{background:var(--bg);color:var(--ink)}
   .tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:11px}
-  .tab{padding:7px 13px;border-radius:8px;font-size:13.5px;font-weight:550;color:var(--muted);transition:.15s;display:flex;align-items:center;gap:7px}
+  .tab{padding:7px 13px;border-radius:8px;font-size:13.5px;font-weight:550;color:var(--muted);transition:.15s;display:flex;align-items:center;gap:7px;white-space:nowrap}
   .tab.active{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(20,28,45,.09)}
   .tab:not(.active):hover{color:var(--ink)}
 
@@ -129,6 +129,7 @@
   .s-sub{font-size:12.5px;color:var(--muted);margin-top:2px}
   .s-sub b{color:var(--ink);font-weight:600}
   .chip{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--blue-soft);color:var(--blue-dark)}
+  .s-right{flex:1;display:flex;align-items:center;gap:12px;min-width:0}
   .s-cons{flex:1;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px;min-width:0}
 
   /* check-in icons */
@@ -264,6 +265,30 @@
   .gate-err{color:var(--red);font-size:13px;min-height:18px;margin:8px 0 2px}
   .gate-shake{animation:shake .3s}
   @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+
+  /* ---------- Mobile ---------- */
+  @media(max-width:560px){
+    .topbar-inner{flex-wrap:wrap;padding:10px 14px;gap:10px}
+    .brand p{display:none}
+    .brand h1{font-size:15.5px}
+    .theme-toggle{margin-left:auto}
+    .tabs{order:5;width:100%;gap:4px}
+    .tab{flex:1;justify-content:center;padding:9px 6px;font-size:12.5px}
+    .wrap{padding:16px 14px}
+    .student{flex-wrap:wrap;gap:11px}
+    .avatar{width:40px;height:40px}
+    .s-main{flex:1 1 auto}
+    .s-right{flex:1 1 100%;gap:10px;justify-content:space-between}
+    .s-cons{flex:0 1 auto;justify-content:flex-start}
+    .roster-search{padding:13px 14px}
+    .roster-bar{padding:12px 14px 4px}
+    #roster{padding:0 14px}
+    .addrow{padding:12px 14px}
+    .panel-pad{padding:16px 14px}
+    .set-row{flex-wrap:wrap;gap:8px}
+    .set-row .ctl{margin-left:auto}
+    .set-row .d{max-width:none}
+  }
 
   #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(140%);background:var(--toast-bg);color:var(--toast-fg);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:550;box-shadow:0 12px 30px rgba(0,0,0,.25);z-index:80;transition:transform .28s cubic-bezier(.2,.9,.3,1.2);display:flex;align-items:center;gap:9px;max-width:90vw}
   #toast.show{transform:translateX(-50%) translateY(0)}
@@ -812,6 +837,7 @@ function renderRoster(){
         <div class="s-name">${esc(x.name)} ${x.cls?`<span class="chip">${esc(x.cls)}</span>`:""}</div>
         <div class="s-sub">${x.strikes} strike${x.strikes===1?"":"s"}${yearNote}</div>
       </div>
+      <div class="s-right">
       <div class="s-cons">${consHTML(x)}</div>
       <div class="s-actions">
         <button class="step" data-undo="${x.id}" title="Remove one strike" ${x.strikes?"":"disabled"}>
@@ -831,6 +857,7 @@ function renderRoster(){
             <button class="danger" data-del="${x.id}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg> Remove student</button>
           </div>
         </div>
+      </div>
       </div>
     </div>`;
   }).join("");
