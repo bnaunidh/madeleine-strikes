@@ -1,0 +1,925 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Madeleine Strikes · The School of the Madeleine</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --panel:#ffffff; --ink:#1f2733; --muted:#6b7684;
+    --line:#e7e9ee; --line-soft:#eef0f4;
+    --blue:#2f6bd8; --blue-dark:#255ac0; --blue-soft:#eaf1fd;
+    --red:#d8443c; --red-dark:#c1362f; --red-soft:#fdecea;
+    --amber:#e0902a; --amber-ink:#8a5a12; --amber-soft:#fbf1e0; --amber-line:#f0dcae;
+    --green:#2f9e59; --green-dark:#268a4c; --green-soft:#e9f6ee; --green-line:#bfe6cd;
+    --field-bg:#fcfcfd; --field-focus-bg:#ffffff; --ghost-hover:#eef0f4; --danger-hover:#fbdedb;
+    --chip-btn:rgba(0,0,0,.06); --chip-btn-h:rgba(0,0,0,.14);
+    --toast-bg:#1f2733; --toast-fg:#ffffff; --toast-accent:#8fc6ff;
+    --shadow:0 1px 2px rgba(20,28,45,.04), 0 8px 24px rgba(20,28,45,.06);
+    --radius:16px;
+  }
+  :root[data-theme="dark"]{
+    --bg:#0f1420; --panel:#161d2b; --ink:#e7ebf2; --muted:#98a2b3;
+    --line:#28303f; --line-soft:#1f2735;
+    --blue:#4f86e6; --blue-dark:#7ea8f0; --blue-soft:#20304e;
+    --red:#e2564d; --red-dark:#ef7a72; --red-soft:#3a1e1c;
+    --amber:#e0902a; --amber-ink:#e7b467; --amber-soft:#2c2214; --amber-line:#4a3a1c;
+    --green:#3fb26b; --green-dark:#54c47f; --green-soft:#14261b; --green-line:#28502f;
+    --field-bg:#111827; --field-focus-bg:#0c1220; --ghost-hover:#232c3c; --danger-hover:#3f2220;
+    --chip-btn:rgba(255,255,255,.12); --chip-btn-h:rgba(255,255,255,.2);
+    --toast-bg:#242e40; --toast-fg:#eef2f8; --toast-accent:#9cc0ff;
+    --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.42);
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --bg:#0f1420; --panel:#161d2b; --ink:#e7ebf2; --muted:#98a2b3;
+      --line:#28303f; --line-soft:#1f2735;
+      --blue:#4f86e6; --blue-dark:#7ea8f0; --blue-soft:#20304e;
+      --red:#e2564d; --red-dark:#ef7a72; --red-soft:#3a1e1c;
+      --amber:#e0902a; --amber-ink:#e7b467; --amber-soft:#2c2214; --amber-line:#4a3a1c;
+      --green:#3fb26b; --green-dark:#54c47f; --green-soft:#14261b; --green-line:#28502f;
+      --field-bg:#111827; --field-focus-bg:#0c1220; --ghost-hover:#232c3c; --danger-hover:#3f2220;
+      --chip-btn:rgba(255,255,255,.12); --chip-btn-h:rgba(255,255,255,.2);
+      --toast-bg:#242e40; --toast-fg:#eef2f8; --toast-accent:#9cc0ff;
+      --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.42);
+    }
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--ink);-webkit-font-smoothing:antialiased;line-height:1.45}
+  button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+  input,select{font-family:inherit}
+
+  /* Top bar */
+  .topbar{background:var(--panel);border-bottom:1px solid var(--line);position:sticky;top:0;z-index:40}
+  .topbar-inner{max-width:1000px;margin:0 auto;padding:12px 20px;display:flex;align-items:center;gap:12px}
+  .brand-btn{display:flex;align-items:center;gap:13px;padding:4px;margin:-4px;border-radius:12px;cursor:pointer;transition:.15s;text-align:left}
+  .brand-btn:hover{background:var(--bg)}
+  .crest{width:42px;height:42px;border-radius:11px;flex:0 0 auto;background:linear-gradient(140deg,var(--blue),#4d84e6);display:grid;place-items:center;color:#fff;font-weight:700;font-size:17px;box-shadow:0 4px 12px rgba(47,107,216,.28);overflow:hidden}
+  .crest img{width:100%;height:100%;object-fit:contain}
+  .crest.has-logo{background:#fff;padding:4px;box-shadow:0 1px 3px rgba(20,28,45,.12)}
+  .brand h1{font-size:16px;margin:0;font-weight:650;letter-spacing:-.01em}
+  .brand p{font-size:12.5px;margin:0;color:var(--muted)}
+  .topbar-spacer{flex:1}
+  .theme-toggle{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--muted);display:grid;place-items:center;transition:.15s;flex:0 0 auto}
+  .theme-toggle:hover{background:var(--bg);color:var(--ink)}
+  .tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:11px}
+  .tab{padding:7px 13px;border-radius:8px;font-size:13.5px;font-weight:550;color:var(--muted);transition:.15s;display:flex;align-items:center;gap:7px}
+  .tab.active{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(20,28,45,.09)}
+  .tab:not(.active):hover{color:var(--ink)}
+
+  .wrap{max-width:1000px;margin:0 auto;padding:20px}
+  .panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
+  .panel-pad{padding:18px 20px}
+  .section-title{font-size:13px;font-weight:640;text-transform:uppercase;letter-spacing:.05em;color:var(--muted);margin:0 0 12px}
+
+  /* Buttons */
+  .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;padding:10px 16px;border-radius:10px;font-size:14px;font-weight:600;transition:.15s;white-space:nowrap}
+  .btn-primary{background:var(--blue);color:#fff}
+  .btn-primary:hover{background:var(--blue-dark)}
+  .btn-ghost{background:var(--bg);color:var(--ink);border:1px solid var(--line)}
+  .btn-ghost:hover{background:var(--ghost-hover)}
+  .btn-danger{background:var(--red-soft);color:var(--red)}
+  .btn-danger:hover{background:var(--danger-hover)}
+  .btn-strike{background:var(--red);color:#fff}
+  .btn-strike:hover{background:var(--red-dark)}
+  .btn:disabled{opacity:.45;cursor:default}
+  .btn-sm{padding:7px 11px;font-size:13px;border-radius:9px}
+  .input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px;font-size:14.5px;background:var(--field-bg);color:var(--ink);transition:.15s}
+  .input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft);background:var(--field-focus-bg)}
+  .field{margin-bottom:12px}
+  .field label{display:block;font-size:12.5px;font-weight:550;color:var(--muted);margin-bottom:5px}
+
+  /* Checklist (reminders) */
+  .checklist{background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);padding:6px;margin-bottom:18px}
+  .cl-head{display:flex;align-items:center;gap:9px;font-weight:650;font-size:14px;padding:11px 12px 8px}
+  .cl-head svg{color:var(--amber)}
+  .cl-count{margin-left:auto;background:var(--red-soft);color:var(--red);font-size:12px;font-weight:700;border-radius:20px;padding:2px 10px}
+  .cl-item{display:flex;align-items:center;gap:12px;padding:11px 12px;border-radius:10px;text-align:left;width:100%;transition:.12s}
+  .cl-item:hover{background:var(--bg)}
+  .cl-box{width:22px;height:22px;border-radius:7px;border:2px solid var(--line);flex:0 0 auto;position:relative;transition:.12s}
+  .cl-item:hover .cl-box{border-color:var(--green)}
+  .cl-item:hover .cl-box::after{content:"";position:absolute;left:6px;top:2px;width:6px;height:11px;border:solid var(--green);border-width:0 2px 2px 0;transform:rotate(45deg);opacity:.55}
+  .cl-item.top .cl-box{border-color:#e6a5a0}
+  .cl-text{flex:1;font-size:14px;color:var(--ink)}
+  .cl-text .cls{color:var(--muted);font-size:12px}
+  .cl-item .cic{color:var(--amber);flex:0 0 auto}
+  .cl-item.top .cic{color:var(--red)}
+
+  /* Stats */
+  .stats{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px}
+  .stat{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px 16px}
+  .stat .n{font-size:24px;font-weight:680;letter-spacing:-.02em;line-height:1.15}
+  .stat .l{font-size:12.5px;color:var(--muted);margin-top:1px}
+  .stat.warn .n{color:var(--red)}
+  @media(max-width:720px){.stats{grid-template-columns:repeat(2,1fr)}}
+
+  /* Roster panel */
+  .roster-search{display:flex;align-items:center;gap:11px;padding:15px 18px;border-bottom:1px solid var(--line)}
+  .roster-search svg{color:var(--muted);flex:0 0 auto}
+  .roster-search input{flex:1;border:none;background:transparent;color:var(--ink);font-size:15.5px;padding:2px 0}
+  .roster-search input:focus{outline:none}
+  .roster-bar{display:flex;align-items:center;justify-content:space-between;padding:13px 18px 4px}
+  .sortsel{font-size:12.5px;color:var(--muted);display:flex;align-items:center;gap:7px}
+  .sortsel select{border:1px solid var(--line);background:var(--field-bg);color:var(--ink);border-radius:8px;padding:6px 8px;font-size:12.5px;cursor:pointer}
+  #roster{padding:0 18px}
+
+  .student{display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid var(--line-soft)}
+  .student:last-child{border-bottom:none}
+  .avatar{width:42px;height:42px;border-radius:12px;flex:0 0 auto;display:grid;place-items:center;font-weight:650;font-size:15px;color:#fff}
+  .s-main{flex:0 1 auto;min-width:110px}
+  .s-name{font-size:15px;font-weight:600;letter-spacing:-.01em;display:flex;align-items:center;gap:8px}
+  .s-sub{font-size:12.5px;color:var(--muted);margin-top:2px}
+  .s-sub b{color:var(--ink);font-weight:600}
+  .chip{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:20px;background:var(--blue-soft);color:var(--blue-dark)}
+  .s-cons{flex:1;display:flex;justify-content:flex-end;flex-wrap:wrap;gap:6px;min-width:0}
+
+  /* check-in icons */
+  .cico{width:32px;height:32px;border-radius:9px;display:grid;place-items:center;flex:0 0 auto;border:1px solid transparent;transition:.15s;cursor:pointer}
+  .cico.due{background:var(--amber-soft);color:var(--amber-ink);border-color:var(--amber-line)}
+  .cico.due.top{background:var(--red-soft);color:var(--red);border-color:#e6a5a0}
+  .cico.done{background:var(--green-soft);color:var(--green);border-color:var(--green-line)}
+  .cico:hover{filter:brightness(.97)}
+
+  .count{min-width:36px;height:38px;padding:0 10px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;font-weight:750;font-size:15px;background:var(--bg);color:var(--muted);flex:0 0 auto}
+  .count.has{background:var(--red-soft);color:var(--red)}
+  .count.max{background:var(--red);color:#fff}
+  .step{width:36px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--muted);display:grid;place-items:center;transition:.15s;flex:0 0 auto}
+  .step:hover:not(:disabled){background:var(--bg);color:var(--ink)}
+  .step:disabled{opacity:.4;cursor:default}
+  .s-actions{display:flex;gap:8px;align-items:center;flex:0 0 auto}
+  .strike-btn{display:inline-flex;align-items:center;gap:7px;height:38px;padding:0 15px;border-radius:11px;background:var(--red);color:#fff;font-weight:650;font-size:14px;transition:.15s}
+  .strike-btn:hover{background:var(--red-dark)}
+  .strike-btn:disabled{opacity:.5;cursor:default}
+  .strike-btn:disabled:hover{background:var(--red)}
+  .kebab-wrap{position:relative}
+  .kebab{width:38px;height:38px;border-radius:11px;border:1px solid var(--line);background:var(--panel);color:var(--muted);display:grid;place-items:center;transition:.15s}
+  .kebab:hover{background:var(--bg);color:var(--ink)}
+  .menu{position:absolute;right:0;top:calc(100% + 6px);background:var(--panel);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(15,20,32,.28);padding:6px;min-width:196px;z-index:30;display:none}
+  .menu.open{display:block}
+  .menu button{display:flex;align-items:center;gap:10px;width:100%;text-align:left;padding:9px 10px;border-radius:8px;font-size:13.5px;color:var(--ink)}
+  .menu button:hover{background:var(--bg)}
+  .menu button.danger{color:var(--red)}
+  .menu .sep{height:1px;background:var(--line-soft);margin:5px 4px}
+  .menu svg{color:var(--muted);flex:0 0 auto}
+  .menu button.danger svg{color:var(--red)}
+
+  /* inline add row */
+  .addrow{display:flex;gap:10px;align-items:center;padding:13px 18px;border-top:1px solid var(--line)}
+  .addrow-plus{width:38px;height:40px;border-radius:10px;background:var(--blue);color:#fff;display:grid;place-items:center;flex:0 0 auto;transition:.15s}
+  .addrow-plus:hover{background:var(--blue-dark)}
+  .addrow-name{flex:1}
+  .addrow-class{width:110px;flex:0 0 auto}
+  @media(max-width:560px){.addrow-class{width:80px}}
+
+  .empty{text-align:center;padding:40px 20px;color:var(--muted)}
+  .empty svg{color:#c7ccd6;margin-bottom:10px}
+
+  /* Log */
+  .roster-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;gap:10px}
+  .log-item{display:flex;gap:11px;padding:10px 0;border-bottom:1px solid var(--line-soft);font-size:13.5px}
+  .log-item:last-child{border-bottom:none}
+  .log-dot{width:8px;height:8px;border-radius:50%;background:var(--red);margin-top:6px;flex:0 0 auto}
+  .log-dot.good{background:var(--green)}
+  .log-body{flex:1}
+  .log-time{font-size:12px;color:var(--muted)}
+  .log-reason{color:var(--muted);font-style:italic}
+
+  /* Fast mode */
+  .fast{display:none;max-width:560px;margin:6vh auto 0;padding:0 20px}
+  .fast.show{display:block}
+  .fast-card{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:30px 28px 26px}
+  .fast h2{margin:0 0 4px;font-size:22px;letter-spacing:-.02em}
+  .fast .sub{margin:0 0 22px;color:var(--muted);font-size:14px}
+  .fast-search .input{font-size:17px;padding:14px 16px}
+  .picker{margin-top:10px;max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:13px}
+  .pick{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line-soft);cursor:pointer;transition:.12s}
+  .pick:last-child{border-bottom:none}
+  .pick:hover,.pick.sel{background:var(--blue-soft)}
+  .pick .avatar{width:36px;height:36px;border-radius:10px;font-size:13px}
+  .pick-name{font-weight:600;font-size:14.5px}
+  .pick-meta{font-size:12px;color:var(--muted)}
+  .pick-count{margin-left:auto;font-weight:680;color:var(--red);font-size:14px}
+  .fast-reason{margin-top:16px}
+  .fast-actions{margin-top:18px;display:flex;gap:10px}
+  .btn-xl{padding:15px;font-size:16px;border-radius:14px;flex:1}
+  .fast-hint{text-align:center;font-size:12.5px;color:var(--muted);margin-top:14px}
+  kbd{background:var(--bg);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;font-size:11.5px;font-family:inherit}
+  .toast-flash{background:var(--green-soft);border:1px solid var(--green-line);color:var(--green);border-radius:13px;padding:13px 16px;font-size:14.5px;font-weight:550;margin-top:16px;display:flex;align-items:center;gap:9px}
+
+  /* Totals */
+  .tbl{width:100%;border-collapse:collapse;font-size:13.5px;min-width:380px}
+  .tbl th{text-align:left;font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);font-weight:650;padding:8px 10px;border-bottom:1px solid var(--line)}
+  .tbl td{padding:10px;border-bottom:1px solid var(--line-soft)}
+  .tbl tr:last-child td{border-bottom:none}
+  .tbl .num{text-align:right;font-variant-numeric:tabular-nums;font-weight:650}
+  .tbl .barwrap{display:flex;align-items:center}
+  .tbl .bar{height:8px;border-radius:5px;background:var(--red);min-width:3px}
+  .tname{display:flex;align-items:center;gap:10px}
+  .tname .avatar{width:30px;height:30px;border-radius:9px;font-size:12px}
+  .scroll-x{overflow-x:auto}
+
+  /* Modal */
+  .overlay{position:fixed;inset:0;background:rgba(22,28,40,.42);backdrop-filter:blur(2px);display:none;place-items:center;z-index:60;padding:20px}
+  .overlay.show{display:grid}
+  .modal{background:var(--panel);border-radius:20px;box-shadow:0 24px 60px rgba(15,22,40,.28);width:100%;max-width:430px;padding:24px;animation:pop .16s ease}
+  @keyframes pop{from{transform:scale(.96);opacity:0}to{transform:scale(1);opacity:1}}
+  .modal h3{margin:0 0 3px;font-size:18px}
+  .modal .who{color:var(--muted);font-size:13.5px;margin:0 0 18px}
+  .reason-tags{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 4px}
+  .rtag{font-size:12.5px;padding:6px 11px;border-radius:20px;background:var(--bg);border:1px solid var(--line);color:var(--muted);transition:.12s}
+  .rtag:hover{border-color:var(--blue);color:var(--blue)}
+  .modal-actions{display:flex;gap:10px;margin-top:20px}
+
+  /* Settings */
+  .set-row{display:flex;align-items:center;justify-content:space-between;padding:14px 0;border-bottom:1px solid var(--line-soft);gap:16px}
+  .set-row:last-child{border-bottom:none}
+  .set-row .t{font-size:14px;font-weight:550}
+  .set-row .d{font-size:12.5px;color:var(--muted);margin-top:2px;max-width:400px}
+  .set-row .ctl{flex:0 0 auto;display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px}
+  .switch{width:44px;height:26px;border-radius:20px;background:var(--line);position:relative;transition:.18s;cursor:pointer;flex:0 0 auto}
+  .switch.on{background:var(--green)}
+  .switch::after{content:"";position:absolute;width:20px;height:20px;border-radius:50%;background:#fff;top:3px;left:3px;transition:.18s;box-shadow:0 1px 3px rgba(0,0,0,.2)}
+  .switch.on::after{left:21px}
+  .tier-warn{color:var(--muted);font-size:13px;padding:2px 0 12px}
+  .tier-warn b{color:var(--ink)}
+  .tier-row{display:flex;align-items:center;gap:10px;padding:6px 0}
+  .tier-at{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;flex:0 0 auto;white-space:nowrap}
+  .tier-num{width:60px;text-align:center;padding:9px 6px}
+  .tier-row>.input{flex:1;min-width:0}
+  .tier-del{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--muted);display:grid;place-items:center;flex:0 0 auto;transition:.15s}
+  .tier-del:hover{background:var(--red-soft);color:var(--red);border-color:transparent}
+  .banner{background:var(--amber-soft);border:1px solid var(--amber-line);color:var(--amber-ink);border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:flex;align-items:center;gap:9px}
+
+  /* Passcode gate */
+  #gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:200;padding:20px}
+  :root[data-unlocked] #gate{display:none}
+  .gate-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:34px 30px;width:100%;max-width:330px;text-align:center}
+  .gate-logo{width:64px;height:64px;border-radius:16px;margin:0 auto 16px;background:#fff;display:grid;place-items:center;overflow:hidden;padding:7px;box-shadow:0 1px 3px rgba(20,28,45,.12)}
+  .gate-logo img{width:100%;height:100%;object-fit:contain}
+  .gate-card h2{margin:0 0 2px;font-size:20px;letter-spacing:-.01em}
+  .gate-card .gsub{margin:0 0 20px;color:var(--muted);font-size:13.5px}
+  .gate-input{width:100%;text-align:center;font-size:22px;letter-spacing:8px;padding:12px;border:1px solid var(--line);border-radius:12px;background:var(--field-bg);color:var(--ink)}
+  .gate-input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+  .gate-err{color:var(--red);font-size:13px;min-height:18px;margin:8px 0 2px}
+  .gate-shake{animation:shake .3s}
+  @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
+
+  #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(140%);background:var(--toast-bg);color:var(--toast-fg);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:550;box-shadow:0 12px 30px rgba(0,0,0,.25);z-index:80;transition:transform .28s cubic-bezier(.2,.9,.3,1.2);display:flex;align-items:center;gap:9px;max-width:90vw}
+  #toast.show{transform:translateX(-50%) translateY(0)}
+  #toast.undo{cursor:pointer}
+  #toast .u{color:var(--toast-accent);font-weight:650}
+</style>
+<script>
+  try{ var _t=localStorage.getItem("madeleine_theme"); if(_t) document.documentElement.setAttribute("data-theme",_t); }catch(e){}
+  try{ if(localStorage.getItem("madeleine_unlocked")==="1") document.documentElement.setAttribute("data-unlocked",""); }catch(e){}
+</script>
+
+<div id="gate">
+  <div class="gate-card">
+    <div class="gate-logo"><img id="gate-logo-img" alt="School of the Madeleine"></div>
+    <h2>Madeleine Strikes</h2>
+    <p class="gsub">The School of the Madeleine</p>
+    <input class="gate-input" id="gate-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" autocomplete="off" aria-label="Passcode">
+    <div class="gate-err" id="gate-err"></div>
+    <button class="btn btn-primary" id="gate-go" style="width:100%">Unlock</button>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="topbar-inner">
+    <button class="brand-btn" id="brand-home" title="Back to roster">
+      <div class="crest has-logo" id="crest"><img src="data:image/png;base64,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" alt="School of the Madeleine"></div>
+      <div class="brand">
+        <h1>Madeleine Strikes</h1>
+        <p>The School of the Madeleine</p>
+      </div>
+    </button>
+    <div class="topbar-spacer"></div>
+    <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode"></button>
+    <div class="tabs">
+      <button class="tab active" data-view="board">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
+        Roster
+      </button>
+      <button class="tab" data-view="fast">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg>
+        Fast Strike
+      </button>
+      <button class="tab" data-view="totals">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l3-4 3 2 4-6"/></svg>
+        This Year
+      </button>
+      <button class="tab" data-view="settings" title="Settings">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- BOARD -->
+<div class="wrap" id="view-board">
+  <div id="reminders"></div>
+  <div class="stats" id="stats"></div>
+
+  <div class="panel">
+    <div class="roster-search">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+      <input id="search" placeholder="Search students…" autocomplete="off">
+    </div>
+    <div class="roster-bar">
+      <span class="section-title" style="margin:0">Roster</span>
+      <label class="sortsel">Sort:
+        <select id="sortsel">
+          <option value="strikes">Most strikes</option>
+          <option value="name">Name</option>
+          <option value="class">Class</option>
+        </select>
+      </label>
+    </div>
+    <div id="roster"></div>
+    <div class="addrow">
+      <button class="addrow-plus" id="addrow-add" title="Add student">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>
+      </button>
+      <input class="input addrow-name" id="f-name" placeholder="Add a student — type a name, press Enter" autocomplete="off">
+      <input class="input addrow-class" id="f-class" placeholder="Class" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="panel panel-pad" style="margin-top:20px">
+    <div class="roster-head">
+      <p class="section-title" style="margin:0">Recent activity</p>
+      <button class="btn btn-ghost btn-sm" id="clearlog">Clear log</button>
+    </div>
+    <div id="log"></div>
+  </div>
+</div>
+
+<!-- FAST STRIKE -->
+<div class="fast" id="view-fast">
+  <div class="fast-card">
+    <h2>Give a strike</h2>
+    <p class="sub">Find the student, add a reason if you want, done.</p>
+    <div class="fast-search"><input class="input" id="fast-search" placeholder="Type a name…" autocomplete="off"></div>
+    <div class="picker" id="fast-picker"></div>
+    <div class="fast-reason"><input class="input" id="fast-reason" placeholder="Reason (optional)" autocomplete="off"></div>
+    <div class="fast-actions"><button class="btn btn-strike btn-xl" id="fast-give" disabled>Give strike</button></div>
+    <div id="fast-flash"></div>
+    <p class="fast-hint">Pick a student, then press <kbd>Enter</kbd> to strike.</p>
+  </div>
+</div>
+
+<!-- THIS YEAR -->
+<div class="wrap" id="view-totals" style="display:none">
+  <div class="stats" id="totals-stats"></div>
+  <div class="panel panel-pad">
+    <div class="roster-head" style="margin-bottom:10px">
+      <p class="section-title" style="margin:0">Each student · this school year</p>
+      <button class="btn btn-ghost btn-sm" id="new-year">Start new school year</button>
+    </div>
+    <div class="scroll-x"><table class="tbl" id="student-table"></table></div>
+  </div>
+</div>
+
+<!-- SETTINGS -->
+<div class="wrap" id="view-settings" style="display:none;max-width:660px">
+  <div class="banner" id="autoreset-banner" style="display:none"></div>
+
+  <div class="panel panel-pad">
+    <p class="section-title">Check-in reminders</p>
+    <div class="set-row">
+      <div>
+        <div class="t">Show the check-in checklist</div>
+        <div class="d">A tick-off list at the top of the Roster of every check-in still to do.</div>
+      </div>
+      <div class="ctl"><div class="switch" id="remind-switch"></div></div>
+    </div>
+  </div>
+
+  <div class="panel panel-pad" style="margin-top:18px">
+    <p class="section-title">What each strike means</p>
+    <div class="tier-warn"><b>1 strike</b> — just a warning, nothing happens.</div>
+    <div id="tier-editor"></div>
+    <button class="btn btn-ghost btn-sm" id="add-tier" style="margin-top:12px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg> Add a consequence
+    </button>
+  </div>
+
+  <div class="panel panel-pad" style="margin-top:18px">
+    <p class="section-title">Auto reset</p>
+    <div class="set-row">
+      <div>
+        <div class="t">Automatically reset strikes</div>
+        <div class="d">Wipe every student's current strikes on a schedule — a fresh start each week. Yearly totals are kept.</div>
+      </div>
+      <div class="ctl"><div class="switch" id="auto-switch"></div></div>
+    </div>
+    <div class="set-row" id="auto-interval-row">
+      <div>
+        <div class="t">Reset every</div>
+        <div class="d" id="next-reset-note">—</div>
+      </div>
+      <div class="ctl">
+        <select class="input" id="auto-interval" style="width:130px">
+          <option value="day">Day</option>
+          <option value="week" selected>Week</option>
+          <option value="month">Month</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-pad" style="margin-top:18px">
+    <p class="section-title">Resets</p>
+    <div class="set-row">
+      <div>
+        <div class="t">Reset all strikes now</div>
+        <div class="d">Sets every student's current strikes back to zero. Keeps yearly totals.</div>
+      </div>
+      <div class="ctl"><button class="btn btn-ghost btn-sm" id="reset-all">Reset strikes</button></div>
+    </div>
+    <div class="set-row">
+      <div>
+        <div class="t">Start a new school year</div>
+        <div class="d">Resets strikes AND every yearly total to zero. Keeps your students.</div>
+      </div>
+      <div class="ctl"><button class="btn btn-ghost btn-sm" id="new-year-2">Start new year</button></div>
+    </div>
+    <div class="set-row">
+      <div>
+        <div class="t">Clear everything</div>
+        <div class="d">Removes all students and history. Cannot be undone.</div>
+      </div>
+      <div class="ctl"><button class="btn btn-danger btn-sm" id="wipe">Delete all</button></div>
+    </div>
+  </div>
+</div>
+
+<!-- Strike reason modal -->
+<div class="overlay" id="modal">
+  <div class="modal">
+    <h3>Give a strike</h3>
+    <p class="who" id="modal-who"></p>
+    <label style="font-size:12.5px;font-weight:550;color:var(--muted)">Reason <span style="font-weight:400">(optional)</span></label>
+    <input class="input" id="modal-reason" placeholder="What happened?" autocomplete="off" style="margin-top:5px">
+    <div class="reason-tags" id="reason-tags"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="modal-cancel" style="flex:1">Cancel</button>
+      <button class="btn btn-strike" id="modal-confirm" style="flex:1">Add strike</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast"></div>
+
+<script>
+"use strict";
+const $ = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const STORE = "madeleine_strikeboard_v1";
+const QUICK_REASONS = ["Talking in class","Late","No homework","Disruptive","Phone use","Disrespect"];
+const AVATAR_COLORS = ["#2f6bd8","#7a4dd8","#2f9e59","#d8813c","#c94f9c","#0e9bb0","#5a6acc","#c65353"];
+
+// ---- consequence icons (chosen from the label's keywords) ----
+const CICONS = {
+  check:'<path d="M20 6 9 17l-5-5"/>',
+  sun:'<circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/>',
+  fork:'<path d="M6 3v6a2 2 0 0 0 4 0V3M8 9v12"/><path d="M16 21v-8c-1.6 0-2.5-1.6-2.5-4.5S14.5 3 16 3s2.5 1.6 2.5 5.5c0 1.8-.9 3.1-2.5 3.1"/>',
+  person:'<circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/>',
+  phone:'<path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6 19.8 19.8 0 0 1-3.1-8.7A2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1 1 .4 1.9.7 2.8a2 2 0 0 1-.5 2.1L8.1 9.9a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.5c.9.3 1.8.6 2.8.7a2 2 0 0 1 1.7 2z"/>',
+  home:'<path d="M3 10l9-7 9 7v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 21V12h6v9"/>',
+  clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
+  warn:'<path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+  clip:'<rect x="8" y="3" width="8" height="4" rx="1"/><path d="M9 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3"/>'
+};
+function icoSvg(key,w){ w=w||16; return `<svg class="cic" width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${CICONS[key]||CICONS.clip}</svg>`; }
+function tierIconKey(label){
+  const l=(label||"").toLowerCase();
+  if(/recess|play|yard|break|outside/.test(l)) return "sun";
+  if(/lunch|food|eat|cafeteria|snack/.test(l)) return "fork";
+  if(/princip|office|dean|admin|head/.test(l)) return "person";
+  if(/call|phone/.test(l)) return "phone";
+  if(/home|parent|family|guardian|mom|dad/.test(l)) return "home";
+  if(/detention|stay|after|time ?out/.test(l)) return "clock";
+  if(/warn|note|talk|chat|reflect|reminder/.test(l)) return "warn";
+  return "clip";
+}
+
+let state = load();
+function load(){
+  try{ const s=JSON.parse(localStorage.getItem(STORE)); if(s && s.students) return normalize(s); }catch(e){}
+  return {students:[], log:[], settings:{auto:false,interval:"week",lastReset:Date.now(),reminders:true,
+    tiers:[{at:2,label:"Recess check-in"},{at:3,label:"Lunch check-in"},{at:4,label:"Talk with the principal"},{at:5,label:"Call home"}]}, seq:1};
+}
+function normalize(s){
+  s.students ||= []; s.log ||= []; s.settings ||= {};
+  s.settings.auto ??= false; s.settings.interval ||= "week";
+  s.settings.lastReset ||= Date.now(); s.settings.reminders ??= true;
+  if(!Array.isArray(s.settings.tiers)){
+    const r=s.settings.recessAt||2, l=s.settings.lunchAt||3;
+    s.settings.tiers=[{at:r,label:"Recess check-in"},{at:l,label:"Lunch check-in"},{at:4,label:"Talk with the principal"},{at:5,label:"Call home"}];
+  }
+  s.settings.tiers.sort((a,b)=>a.at-b.at);
+  s.students.forEach(x=>{
+    x.strikes ||= 0; x.total ??= x.strikes;
+    if(!x.done || typeof x.done!=="object" || ("recess" in x.done) || ("lunch" in x.done)) x.done={};
+  });
+  s.seq ||= (Math.max(0,...s.students.map(x=>x.id||0))+1);
+  return s;
+}
+let persistOK=true;
+function save(){ try{ localStorage.setItem(STORE, JSON.stringify(state)); }catch(e){ if(persistOK){ persistOK=false; setTimeout(showPersistWarning,300); } } }
+function showPersistWarning(){
+  if(document.getElementById("persist-warn")) return;
+  const d=document.createElement("div"); d.id="persist-warn";
+  d.style.cssText="position:fixed;bottom:0;left:0;right:0;background:#fbf1e0;border-top:1px solid #f0dcae;color:#8a5a12;font-size:13px;padding:11px 18px;text-align:center;z-index:90";
+  d.innerHTML='⚠️ This browser won’t save your data between sessions. It still works now — to <b>remember day-to-day, open this file in Chrome</b>. <span style="text-decoration:underline;cursor:pointer" onclick="this.parentElement.remove()">Dismiss</span>';
+  document.body.appendChild(d);
+}
+
+// helpers
+function initials(n){ const p=n.trim().split(/\s+/); return ((p[0]?.[0]||"")+(p[1]?.[0]||"")).toUpperCase()||"?"; }
+function colorFor(id){ return AVATAR_COLORS[id % AVATAR_COLORS.length]; }
+function esc(s){ return String(s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c])); }
+function timeAgo(ts){ const d=(Date.now()-ts)/1000;
+  if(d<60) return "just now"; if(d<3600) return Math.floor(d/60)+"m ago"; if(d<86400) return Math.floor(d/3600)+"h ago";
+  const dt=new Date(ts); return dt.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" · "+dt.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}); }
+const INTERVAL_MS={day:864e5,week:6048e5,month:2592e6};
+
+// tiers
+function TIERS(){ return state.settings.tiers||[]; }
+function sortTiers(){ (state.settings.tiers||[]).sort((a,b)=>a.at-b.at); }
+function maxTierAt(){ const ts=TIERS().filter(t=>t.label.trim()); return ts.length ? ts[ts.length-1].at : Infinity; }
+function tierLabel(at){ const t=TIERS().find(t=>t.at===+at); return t?t.label:"Check-in"; }
+function syncDone(st){ if(!st.done||typeof st.done!=="object") st.done={}; TIERS().forEach(t=>{ if(st.strikes<t.at) st.done[t.at]=false; }); }
+function dueTiers(st){ return TIERS().filter(t=> t.label.trim() && st.strikes>=t.at && !st.done[t.at]); }
+
+function checkAutoReset(){
+  const s=state.settings; if(!s.auto) return;
+  if(Date.now() >= s.lastReset + INTERVAL_MS[s.interval]){
+    const had=state.students.some(x=>x.strikes>0);
+    state.students.forEach(x=>{ x.strikes=0; x.done={}; });
+    s.lastReset=Date.now();
+    if(had) state.log.unshift({t:"reset",ts:Date.now(),note:"Auto reset ("+s.interval+"ly)"});
+    save();
+  }
+}
+
+// actions
+function addStudent(name,cls){ name=name.trim(); if(!name) return false; state.students.push({id:state.seq++,name,cls:cls.trim(),strikes:0,total:0,done:{}}); save(); return true; }
+function giveStrike(id,reason){
+  const st=state.students.find(x=>x.id===id); if(!st) return null;
+  const cap=maxTierAt();
+  if(isFinite(cap) && st.strikes>=cap){ toast(st.name+" is already at "+cap+" — the last step ("+tierLabel(cap)+"). Reset when it's handled."); return null; }
+  st.strikes++; st.total=(st.total||0)+1;
+  const triggered=TIERS().find(t=> t.label.trim() && st.strikes===t.at);
+  state.log.unshift({t:"strike",ts:Date.now(),id,name:st.name,cls:st.cls,reason:(reason||"").trim(),count:st.strikes});
+  if(state.log.length>300) state.log.length=300;
+  save(); renderAll();
+  const r=reason&&reason.trim()?' — "'+reason.trim()+'"':"";
+  const cons=triggered?" · "+triggered.label+" now due":"";
+  toastUndo(st.name+": "+st.strikes+" strike"+(st.strikes>1?"s":"")+r+cons, ()=>{
+    st.strikes=Math.max(0,st.strikes-1); st.total=Math.max(0,(st.total||1)-1); syncDone(st);
+    const i=state.log.findIndex(l=>l.t==="strike"&&l.id===id); if(i>-1) state.log.splice(i,1);
+    save(); renderAll();
+  });
+  return triggered;
+}
+function undoStrikeOne(id){
+  const st=state.students.find(x=>x.id===id); if(!st||st.strikes<=0) return;
+  st.strikes--; st.total=Math.max(0,(st.total||1)-1); syncDone(st);
+  const i=state.log.findIndex(l=>l.t==="strike"&&l.id===id); if(i>-1) state.log.splice(i,1);
+  save(); renderAll(); toast(st.name+" — removed 1 strike");
+}
+function toggleDone(id,key){
+  const st=state.students.find(x=>x.id===id); if(!st) return;
+  const at=+key, now=!st.done[at]; st.done[at]=now;
+  const label=tierLabel(at);
+  if(now) state.log.unshift({t:"done",ts:Date.now(),note:label+" done · "+st.name});
+  save(); renderAll(); toast(st.name+" · "+label+(now?" ✓":" reopened"));
+}
+function resetStudent(id){
+  const st=state.students.find(x=>x.id===id); if(!st) return;
+  const prev=st.strikes; st.strikes=0; st.done={};
+  if(prev>0) state.log.unshift({t:"reset",ts:Date.now(),note:"Reset "+st.name});
+  save(); renderAll(); toast(st.name+" reset to 0");
+}
+function removeStudent(id){ state.students=state.students.filter(x=>x.id!==id); save(); renderAll(); }
+function resetAll(){ state.students.forEach(x=>{ x.strikes=0; x.done={}; }); state.settings.lastReset=Date.now(); state.log.unshift({t:"reset",ts:Date.now(),note:"All strikes reset"}); save(); renderAll(); toast("All strikes reset to 0"); }
+function newSchoolYear(){ state.students.forEach(x=>{ x.strikes=0; x.total=0; x.done={}; }); state.settings.lastReset=Date.now(); state.log.unshift({t:"reset",ts:Date.now(),note:"New school year — all totals reset"}); save(); renderAll(); toast("New school year — totals reset"); }
+
+// render
+let sortMode="strikes", search="";
+function renderReminders(){
+  const el=$("#reminders");
+  if(!state.settings.reminders){ el.innerHTML=""; return; }
+  const items=[]; state.students.forEach(x=> dueTiers(x).forEach(t=> items.push({x,t})));
+  items.sort((a,b)=> b.t.at-a.t.at || a.x.name.localeCompare(b.x.name));
+  if(!items.length){ el.innerHTML=""; return; }
+  const maxAt=maxTierAt();
+  el.innerHTML=`<div class="checklist">
+    <div class="cl-head">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+      Check-ins to do <span class="cl-count">${items.length}</span>
+    </div>
+    ${items.map(({x,t})=>`<button class="cl-item ${t.at===maxAt?'top':''}" data-done="${x.id}" data-key="${t.at}" title="Tap to mark done">
+      <span class="cl-box"></span>
+      <span class="cl-text"><b>${esc(x.name)}</b>${x.cls?` <span class="cls">${esc(x.cls)}</span>`:""} — ${esc(t.label)}</span>
+      ${icoSvg(tierIconKey(t.label),17)}
+    </button>`).join("")}
+  </div>`;
+}
+function renderStats(){
+  const total=state.students.length;
+  const due=state.students.reduce((a,x)=>a+dueTiers(x).length,0);
+  const maxAt=maxTierAt();
+  const flagged=isFinite(maxAt)?state.students.filter(x=>x.strikes>=maxAt).length:0;
+  const yearTotal=state.students.reduce((a,x)=>a+(x.total||0),0);
+  $("#stats").innerHTML=`
+    <div class="stat"><div class="n">${total}</div><div class="l">Students</div></div>
+    <div class="stat ${due?'warn':''}"><div class="n">${due}</div><div class="l">Check-ins due</div></div>
+    <div class="stat ${flagged?'warn':''}"><div class="n">${flagged}</div><div class="l">${isFinite(maxAt)?`Flagged (${maxAt}+)`:"Flagged"}</div></div>
+    <div class="stat"><div class="n">${yearTotal}</div><div class="l">Strikes this year</div></div>`;
+}
+function sortedStudents(){
+  let list=state.students.slice();
+  if(search){ const q=search.toLowerCase(); list=list.filter(x=>x.name.toLowerCase().includes(q)||(x.cls||"").toLowerCase().includes(q)); }
+  if(sortMode==="strikes") list.sort((a,b)=>b.strikes-a.strikes||a.name.localeCompare(b.name));
+  if(sortMode==="name") list.sort((a,b)=>a.name.localeCompare(b.name));
+  if(sortMode==="class") list.sort((a,b)=>(a.cls||"").localeCompare(b.cls||"",undefined,{numeric:true})||a.name.localeCompare(b.name));
+  return list;
+}
+function consHTML(x){
+  const maxAt=maxTierAt();
+  return TIERS().map(t=>{
+    if(!t.label.trim() || x.strikes<t.at) return "";
+    const done=!!x.done[t.at], top=t.at===maxAt;
+    const cls=done?"done":(top?"due top":"due");
+    const inner=done?icoSvg("check"):icoSvg(tierIconKey(t.label));
+    const tip=t.label+(done?" — done ✓ (tap to undo)":" — tap when done");
+    return `<button class="cico ${cls}" data-done="${x.id}" data-key="${t.at}" title="${esc(tip)}" aria-label="${esc(t.label)}">${inner}</button>`;
+  }).join("");
+}
+function renderRoster(){
+  const el=$("#roster");
+  if(!state.students.length){ el.innerHTML=`<div class="empty">
+    <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
+    <div style="font-weight:600;color:var(--ink)">No students yet</div>
+    <div>Type a name in the row below to add your first student.</div></div>`; return; }
+  const list=sortedStudents();
+  if(!list.length){ el.innerHTML=`<div class="empty">No matches for "${esc(search)}".</div>`; return; }
+  const maxAt=maxTierAt();
+  el.innerHTML=list.map(x=>{
+    const atMax=isFinite(maxAt)&&x.strikes>=maxAt;
+    const cc=x.strikes>=maxAt?"max":(x.strikes>0?"has":"");
+    const yearNote=(x.total||0)>x.strikes?` · <b>${x.total}</b> this year`:"";
+    return `<div class="student">
+      <div class="avatar" style="background:${colorFor(x.id)}">${initials(x.name)}</div>
+      <div class="s-main">
+        <div class="s-name">${esc(x.name)} ${x.cls?`<span class="chip">${esc(x.cls)}</span>`:""}</div>
+        <div class="s-sub">${x.strikes} strike${x.strikes===1?"":"s"}${yearNote}</div>
+      </div>
+      <div class="s-cons">${consHTML(x)}</div>
+      <div class="s-actions">
+        <button class="step" data-undo="${x.id}" title="Remove one strike" ${x.strikes?"":"disabled"}>
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14"/></svg>
+        </button>
+        <div class="count ${cc}">${x.strikes}</div>
+        <button class="strike-btn" data-strike="${x.id}" ${atMax?"disabled":""} title="${atMax?`At the max (${maxAt})`:"Give a strike"}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Strike
+        </button>
+        <div class="kebab-wrap">
+          <button class="kebab" data-menu="${x.id}" title="More">
+            <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>
+          </button>
+          <div class="menu" id="menu-${x.id}">
+            <button data-reset="${x.id}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Reset strikes to zero</button>
+            <div class="sep"></div>
+            <button class="danger" data-del="${x.id}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg> Remove student</button>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  }).join("");
+}
+function renderLog(){
+  const el=$("#log");
+  if(!state.log.length){ el.innerHTML=`<div class="empty" style="padding:24px">No activity yet.</div>`; return; }
+  el.innerHTML=state.log.slice(0,40).map(l=>{
+    if(l.t==="reset"||l.t==="done") return `<div class="log-item"><span class="log-dot good"></span><div class="log-body"><div>${esc(l.note||"")}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
+    return `<div class="log-item"><span class="log-dot"></span><div class="log-body"><div><strong>${esc(l.name)}</strong>${l.cls?` <span style="color:var(--muted)">· ${esc(l.cls)}</span>`:""} — strike ${l.count}${l.reason?` <span class="log-reason">"${esc(l.reason)}"</span>`:""}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
+  }).join("");
+}
+function renderTotals(){
+  const students=state.students.length;
+  const yearTotal=state.students.reduce((a,x)=>a+(x.total||0),0);
+  const doneCount=state.log.filter(l=>l.t==="done").length;
+  const worst=state.students.slice().sort((a,b)=>(b.total||0)-(a.total||0))[0];
+  $("#totals-stats").innerHTML=`
+    <div class="stat"><div class="n">${yearTotal}</div><div class="l">Strikes this year</div></div>
+    <div class="stat"><div class="n">${students}</div><div class="l">Students</div></div>
+    <div class="stat"><div class="n">${doneCount}</div><div class="l">Check-ins completed</div></div>
+    <div class="stat"><div class="n" style="font-size:18px">${worst&&worst.total?esc(worst.name):"—"}</div><div class="l">Most strikes</div></div>`;
+  const studs=state.students.slice().sort((a,b)=>(b.total||0)-(a.total||0)||a.name.localeCompare(b.name));
+  const maxStud=Math.max(1,...studs.map(s=>s.total||0));
+  $("#student-table").innerHTML = !studs.length
+    ? `<tbody><tr><td style="color:var(--muted)">No students yet.</td></tr></tbody>`
+    : `<thead><tr><th>Student</th><th>Class</th><th class="num">Now</th><th class="num">This year</th><th style="width:26%"></th></tr></thead>
+       <tbody>${studs.map(s=>`<tr>
+         <td><div class="tname"><div class="avatar" style="background:${colorFor(s.id)}">${initials(s.name)}</div>${esc(s.name)}</div></td>
+         <td>${s.cls?esc(s.cls):'<span style="color:var(--muted)">—</span>'}</td>
+         <td class="num">${s.strikes}</td>
+         <td class="num">${s.total||0}</td>
+         <td><div class="barwrap"><div class="bar" style="width:${Math.round((s.total||0)/maxStud*100)}%"></div></div></td>
+       </tr>`).join("")}</tbody>`;
+}
+function renderTierEditor(){
+  const el=$("#tier-editor"); if(!el) return;
+  const tiers=TIERS();
+  el.innerHTML=tiers.map((t,i)=>`
+    <div class="tier-row">
+      <div class="tier-at"><input class="input tier-num" type="number" min="1" max="99" value="${t.at}" data-tier-at="${i}" aria-label="strike number"><span>strikes →</span></div>
+      <input class="input" value="${esc(t.label)}" placeholder="e.g. Call home" data-tier-label="${i}" aria-label="consequence">
+      <button class="tier-del" data-tier-del="${i}" title="Remove"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+    </div>`).join("") || `<div class="tier-warn">No consequences yet — add one below.</div>`;
+}
+function renderSettings(){
+  $("#remind-switch").classList.toggle("on", state.settings.reminders);
+  $("#auto-switch").classList.toggle("on", state.settings.auto);
+  $("#auto-interval").value=state.settings.interval;
+  $("#auto-interval-row").style.opacity=state.settings.auto?"1":".45";
+  $("#auto-interval").disabled=!state.settings.auto;
+  renderTierEditor();
+  const note=$("#next-reset-note");
+  if(state.settings.auto){ const due=state.settings.lastReset+INTERVAL_MS[state.settings.interval]; note.textContent="Next reset "+new Date(due).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}); }
+  else note.textContent="Turn on to schedule automatic resets.";
+  const b=$("#autoreset-banner");
+  if(state.settings.auto){ b.style.display="flex"; b.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Strikes reset automatically every ${state.settings.interval}.`; }
+  else b.style.display="none";
+}
+function renderAll(){
+  renderReminders(); renderStats(); renderRoster(); renderLog(); renderSettings();
+  if($("#view-fast").classList.contains("show")) renderPicker();
+  if($("#view-totals").style.display!=="none") renderTotals();
+}
+
+// toast
+let toastTimer;
+function toast(msg){ const t=$("#toast"); t.className=""; t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2600); }
+function toastUndo(msg,undo){ const t=$("#toast"); t.className="undo"; t.innerHTML=esc(msg)+' <span class="u">Undo</span>'; t.classList.add("show"); t.onclick=()=>{ undo(); t.classList.remove("show"); t.onclick=null; }; clearTimeout(toastTimer); toastTimer=setTimeout(()=>{t.classList.remove("show");t.onclick=null;},5000); }
+
+// modal
+let modalId=null;
+function openModal(id){ const st=state.students.find(x=>x.id===id); if(!st) return; modalId=id;
+  $("#modal-who").textContent=st.name+(st.cls?` · ${st.cls}`:"")+` · currently ${st.strikes} strike${st.strikes===1?"":"s"}`;
+  $("#modal-reason").value=""; $("#reason-tags").innerHTML=QUICK_REASONS.map(r=>`<button class="rtag" data-r="${esc(r)}">${esc(r)}</button>`).join("");
+  $("#modal").classList.add("show"); setTimeout(()=>$("#modal-reason").focus(),50); }
+function closeModal(){ $("#modal").classList.remove("show"); modalId=null; }
+
+// fast
+let fastSel=null;
+function renderPicker(){
+  const q=$("#fast-search").value.trim().toLowerCase();
+  let list=state.students.slice();
+  if(q) list=list.filter(x=>x.name.toLowerCase().includes(q)||(x.cls||"").toLowerCase().includes(q));
+  list.sort((a,b)=>a.name.localeCompare(b.name));
+  const el=$("#fast-picker");
+  if(!state.students.length){ el.innerHTML=`<div class="empty" style="padding:22px">Add students on the Roster tab first.</div>`; fastSel=null; updateFastBtn(); return; }
+  if(!list.length){ el.innerHTML=`<div class="empty" style="padding:22px">No match.</div>`; fastSel=null; updateFastBtn(); return; }
+  if(fastSel && !list.some(x=>x.id===fastSel)) fastSel=null;
+  if(!fastSel && list.length) fastSel=list[0].id;
+  el.innerHTML=list.map(x=>`<div class="pick ${x.id===fastSel?'sel':''}" data-pick="${x.id}">
+    <div class="avatar" style="background:${colorFor(x.id)}">${initials(x.name)}</div>
+    <div><div class="pick-name">${esc(x.name)}</div><div class="pick-meta">${x.cls?esc(x.cls)+" · ":""}${x.strikes} strike${x.strikes===1?"":"s"}</div></div>
+    ${x.strikes?`<div class="pick-count">${x.strikes}</div>`:""}</div>`).join("");
+  updateFastBtn();
+}
+function updateFastBtn(){
+  const btn=$("#fast-give"); const st=state.students.find(x=>x.id===fastSel);
+  const cap=maxTierAt(); const atMax=st&&isFinite(cap)&&st.strikes>=cap;
+  btn.disabled=!st||atMax;
+  btn.textContent=!st?"Give strike":(atMax?`${st.name.split(" ")[0]} is at the max (${cap})`:`Give strike to ${st.name.split(" ")[0]}`);
+}
+function fastGive(){
+  const st=state.students.find(x=>x.id===fastSel); if(!st) return;
+  const before=st.strikes; const reason=$("#fast-reason").value;
+  const triggered=giveStrike(st.id,reason);
+  if(st.strikes===before){ renderPicker(); return; }
+  const cons=triggered?` <b>${triggered.label} now due.</b>`:"";
+  $("#fast-flash").innerHTML=`<div class="toast-flash"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Strike given to ${esc(st.name)} — now ${st.strikes}.${cons}</div>`;
+  $("#fast-reason").value=""; $("#fast-search").value=""; $("#fast-search").focus(); renderPicker();
+  clearTimeout(fastGive._t); fastGive._t=setTimeout(()=>$("#fast-flash").innerHTML="",3400);
+}
+
+// views
+function switchView(v){
+  $$(".tab").forEach(t=>t.classList.toggle("active", t.dataset.view===v));
+  $("#view-board").style.display=v==="board"?"block":"none";
+  $("#view-settings").style.display=v==="settings"?"block":"none";
+  $("#view-totals").style.display=v==="totals"?"block":"none";
+  $("#view-fast").classList.toggle("show", v==="fast");
+  closeMenus();
+  if(v==="fast"){ $("#fast-search").value=""; fastSel=null; renderPicker(); setTimeout(()=>$("#fast-search").focus(),50); }
+  if(v==="settings") renderSettings();
+  if(v==="totals") renderTotals();
+}
+function closeMenus(){ $$(".menu.open").forEach(m=>m.classList.remove("open")); }
+document.addEventListener("click",e=>{ if(!e.target.closest(".kebab-wrap")) closeMenus(); });
+
+// events
+$$(".tab").forEach(t=>t.onclick=()=>switchView(t.dataset.view));
+$("#brand-home").onclick=()=>switchView("board");
+
+function doAdd(){
+  const n=$("#f-name").value, c=$("#f-class").value;
+  if(!n.trim()){ $("#f-name").focus(); return; }
+  addStudent(n,c); renderAll();
+  $("#f-name").value=""; $("#f-class").value=""; $("#f-name").focus();
+  toast("Added "+n.trim());
+}
+$("#addrow-add").onclick=doAdd;
+$("#f-name").addEventListener("keydown",e=>{ if(e.key==="Enter") doAdd(); });
+$("#f-class").addEventListener("keydown",e=>{ if(e.key==="Enter") doAdd(); });
+
+$("#roster").addEventListener("click",e=>{
+  const b=e.target.closest("button"); if(!b) return;
+  if(b.dataset.menu){ const m=$("#menu-"+b.dataset.menu); const open=m.classList.contains("open"); closeMenus(); if(!open) m.classList.add("open"); e.stopPropagation(); return; }
+  if(b.dataset.done){ toggleDone(+b.dataset.done, b.dataset.key); return; }
+  if(b.dataset.strike){ openModal(+b.dataset.strike); return; }
+  if(b.dataset.undo){ undoStrikeOne(+b.dataset.undo); closeMenus(); return; }
+  if(b.dataset.reset){ resetStudent(+b.dataset.reset); closeMenus(); return; }
+  if(b.dataset.del){ closeMenus(); const st=state.students.find(x=>x.id===+b.dataset.del); if(confirm(`Remove ${st?.name} from the roster? This deletes their record.`)) removeStudent(+b.dataset.del); }
+});
+$("#reminders").addEventListener("click",e=>{ const b=e.target.closest("button[data-done]"); if(!b) return; toggleDone(+b.dataset.done, b.dataset.key); });
+$("#search").addEventListener("input",e=>{ search=e.target.value; renderRoster(); });
+$("#sortsel").onchange=e=>{ sortMode=e.target.value; renderRoster(); };
+$("#clearlog").onclick=()=>{ if(confirm("Clear the activity log? Strike counts stay the same.")){ state.log=[]; save(); renderLog(); } };
+
+$("#modal-cancel").onclick=closeModal;
+$("#modal").addEventListener("click",e=>{ if(e.target.id==="modal") closeModal(); });
+$("#reason-tags").addEventListener("click",e=>{ const b=e.target.closest(".rtag"); if(!b) return; const inp=$("#modal-reason"); inp.value=inp.value.trim()?inp.value.trim()+", "+b.dataset.r:b.dataset.r; inp.focus(); });
+$("#modal-confirm").onclick=()=>{ if(modalId!=null){ giveStrike(modalId,$("#modal-reason").value); closeModal(); } };
+$("#modal-reason").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#modal-confirm").click(); });
+
+$("#fast-search").addEventListener("input",renderPicker);
+$("#fast-picker").addEventListener("click",e=>{ const p=e.target.closest(".pick"); if(!p||!p.dataset.pick) return; fastSel=+p.dataset.pick; renderPicker(); $("#fast-reason").focus(); });
+$("#fast-give").onclick=fastGive;
+$("#fast-search").addEventListener("keydown",e=>{
+  if(e.key==="Enter"){ e.preventDefault(); const q=$("#fast-search").value.trim().toLowerCase(); const exact=state.students.find(x=>x.name.toLowerCase()===q); if(exact) fastSel=exact.id; if(fastSel){ if($("#fast-reason").value===""&&!exact) $("#fast-reason").focus(); else fastGive(); } }
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){ e.preventDefault(); const picks=$$("#fast-picker .pick"); if(!picks.length) return; let i=picks.findIndex(p=>+p.dataset.pick===fastSel); i=e.key==="ArrowDown"?Math.min(picks.length-1,i+1):Math.max(0,i-1); fastSel=+picks[i].dataset.pick; renderPicker(); }
+});
+$("#fast-reason").addEventListener("keydown",e=>{ if(e.key==="Enter") fastGive(); });
+
+// settings events
+$("#remind-switch").onclick=()=>{ state.settings.reminders=!state.settings.reminders; save(); renderAll(); };
+$("#auto-switch").onclick=()=>{ state.settings.auto=!state.settings.auto; if(state.settings.auto) state.settings.lastReset=Date.now(); save(); renderSettings(); };
+$("#auto-interval").onchange=e=>{ state.settings.interval=e.target.value; state.settings.lastReset=Date.now(); save(); renderSettings(); };
+$("#tier-editor").addEventListener("input",e=>{ const t=e.target; if(t.dataset.tierLabel!==undefined){ const i=+t.dataset.tierLabel; if(state.settings.tiers[i]){ state.settings.tiers[i].label=t.value; save(); renderReminders(); renderRoster(); renderStats(); } } });
+$("#tier-editor").addEventListener("change",e=>{ const t=e.target; if(t.dataset.tierAt!==undefined){ const i=+t.dataset.tierAt; if(state.settings.tiers[i]){ state.settings.tiers[i].at=Math.max(1,Math.min(99,parseInt(t.value)||1)); sortTiers(); state.students.forEach(syncDone); save(); renderAll(); } } });
+$("#tier-editor").addEventListener("click",e=>{ const b=e.target.closest("[data-tier-del]"); if(!b) return; state.settings.tiers.splice(+b.dataset.tierDel,1); state.students.forEach(syncDone); save(); renderAll(); });
+$("#add-tier").onclick=()=>{ const ts=state.settings.tiers||(state.settings.tiers=[]); const nextAt=ts.length?Math.min(99,Math.max(...ts.map(t=>t.at))+1):2; ts.push({at:nextAt,label:""}); sortTiers(); save(); renderAll(); setTimeout(()=>{ const inputs=$$("#tier-editor [data-tier-label]"); const target=inputs.find(inp=>state.settings.tiers[+inp.dataset.tierLabel]?.at===nextAt); (target||inputs[inputs.length-1])?.focus(); },30); };
+$("#reset-all").onclick=()=>{ if(confirm("Reset every student's current strikes to zero? Yearly totals are kept.")) resetAll(); };
+function confirmNewYear(){ if(confirm("Start a new school year?\n\nThis sets every student's strikes AND yearly totals back to zero. Students stay. This can't be undone.")) newSchoolYear(); }
+$("#new-year").onclick=confirmNewYear; $("#new-year-2").onclick=confirmNewYear;
+$("#wipe").onclick=()=>{ if(confirm("Delete ALL students and history? This cannot be undone.")){ state.students=[]; state.log=[]; save(); renderAll(); toast("Everything cleared"); } };
+
+// theme
+function currentTheme(){ const e=document.documentElement.getAttribute("data-theme"); if(e) return e; return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"; }
+const SUN='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>';
+const MOON='<svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>';
+function updateThemeIcon(){ const dark=currentTheme()==="dark"; $("#theme-toggle").innerHTML=dark?SUN:MOON; $("#theme-toggle").title=dark?"Switch to light mode":"Switch to dark mode"; }
+function toggleTheme(){ const next=currentTheme()==="dark"?"light":"dark"; document.documentElement.setAttribute("data-theme",next); try{ localStorage.setItem("madeleine_theme",next); }catch(e){} updateThemeIcon(); }
+$("#theme-toggle").onclick=toggleTheme;
+if(window.matchMedia){ window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{ if(!document.documentElement.getAttribute("data-theme")) updateThemeIcon(); }); }
+
+// keyboard
+document.addEventListener("keydown",e=>{
+  if(e.target.tagName==="INPUT"||e.target.tagName==="SELECT") return;
+  if(e.key==="f"||e.key==="F") switchView("fast");
+  if(e.key==="Escape"){ if($("#modal").classList.contains("show")) closeModal(); else closeMenus(); }
+});
+
+// passcode gate
+const PASSCODE="9096";
+(function initGate(){
+  const gi=$("#gate-input"), err=$("#gate-err");
+  const ci=document.querySelector("#crest img"); if(ci) $("#gate-logo-img").src=ci.src;
+  function tryUnlock(){
+    if(gi.value.trim()===PASSCODE){
+      document.documentElement.setAttribute("data-unlocked","");
+      try{ localStorage.setItem("madeleine_unlocked","1"); }catch(e){}
+    } else {
+      err.textContent="Wrong passcode"; gi.value="";
+      const c=$(".gate-card"); c.classList.remove("gate-shake"); void c.offsetWidth; c.classList.add("gate-shake"); gi.focus();
+    }
+  }
+  $("#gate-go").onclick=tryUnlock;
+  gi.addEventListener("keydown",e=>{ if(e.key==="Enter") tryUnlock(); });
+  gi.addEventListener("input",()=>{ err.textContent=""; });
+  if(!document.documentElement.hasAttribute("data-unlocked")) setTimeout(()=>gi.focus(),60);
+})();
+
+// boot
+updateThemeIcon();
+checkAutoReset();
+renderAll();
+setInterval(()=>{ checkAutoReset(); if($("#view-board").style.display!=="none") renderLog(); }, 60000);
+</script>
