@@ -247,6 +247,9 @@
   .tier-del{width:40px;height:40px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--muted);display:grid;place-items:center;flex:0 0 auto;transition:.15s}
   .tier-del:hover{background:var(--red-soft);color:var(--red);border-color:transparent}
   .banner{background:var(--amber-soft);border:1px solid var(--amber-line);color:var(--amber-ink);border-radius:12px;padding:10px 14px;font-size:13px;margin-bottom:16px;display:flex;align-items:center;gap:9px}
+  .backup-due{background:var(--blue-soft);border:1px solid var(--line);color:var(--ink);border-radius:14px;padding:12px 16px;margin-bottom:18px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;font-size:14px;font-weight:550}
+  .backup-due .bd-ico{color:var(--blue);flex:0 0 auto}
+  .backup-due .sp{flex:1;min-width:140px}
 
   /* Passcode gate */
   #gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:200;padding:20px}
@@ -316,6 +319,7 @@
 
 <!-- BOARD -->
 <div class="wrap" id="view-board">
+  <div id="backup-banner"></div>
   <div id="reminders"></div>
   <div class="stats" id="stats"></div>
 
@@ -428,6 +432,64 @@
   </div>
 
   <div class="panel panel-pad" style="margin-top:18px">
+    <p class="section-title">Sound</p>
+    <div class="set-row">
+      <div>
+        <div class="t">Sound effects</div>
+        <div class="d">Play a short sound when you add or remove a strike.</div>
+      </div>
+      <div class="ctl"><div class="switch" id="sound-switch"></div></div>
+    </div>
+  </div>
+
+  <div class="panel panel-pad" style="margin-top:18px">
+    <p class="section-title">Backup &amp; data</p>
+    <div class="set-row">
+      <div>
+        <div class="t">Save a backup now</div>
+        <div class="d">Downloads one file with all your students, strikes and history. Keep it somewhere safe.</div>
+      </div>
+      <div class="ctl"><button class="btn btn-primary btn-sm" id="export-now">Download backup</button></div>
+    </div>
+    <div class="set-row">
+      <div>
+        <div class="t">Restore from a backup</div>
+        <div class="d">Loads a backup file — this replaces everything currently in the app.</div>
+      </div>
+      <div class="ctl">
+        <button class="btn btn-ghost btn-sm" id="import-btn">Choose file…</button>
+        <input type="file" id="import-file" accept="application/json,.json" style="display:none">
+      </div>
+    </div>
+    <div class="set-row">
+      <div>
+        <div class="t">Automatic backups</div>
+        <div class="d" id="backup-last">—</div>
+      </div>
+      <div class="ctl">
+        <select class="input" id="backup-freq" style="width:130px">
+          <option value="off">Off</option>
+          <option value="day">Every day</option>
+          <option value="week">Every week</option>
+          <option value="month">Every month</option>
+        </select>
+      </div>
+    </div>
+    <div class="set-row" id="backup-mode-row">
+      <div>
+        <div class="t">When one is due</div>
+        <div class="d">“Download automatically” saves the file for you. “Remind me” just shows a button so you download when you want.</div>
+      </div>
+      <div class="ctl">
+        <select class="input" id="backup-mode" style="width:190px">
+          <option value="manual">Remind me</option>
+          <option value="auto">Download automatically</option>
+        </select>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-pad" style="margin-top:18px">
     <p class="section-title">Resets</p>
     <div class="set-row">
       <div>
@@ -506,13 +568,17 @@ function tierIconKey(label){
 let state = load();
 function load(){
   try{ const s=JSON.parse(localStorage.getItem(STORE)); if(s && s.students) return normalize(s); }catch(e){}
-  return {students:[], log:[], settings:{auto:false,interval:"week",lastReset:Date.now(),reminders:true,
+  return {students:[], log:[], settings:{auto:false,interval:"week",lastReset:Date.now(),reminders:true,sound:true,
+    backup:{freq:"month",mode:"manual",last:Date.now()},
     tiers:[{at:2,label:"Recess check-in"},{at:3,label:"Lunch check-in"},{at:4,label:"Talk with the principal"},{at:5,label:"Call home"}]}, seq:1};
 }
 function normalize(s){
   s.students ||= []; s.log ||= []; s.settings ||= {};
   s.settings.auto ??= false; s.settings.interval ||= "week";
   s.settings.lastReset ||= Date.now(); s.settings.reminders ??= true;
+  s.settings.sound ??= true;
+  if(!s.settings.backup || typeof s.settings.backup!=="object") s.settings.backup={freq:"month",mode:"manual",last:Date.now()};
+  s.settings.backup.freq ||= "month"; s.settings.backup.mode ||= "manual"; s.settings.backup.last ||= Date.now();
   if(!Array.isArray(s.settings.tiers)){
     const r=s.settings.recessAt||2, l=s.settings.lunchAt||3;
     s.settings.tiers=[{at:r,label:"Recess check-in"},{at:l,label:"Lunch check-in"},{at:4,label:"Talk with the principal"},{at:5,label:"Call home"}];
@@ -544,6 +610,30 @@ function timeAgo(ts){ const d=(Date.now()-ts)/1000;
   const dt=new Date(ts); return dt.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" · "+dt.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}); }
 const INTERVAL_MS={day:864e5,week:6048e5,month:2592e6};
 
+// ---- sound effects (built-in, generated with Web Audio — no downloads) ----
+let audioCtx=null;
+function tone(f0,f1,dur,vol,wave){
+  const t=audioCtx.currentTime;
+  const o=audioCtx.createOscillator(), g=audioCtx.createGain();
+  o.type=wave||"triangle";
+  o.frequency.setValueAtTime(f0,t);
+  o.frequency.exponentialRampToValueAtTime(Math.max(1,f1),t+dur);
+  g.gain.setValueAtTime(0.0001,t);
+  g.gain.exponentialRampToValueAtTime(vol,t+0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001,t+dur);
+  o.connect(g); g.connect(audioCtx.destination);
+  o.start(t); o.stop(t+dur+0.03);
+}
+function beep(kind){
+  if(!state.settings.sound) return;
+  try{
+    audioCtx = audioCtx || new (window.AudioContext||window.webkitAudioContext)();
+    if(audioCtx.state==="suspended") audioCtx.resume();
+    if(kind==="add") tone(330,150,0.16,0.14,"triangle");   // strike given — soft downward thunk
+    else tone(380,660,0.13,0.11,"sine");                    // strike removed — gentle upward pop
+  }catch(e){}
+}
+
 // tiers
 function TIERS(){ return state.settings.tiers||[]; }
 function sortTiers(){ (state.settings.tiers||[]).sort((a,b)=>a.at-b.at); }
@@ -569,7 +659,7 @@ function giveStrike(id,reason){
   const st=state.students.find(x=>x.id===id); if(!st) return null;
   const cap=maxTierAt();
   if(isFinite(cap) && st.strikes>=cap){ toast(st.name+" is already at "+cap+" — the last step ("+tierLabel(cap)+"). Reset when it's handled."); return null; }
-  st.strikes++; st.total=(st.total||0)+1;
+  st.strikes++; st.total=(st.total||0)+1; beep("add");
   const triggered=TIERS().find(t=> t.label.trim() && st.strikes===t.at);
   state.log.unshift({t:"strike",ts:Date.now(),id,name:st.name,cls:st.cls,reason:(reason||"").trim(),count:st.strikes});
   if(state.log.length>300) state.log.length=300;
@@ -577,7 +667,7 @@ function giveStrike(id,reason){
   const r=reason&&reason.trim()?' — "'+reason.trim()+'"':"";
   const cons=triggered?" · "+triggered.label+" now due":"";
   toastUndo(st.name+": "+st.strikes+" strike"+(st.strikes>1?"s":"")+r+cons, ()=>{
-    st.strikes=Math.max(0,st.strikes-1); st.total=Math.max(0,(st.total||1)-1); syncDone(st);
+    st.strikes=Math.max(0,st.strikes-1); st.total=Math.max(0,(st.total||1)-1); syncDone(st); beep("remove");
     const i=state.log.findIndex(l=>l.t==="strike"&&l.id===id); if(i>-1) state.log.splice(i,1);
     save(); renderAll();
   });
@@ -585,7 +675,7 @@ function giveStrike(id,reason){
 }
 function undoStrikeOne(id){
   const st=state.students.find(x=>x.id===id); if(!st||st.strikes<=0) return;
-  st.strikes--; st.total=Math.max(0,(st.total||1)-1); syncDone(st);
+  st.strikes--; st.total=Math.max(0,(st.total||1)-1); syncDone(st); beep("remove");
   const i=state.log.findIndex(l=>l.t==="strike"&&l.id===id); if(i>-1) state.log.splice(i,1);
   save(); renderAll(); toast(st.name+" — removed 1 strike");
 }
@@ -605,6 +695,51 @@ function resetStudent(id){
 function removeStudent(id){ state.students=state.students.filter(x=>x.id!==id); save(); renderAll(); }
 function resetAll(){ state.students.forEach(x=>{ x.strikes=0; x.done={}; }); state.settings.lastReset=Date.now(); state.log.unshift({t:"reset",ts:Date.now(),note:"All strikes reset"}); save(); renderAll(); toast("All strikes reset to 0"); }
 function newSchoolYear(){ state.students.forEach(x=>{ x.strikes=0; x.total=0; x.done={}; }); state.settings.lastReset=Date.now(); state.log.unshift({t:"reset",ts:Date.now(),note:"New school year — all totals reset"}); save(); renderAll(); toast("New school year — totals reset"); }
+
+// ---- backup: export / import ----
+function stamp(){ const d=new Date(); const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
+function exportData(silent){
+  try{
+    const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+    const url=URL.createObjectURL(blob);
+    const a=document.createElement("a");
+    a.href=url; a.download="madeleine-strikes-backup-"+stamp()+".json";
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500);
+    if(!silent) toast("Backup downloaded");
+  }catch(e){ if(!silent) alert("Couldn't create the backup file."); }
+}
+function importData(file){
+  const rd=new FileReader();
+  rd.onload=()=>{
+    let obj; try{ obj=JSON.parse(rd.result); }catch(e){ obj=null; }
+    if(!obj || !Array.isArray(obj.students)){ alert("That file isn't a Madeleine Strikes backup."); return; }
+    if(!confirm("Import this backup?\n\nIt will REPLACE all current students, strikes and history. This can't be undone.")) return;
+    state=normalize(obj); save(); renderAll(); toast("Backup imported ✓");
+  };
+  rd.readAsText(file);
+}
+let backupDismissed=false;
+function backupDue(){ const b=state.settings.backup; return b && b.freq!=="off" && Date.now() >= (b.last||0)+INTERVAL_MS[b.freq]; }
+function maybeBackup(){
+  if(!document.documentElement.hasAttribute("data-unlocked")) return; // wait until unlocked
+  const b=state.settings.backup;
+  if(b && b.freq!=="off" && b.mode==="auto" && backupDue()){ exportData(true); b.last=Date.now(); save(); toast("Automatic backup downloaded"); }
+  renderBackupBanner();
+}
+function renderBackupBanner(){
+  const el=$("#backup-banner"); if(!el) return;
+  const b=state.settings.backup;
+  const show = b && b.freq!=="off" && b.mode==="manual" && backupDue() && !backupDismissed;
+  if(!show){ el.innerHTML=""; return; }
+  const word = b.freq==="day"?"daily":(b.freq==="week"?"weekly":"monthly");
+  el.innerHTML=`<div class="backup-due">
+    <svg class="bd-ico" width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 8v13H3V8"/><path d="M1 3h22v5H1zM10 12h4"/></svg>
+    <span class="sp">Your ${word} backup is ready to save.</span>
+    <button class="btn btn-primary btn-sm" id="backup-now">Download backup</button>
+    <button class="btn btn-ghost btn-sm" id="backup-later">Later</button>
+  </div>`;
+}
 
 // render
 let sortMode="strikes", search="";
@@ -743,6 +878,12 @@ function renderTierEditor(){
 }
 function renderSettings(){
   $("#remind-switch").classList.toggle("on", state.settings.reminders);
+  $("#sound-switch").classList.toggle("on", state.settings.sound);
+  const bk=state.settings.backup;
+  $("#backup-freq").value=bk.freq; $("#backup-mode").value=bk.mode;
+  $("#backup-mode-row").style.opacity = bk.freq==="off"?".45":"1";
+  $("#backup-mode").disabled = bk.freq==="off";
+  $("#backup-last").textContent = bk.freq==="off" ? "Off — no automatic backups." : ("Last saved "+new Date(bk.last).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"}));
   $("#auto-switch").classList.toggle("on", state.settings.auto);
   $("#auto-interval").value=state.settings.interval;
   $("#auto-interval-row").style.opacity=state.settings.auto?"1":".45";
@@ -756,7 +897,7 @@ function renderSettings(){
   else b.style.display="none";
 }
 function renderAll(){
-  renderReminders(); renderStats(); renderRoster(); renderLog(); renderSettings();
+  renderBackupBanner(); renderReminders(); renderStats(); renderRoster(); renderLog(); renderSettings();
   if($("#view-fast").classList.contains("show")) renderPicker();
   if($("#view-totals").style.display!=="none") renderTotals();
 }
@@ -876,6 +1017,16 @@ $("#tier-editor").addEventListener("input",e=>{ const t=e.target; if(t.dataset.t
 $("#tier-editor").addEventListener("change",e=>{ const t=e.target; if(t.dataset.tierAt!==undefined){ const i=+t.dataset.tierAt; if(state.settings.tiers[i]){ state.settings.tiers[i].at=Math.max(1,Math.min(99,parseInt(t.value)||1)); sortTiers(); state.students.forEach(syncDone); save(); renderAll(); } } });
 $("#tier-editor").addEventListener("click",e=>{ const b=e.target.closest("[data-tier-del]"); if(!b) return; state.settings.tiers.splice(+b.dataset.tierDel,1); state.students.forEach(syncDone); save(); renderAll(); });
 $("#add-tier").onclick=()=>{ const ts=state.settings.tiers||(state.settings.tiers=[]); const nextAt=ts.length?Math.min(99,Math.max(...ts.map(t=>t.at))+1):2; ts.push({at:nextAt,label:""}); sortTiers(); save(); renderAll(); setTimeout(()=>{ const inputs=$$("#tier-editor [data-tier-label]"); const target=inputs.find(inp=>state.settings.tiers[+inp.dataset.tierLabel]?.at===nextAt); (target||inputs[inputs.length-1])?.focus(); },30); };
+$("#sound-switch").onclick=()=>{ state.settings.sound=!state.settings.sound; save(); renderSettings(); if(state.settings.sound) beep("add"); };
+$("#export-now").onclick=()=>exportData(false);
+$("#import-btn").onclick=()=>$("#import-file").click();
+$("#import-file").addEventListener("change",e=>{ const f=e.target.files&&e.target.files[0]; if(f) importData(f); e.target.value=""; });
+$("#backup-freq").onchange=e=>{ state.settings.backup.freq=e.target.value; state.settings.backup.last=Date.now(); backupDismissed=false; save(); renderSettings(); renderBackupBanner(); };
+$("#backup-mode").onchange=e=>{ state.settings.backup.mode=e.target.value; save(); renderBackupBanner(); };
+$("#backup-banner").addEventListener("click",e=>{
+  if(e.target.closest("#backup-now")){ exportData(false); state.settings.backup.last=Date.now(); save(); renderBackupBanner(); }
+  else if(e.target.closest("#backup-later")){ backupDismissed=true; renderBackupBanner(); }
+});
 $("#reset-all").onclick=()=>{ if(confirm("Reset every student's current strikes to zero? Yearly totals are kept.")) resetAll(); };
 function confirmNewYear(){ if(confirm("Start a new school year?\n\nThis sets every student's strikes AND yearly totals back to zero. Students stay. This can't be undone.")) newSchoolYear(); }
 $("#new-year").onclick=confirmNewYear; $("#new-year-2").onclick=confirmNewYear;
@@ -906,6 +1057,7 @@ const PASSCODE="9096";
     if(gi.value.trim()===PASSCODE){
       document.documentElement.setAttribute("data-unlocked","");
       try{ localStorage.setItem("madeleine_unlocked","1"); }catch(e){}
+      maybeBackup();
     } else {
       err.textContent="Wrong passcode"; gi.value="";
       const c=$(".gate-card"); c.classList.remove("gate-shake"); void c.offsetWidth; c.classList.add("gate-shake"); gi.focus();
@@ -921,5 +1073,6 @@ const PASSCODE="9096";
 updateThemeIcon();
 checkAutoReset();
 renderAll();
-setInterval(()=>{ checkAutoReset(); if($("#view-board").style.display!=="none") renderLog(); }, 60000);
+maybeBackup();
+setInterval(()=>{ checkAutoReset(); maybeBackup(); if($("#view-board").style.display!=="none") renderLog(); }, 60000);
 </script>
