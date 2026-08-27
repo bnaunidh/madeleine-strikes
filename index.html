@@ -184,26 +184,35 @@
   .log-reason{color:var(--muted);font-style:italic}
 
   /* Fast mode */
-  .fast{display:none;max-width:560px;margin:6vh auto 0;padding:0 20px}
+  .fast{display:none}
   .fast.show{display:block}
-  .fast-card{background:var(--panel);border:1px solid var(--line);border-radius:22px;box-shadow:var(--shadow);padding:30px 28px 26px}
-  .fast h2{margin:0 0 4px;font-size:22px;letter-spacing:-.02em}
-  .fast .sub{margin:0 0 22px;color:var(--muted);font-size:14px}
-  .fast-search .input{font-size:17px;padding:14px 16px}
-  .picker{margin-top:10px;max-height:230px;overflow:auto;border:1px solid var(--line);border-radius:13px}
-  .pick{display:flex;align-items:center;gap:12px;padding:11px 14px;border-bottom:1px solid var(--line-soft);cursor:pointer;transition:.12s}
-  .pick:last-child{border-bottom:none}
-  .pick:hover,.pick.sel{background:var(--blue-soft)}
-  .pick .avatar{width:36px;height:36px;border-radius:10px;font-size:13px}
-  .pick-name{font-weight:600;font-size:14.5px}
-  .pick-meta{font-size:12px;color:var(--muted)}
-  .pick-count{margin-left:auto;font-weight:680;color:var(--red);font-size:14px}
-  .fast-reason{margin-top:16px}
-  .fast-actions{margin-top:18px;display:flex;gap:10px}
-  .btn-xl{padding:15px;font-size:16px;border-radius:14px;flex:1}
-  .fast-hint{text-align:center;font-size:12.5px;color:var(--muted);margin-top:14px}
-  kbd{background:var(--bg);border:1px solid var(--line);border-bottom-width:2px;border-radius:5px;padding:1px 6px;font-size:11.5px;font-family:inherit}
-  .toast-flash{background:var(--green-soft);border:1px solid var(--green-line);color:var(--green);border-radius:13px;padding:13px 16px;font-size:14.5px;font-weight:550;margin-top:16px;display:flex;align-items:center;gap:9px}
+  .fast-inner{max-width:1000px;margin:0 auto;padding:20px}
+  .fast-head h2{margin:0 0 3px;font-size:22px;letter-spacing:-.02em}
+  .fast-head .sub{margin:0 0 16px;color:var(--muted);font-size:14px;max-width:640px}
+  .fast-search{display:flex;align-items:center;gap:11px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:12px 16px;margin-bottom:11px}
+  .fast-search svg{color:var(--muted);flex:0 0 auto}
+  .fast-search input{flex:1;border:none;background:transparent;color:var(--ink);font-size:16px;padding:2px 0}
+  .fast-search input:focus{outline:none}
+  .fast-reason-bar{position:relative;margin-bottom:10px}
+  .fast-reason-bar input{width:100%;padding:11px 42px 11px 14px;border:1px solid var(--line);border-radius:12px;background:var(--field-bg);color:var(--ink);font-size:14.5px}
+  .fast-reason-bar input:focus{outline:none;border-color:var(--blue);box-shadow:0 0 0 3px var(--blue-soft)}
+  #fast-reason-clear{position:absolute;right:8px;top:50%;transform:translateY(-50%);width:28px;height:28px;border-radius:8px;color:var(--muted);font-size:19px;line-height:1;display:none;place-items:center}
+  #fast-reason-clear.show{display:grid}
+  #fast-reason-clear:hover{background:var(--bg);color:var(--ink)}
+  .fast-reason-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:20px}
+  .fast-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+  .ftile{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:16px 12px 14px;display:flex;flex-direction:column;align-items:center;gap:8px;text-align:center;cursor:pointer;transition:transform .1s,border-color .12s,box-shadow .12s;position:relative}
+  .ftile:hover{border-color:var(--blue);box-shadow:var(--shadow)}
+  .ftile:active{transform:scale(.97)}
+  .ftile .avatar{width:52px;height:52px;border-radius:14px;font-size:18px}
+  .ftile-name{font-weight:600;font-size:14.5px;line-height:1.2}
+  .ftile-meta{font-size:12px;color:var(--muted)}
+  .ftile-count{position:absolute;top:9px;right:9px;min-width:24px;height:24px;padding:0 7px;border-radius:8px;display:grid;place-items:center;font-weight:750;font-size:13px;background:var(--red-soft);color:var(--red)}
+  .ftile-count.max{background:var(--red);color:#fff}
+  .ftile.maxed{opacity:.5;cursor:default}
+  .ftile.maxed:hover{border-color:var(--line);box-shadow:none}
+  .ftile.pulse{animation:tilepulse .55s ease-out}
+  @keyframes tilepulse{0%{box-shadow:0 0 0 0 rgba(216,68,60,.55)}100%{box-shadow:0 0 0 16px rgba(216,68,60,0)}}
 
   /* Totals */
   .tbl{width:100%;border-collapse:collapse;font-size:13.5px;min-width:380px}
@@ -227,6 +236,7 @@
   .reason-tags{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 4px}
   .rtag{font-size:12.5px;padding:6px 11px;border-radius:20px;background:var(--bg);border:1px solid var(--line);color:var(--muted);transition:.12s}
   .rtag:hover{border-color:var(--blue);color:var(--blue)}
+  .rtag.on{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
   .modal-actions{display:flex;gap:10px;margin-top:20px}
 
   /* Settings */
@@ -288,6 +298,8 @@
     .set-row{flex-wrap:wrap;gap:8px}
     .set-row .ctl{margin-left:auto}
     .set-row .d{max-width:none}
+    .fast-inner{padding:16px 14px}
+    .fast-grid{grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
   }
 
   #toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%) translateY(140%);background:var(--toast-bg);color:var(--toast-fg);padding:12px 20px;border-radius:12px;font-size:14px;font-weight:550;box-shadow:0 12px 30px rgba(0,0,0,.25);z-index:80;transition:transform .28s cubic-bezier(.2,.9,.3,1.2);display:flex;align-items:center;gap:9px;max-width:90vw}
@@ -384,15 +396,21 @@
 
 <!-- FAST STRIKE -->
 <div class="fast" id="view-fast">
-  <div class="fast-card">
-    <h2>Give a strike</h2>
-    <p class="sub">Find the student, add a reason if you want, done.</p>
-    <div class="fast-search"><input class="input" id="fast-search" placeholder="Type a name…" autocomplete="off"></div>
-    <div class="picker" id="fast-picker"></div>
-    <div class="fast-reason"><input class="input" id="fast-reason" placeholder="Reason (optional)" autocomplete="off"></div>
-    <div class="fast-actions"><button class="btn btn-strike btn-xl" id="fast-give" disabled>Give strike</button></div>
-    <div id="fast-flash"></div>
-    <p class="fast-hint">Pick a student, then press <kbd>Enter</kbd> to strike.</p>
+  <div class="fast-inner">
+    <div class="fast-head">
+      <h2>Fast Strike</h2>
+      <p class="sub">Tap a student to give them a strike. Set a reason first if you like — it sticks, so you can tap several in a row.</p>
+    </div>
+    <div class="fast-search">
+      <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
+      <input id="fast-search" placeholder="Search students…" autocomplete="off">
+    </div>
+    <div class="fast-reason-bar">
+      <input id="fast-reason" placeholder="Reason for the next strike (optional)" autocomplete="off">
+      <button id="fast-reason-clear" title="Clear reason" aria-label="Clear reason">&times;</button>
+    </div>
+    <div class="fast-reason-chips" id="fast-reason-chips"></div>
+    <div class="fast-grid" id="fast-grid"></div>
   </div>
 </div>
 
@@ -925,7 +943,7 @@ function renderSettings(){
 }
 function renderAll(){
   renderBackupBanner(); renderReminders(); renderStats(); renderRoster(); renderLog(); renderSettings();
-  if($("#view-fast").classList.contains("show")) renderPicker();
+  if($("#view-fast").classList.contains("show")) renderFastGrid();
   if($("#view-totals").style.display!=="none") renderTotals();
 }
 
@@ -943,38 +961,39 @@ function openModal(id){ const st=state.students.find(x=>x.id===id); if(!st) retu
 function closeModal(){ $("#modal").classList.remove("show"); modalId=null; }
 
 // fast
-let fastSel=null;
-function renderPicker(){
+function renderFastGrid(){
   const q=$("#fast-search").value.trim().toLowerCase();
   let list=state.students.slice();
   if(q) list=list.filter(x=>x.name.toLowerCase().includes(q)||(x.cls||"").toLowerCase().includes(q));
   list.sort((a,b)=>a.name.localeCompare(b.name));
-  const el=$("#fast-picker");
-  if(!state.students.length){ el.innerHTML=`<div class="empty" style="padding:22px">Add students on the Roster tab first.</div>`; fastSel=null; updateFastBtn(); return; }
-  if(!list.length){ el.innerHTML=`<div class="empty" style="padding:22px">No match.</div>`; fastSel=null; updateFastBtn(); return; }
-  if(fastSel && !list.some(x=>x.id===fastSel)) fastSel=null;
-  if(!fastSel && list.length) fastSel=list[0].id;
-  el.innerHTML=list.map(x=>`<div class="pick ${x.id===fastSel?'sel':''}" data-pick="${x.id}">
-    <div class="avatar" style="background:${colorFor(x.id)}">${initials(x.name)}</div>
-    <div><div class="pick-name">${esc(x.name)}</div><div class="pick-meta">${x.cls?esc(x.cls)+" · ":""}${x.strikes} strike${x.strikes===1?"":"s"}</div></div>
-    ${x.strikes?`<div class="pick-count">${x.strikes}</div>`:""}</div>`).join("");
-  updateFastBtn();
+  const el=$("#fast-grid");
+  if(!state.students.length){ el.innerHTML=`<div class="empty" style="grid-column:1/-1;padding:40px">Add students on the Roster tab first.</div>`; return; }
+  if(!list.length){ el.innerHTML=`<div class="empty" style="grid-column:1/-1;padding:40px">No match for "${esc(q)}".</div>`; return; }
+  const maxAt=maxTierAt();
+  el.innerHTML=list.map(x=>{
+    const atMax=isFinite(maxAt)&&x.strikes>=maxAt;
+    const badge=x.strikes>0?`<div class="ftile-count ${atMax?'max':''}">${x.strikes}</div>`:"";
+    return `<button class="ftile ${atMax?'maxed':''}" data-fstrike="${x.id}" ${atMax?"disabled":""} title="${atMax?`${esc(x.name)} is at the max`:`Give ${esc(x.name)} a strike`}">
+      ${badge}
+      <div class="avatar" style="background:${colorFor(x.id)}">${initials(x.name)}</div>
+      <div class="ftile-name">${esc(x.name)}</div>
+      <div class="ftile-meta">${x.cls?esc(x.cls)+" · ":""}${x.strikes} strike${x.strikes===1?"":"s"}${atMax?" · max":""}</div>
+    </button>`;
+  }).join("");
 }
-function updateFastBtn(){
-  const btn=$("#fast-give"); const st=state.students.find(x=>x.id===fastSel);
-  const cap=maxTierAt(); const atMax=st&&isFinite(cap)&&st.strikes>=cap;
-  btn.disabled=!st||atMax;
-  btn.textContent=!st?"Give strike":(atMax?`${st.name.split(" ")[0]} is at the max (${cap})`:`Give strike to ${st.name.split(" ")[0]}`);
+function fastReasonChips(){ $("#fast-reason-chips").innerHTML=QUICK_REASONS.map(r=>`<button class="rtag" data-fr="${esc(r)}">${esc(r)}</button>`).join(""); }
+function updateReasonClear(){
+  const v=$("#fast-reason").value.trim();
+  $("#fast-reason-clear").classList.toggle("show", !!$("#fast-reason").value);
+  $$("#fast-reason-chips .rtag").forEach(c=>c.classList.toggle("on", c.dataset.fr===v));
 }
-function fastGive(){
-  const st=state.students.find(x=>x.id===fastSel); if(!st) return;
-  const before=st.strikes; const reason=$("#fast-reason").value;
-  const triggered=giveStrike(st.id,reason);
-  if(st.strikes===before){ renderPicker(); return; }
-  const cons=triggered?` <b>${triggered.label} now due.</b>`:"";
-  $("#fast-flash").innerHTML=`<div class="toast-flash"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M20 6 9 17l-5-5"/></svg> Strike given to ${esc(st.name)} — now ${st.strikes}.${cons}</div>`;
-  $("#fast-reason").value=""; $("#fast-search").value=""; $("#fast-search").focus(); renderPicker();
-  clearTimeout(fastGive._t); fastGive._t=setTimeout(()=>$("#fast-flash").innerHTML="",3400);
+function fastStrike(id){
+  const st=state.students.find(x=>x.id===id); if(!st) return;
+  const before=st.strikes;
+  giveStrike(id, $("#fast-reason").value);       // beeps, toasts w/ undo, re-renders grid
+  if(st.strikes===before) return;                 // capped — giveStrike already notified
+  const tile=$("#fast-grid button[data-fstrike='"+id+"']");
+  if(tile){ tile.classList.remove("pulse"); void tile.offsetWidth; tile.classList.add("pulse"); }
 }
 
 // views
@@ -985,7 +1004,7 @@ function switchView(v){
   $("#view-totals").style.display=v==="totals"?"block":"none";
   $("#view-fast").classList.toggle("show", v==="fast");
   closeMenus();
-  if(v==="fast"){ $("#fast-search").value=""; fastSel=null; renderPicker(); setTimeout(()=>$("#fast-search").focus(),50); }
+  if(v==="fast"){ $("#fast-search").value=""; $("#fast-reason").value=""; updateReasonClear(); fastReasonChips(); renderFastGrid(); setTimeout(()=>$("#fast-search").focus(),50); }
   if(v==="settings") renderSettings();
   if(v==="totals") renderTotals();
 }
@@ -1027,14 +1046,20 @@ $("#reason-tags").addEventListener("click",e=>{ const b=e.target.closest(".rtag"
 $("#modal-confirm").onclick=()=>{ if(modalId!=null){ giveStrike(modalId,$("#modal-reason").value); closeModal(); } };
 $("#modal-reason").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#modal-confirm").click(); });
 
-$("#fast-search").addEventListener("input",renderPicker);
-$("#fast-picker").addEventListener("click",e=>{ const p=e.target.closest(".pick"); if(!p||!p.dataset.pick) return; fastSel=+p.dataset.pick; renderPicker(); $("#fast-reason").focus(); });
-$("#fast-give").onclick=fastGive;
+$("#fast-search").addEventListener("input",renderFastGrid);
+$("#fast-grid").addEventListener("click",e=>{ const b=e.target.closest("button[data-fstrike]"); if(!b||b.disabled) return; fastStrike(+b.dataset.fstrike); });
+$("#fast-reason").addEventListener("input",updateReasonClear);
+$("#fast-reason-clear").onclick=()=>{ $("#fast-reason").value=""; updateReasonClear(); $("#fast-reason").focus(); };
+$("#fast-reason-chips").addEventListener("click",e=>{ const b=e.target.closest("[data-fr]"); if(!b) return; const inp=$("#fast-reason"); inp.value = inp.value.trim()===b.dataset.fr ? "" : b.dataset.fr; updateReasonClear(); });
 $("#fast-search").addEventListener("keydown",e=>{
-  if(e.key==="Enter"){ e.preventDefault(); const q=$("#fast-search").value.trim().toLowerCase(); const exact=state.students.find(x=>x.name.toLowerCase()===q); if(exact) fastSel=exact.id; if(fastSel){ if($("#fast-reason").value===""&&!exact) $("#fast-reason").focus(); else fastGive(); } }
-  if(e.key==="ArrowDown"||e.key==="ArrowUp"){ e.preventDefault(); const picks=$$("#fast-picker .pick"); if(!picks.length) return; let i=picks.findIndex(p=>+p.dataset.pick===fastSel); i=e.key==="ArrowDown"?Math.min(picks.length-1,i+1):Math.max(0,i-1); fastSel=+picks[i].dataset.pick; renderPicker(); }
+  if(e.key!=="Enter") return;
+  e.preventDefault();
+  const q=$("#fast-search").value.trim().toLowerCase();
+  let list=state.students.filter(x=>x.name.toLowerCase().includes(q)||(x.cls||"").toLowerCase().includes(q));
+  const exact=state.students.find(x=>x.name.toLowerCase()===q);
+  const target = exact || (list.length===1 ? list[0] : null);
+  if(target){ fastStrike(target.id); $("#fast-search").value=""; renderFastGrid(); $("#fast-search").focus(); }
 });
-$("#fast-reason").addEventListener("keydown",e=>{ if(e.key==="Enter") fastGive(); });
 
 // settings events
 $("#remind-switch").onclick=()=>{ state.settings.reminders=!state.settings.reminders; save(); renderAll(); };
