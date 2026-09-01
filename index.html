@@ -1,6 +1,13 @@
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>Madeleine Strikes · The School of the Madeleine</title>
+<meta name="theme-color" content="#2f6bd8">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="Strikes">
 <style>
   :root{
     --bg:#f5f6f8; --panel:#ffffff; --ink:#1f2733; --muted:#6b7684;
@@ -282,6 +289,18 @@
   .gate-shake{animation:shake .3s}
   @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 
+  .btn:active:not(:disabled){transform:scale(.97)}
+  /* reminder time rows */
+  .notify-day{padding:10px 0}
+  .notify-day .t{font-weight:550;font-size:14px}
+  .time-input{width:132px;min-height:42px;padding:9px 12px;text-align:center;font-variant-numeric:tabular-nums}
+  .btn .ic{width:15px;height:15px}
+  /* installed-app safe areas (notch / home indicator) */
+  @media (display-mode: standalone){
+    .topbar{padding-top:env(safe-area-inset-top,0)}
+    body{padding-bottom:env(safe-area-inset-bottom,0)}
+  }
+
   /* ---------- Mobile ---------- */
   @media(max-width:560px){
     .topbar-inner{flex-wrap:wrap;padding:10px 14px;gap:10px}
@@ -443,6 +462,39 @@
   <div class="banner" id="autoreset-banner" style="display:none"></div>
 
   <div class="panel panel-pad">
+    <p class="section-title">App</p>
+    <div class="set-row">
+      <div>
+        <div class="t">Get the app</div>
+        <div class="d" id="install-hint">Install Madeleine Strikes to your home screen for a full-screen app that opens with one tap.</div>
+      </div>
+      <div class="ctl"><button class="btn btn-primary btn-sm" id="install-btn">
+        <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
+        Download app</button></div>
+    </div>
+  </div>
+
+  <div class="panel panel-pad" style="margin-top:18px">
+    <p class="section-title">Daily reminder</p>
+    <div class="set-row">
+      <div>
+        <div class="t">Weekday summary</div>
+        <div class="d">A reminder each school day with how many strikes so far this week — or a “great job, none this week!” when it’s all clear. Shows while the app is open.</div>
+      </div>
+      <div class="ctl"><div class="switch" id="notify-switch"></div></div>
+    </div>
+    <div id="notify-config" style="display:none">
+      <div id="notify-days"></div>
+      <div class="set-row" style="border-top:1px solid var(--line-soft)">
+        <div><div class="d" id="notify-status"></div></div>
+        <div class="ctl"><button class="btn btn-ghost btn-sm" id="notify-test">
+          <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
+          Preview</button></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-pad" style="margin-top:18px">
     <p class="section-title">Check-in reminders</p>
     <div class="set-row">
       <div>
@@ -674,6 +726,7 @@ function load(){
   try{ const s=JSON.parse(localStorage.getItem(STORE)); if(s && s.students) return normalize(s); }catch(e){}
   return {students:[], log:[], settings:{auto:false,interval:"week",lastReset:Date.now(),reminders:true,sound:true,
     backup:{freq:"month",mode:"manual",last:Date.now()},
+    notify:{enabled:false,times:{"1":"15:00","2":"15:00","3":"15:00","4":"15:00","5":"15:00"},lastFired:null},
     tiers:[{at:2,label:"Recess check-in"},{at:3,label:"Lunch check-in"},{at:4,label:"Talk with the principal"},{at:5,label:"Call home"}]}, seq:1};
 }
 function normalize(s){
@@ -683,6 +736,9 @@ function normalize(s){
   s.settings.sound ??= true;
   if(!s.settings.backup || typeof s.settings.backup!=="object") s.settings.backup={freq:"month",mode:"manual",last:Date.now()};
   s.settings.backup.freq ||= "month"; s.settings.backup.mode ||= "manual"; s.settings.backup.last ||= Date.now();
+  if(!s.settings.notify || typeof s.settings.notify!=="object") s.settings.notify={enabled:false,times:{},lastFired:null};
+  if(!s.settings.notify.times || typeof s.settings.notify.times!=="object") s.settings.notify.times={};
+  ["1","2","3","4","5"].forEach(d=>{ s.settings.notify.times[d] ||= "15:00"; });
   if(!Array.isArray(s.settings.tiers)){
     const r=s.settings.recessAt||2, l=s.settings.lunchAt||3;
     s.settings.tiers=[{at:r,label:"Recess check-in"},{at:l,label:"Lunch check-in"},{at:4,label:"Talk with the principal"},{at:5,label:"Call home"}];
@@ -1002,6 +1058,12 @@ function renderSettings(){
   $("#status-remove").textContent = state.settings.soundRemove ? ("Your file: "+(state.settings.soundRemoveName||"custom")) : "Built-in tap";
   $("#reset-add").style.display = state.settings.soundAdd ? "" : "none";
   $("#reset-remove").style.display = state.settings.soundRemove ? "" : "none";
+  const nt=state.settings.notify;
+  $("#notify-switch").classList.toggle("on", nt.enabled);
+  $("#notify-config").style.display = nt.enabled ? "" : "none";
+  renderNotifyDays();
+  $("#notify-status").textContent = notifyStatusText();
+  updateInstallUI();
   const bk=state.settings.backup;
   $("#backup-freq").value=bk.freq; $("#backup-mode").value=bk.mode;
   $("#backup-mode-row").style.opacity = bk.freq==="off"?".45":"1";
@@ -1238,6 +1300,68 @@ function toggleTheme(){ const next=currentTheme()==="dark"?"light":"dark"; docum
 $("#theme-toggle").onclick=toggleTheme;
 if(window.matchMedia){ window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change",()=>{ if(!document.documentElement.getAttribute("data-theme")) updateThemeIcon(); }); }
 
+// ---------- app install (PWA) ----------
+let deferredPrompt=null;
+window.addEventListener("beforeinstallprompt",e=>{ e.preventDefault(); deferredPrompt=e; updateInstallUI(); });
+window.addEventListener("appinstalled",()=>{ deferredPrompt=null; updateInstallUI(); toast("App installed 🎉"); });
+function isStandalone(){ return (window.matchMedia && window.matchMedia("(display-mode: standalone)").matches) || window.navigator.standalone===true; }
+function isIOS(){ return /iPad|iPhone|iPod/.test(navigator.userAgent||""); }
+function updateInstallUI(){
+  const btn=$("#install-btn"), hint=$("#install-hint"); if(!btn||!hint) return;
+  if(isStandalone()){ btn.style.display="none"; hint.textContent="✓ The app is installed — you’re using it now."; return; }
+  if(deferredPrompt){ btn.style.display=""; hint.textContent="Install Madeleine Strikes for a full-screen app that opens with one tap."; return; }
+  if(isIOS()){ btn.style.display="none"; hint.innerHTML="On iPhone or iPad: tap the <b>Share</b> icon, then <b>Add to Home Screen</b>."; return; }
+  btn.style.display="none"; hint.innerHTML="To install: open your browser menu → <b>Install app</b> / <b>Add to Home screen</b> (Chrome, Edge or Android).";
+}
+$("#install-btn").onclick=()=>{ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.finally(()=>{ deferredPrompt=null; updateInstallUI(); }); } };
+if("serviceWorker" in navigator){ window.addEventListener("load",()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }); }
+
+// ---------- daily reminder ----------
+const NOTIFY_DAYS=[["1","Monday"],["2","Tuesday"],["3","Wednesday"],["4","Thursday"],["5","Friday"]];
+function renderNotifyDays(){
+  const el=$("#notify-days"); if(!el) return;
+  const nt=state.settings.notify;
+  el.innerHTML=NOTIFY_DAYS.map(([d,name])=>`<div class="set-row notify-day">
+    <div class="t">${name}</div>
+    <div class="ctl"><input type="time" class="input time-input" data-day="${d}" value="${nt.times[d]||"15:00"}" aria-label="${name} reminder time"></div>
+  </div>`).join("");
+}
+function notifyStatusText(){
+  if(!("Notification" in window)) return "Weekends are off. This browser can’t show pop-up notifications — you’ll get an in-app message instead.";
+  if(Notification.permission==="granted") return "Weekends are off. Notifications are allowed — reminders appear while the app is open.";
+  if(Notification.permission==="denied") return "Weekends are off. Notifications are blocked in your browser — you’ll still get an in-app message.";
+  return "Weekends are off. You’ll be asked to allow notifications; either way you’ll get an in-app message.";
+}
+function strikesThisWeek(){ const cut=Date.now()-7*864e5; return state.log.filter(l=>l.t==="strike" && l.ts>=cut); }
+function notifyMessage(){
+  const wk=strikesThisWeek(), n=wk.length;
+  if(n===0) return "🎉 Great job — no strikes this week!";
+  const kids=new Set(wk.map(l=>l.id)).size;
+  return `${n} strike${n>1?"s":""} this week · ${kids} student${kids>1?"s":""}.`;
+}
+function fireReminder(){
+  const body=notifyMessage();
+  toast(body);
+  try{ if("Notification" in window && Notification.permission==="granted") new Notification("Madeleine Strikes",{body,icon:"icon-192.png",tag:"daily-strikes"}); }catch(e){}
+}
+function pad2(n){ return String(n).padStart(2,"0"); }
+function dateKey(d){ return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
+function checkDailyReminder(){
+  const nt=state.settings.notify; if(!nt||!nt.enabled) return;
+  if(!document.documentElement.hasAttribute("data-unlocked")) return;
+  const now=new Date(), day=now.getDay();
+  if(day<1||day>5) return;
+  const t=(nt.times[String(day)]||"15:00").split(":");
+  const setMin=(+t[0])*60+(+t[1]), nowMin=now.getHours()*60+now.getMinutes(), key=dateKey(now);
+  if(nowMin>=setMin && nt.lastFired!==key){ nt.lastFired=key; save(); fireReminder(); }
+}
+$("#notify-switch").onclick=()=>{
+  const nt=state.settings.notify; nt.enabled=!nt.enabled; save(); renderSettings();
+  if(nt.enabled && "Notification" in window && Notification.permission==="default"){ Notification.requestPermission().then(()=>renderSettings()); }
+};
+$("#notify-days").addEventListener("change",e=>{ const inp=e.target.closest("input[data-day]"); if(!inp) return; state.settings.notify.times[inp.dataset.day]=inp.value||"15:00"; save(); });
+$("#notify-test").onclick=fireReminder;
+
 // keyboard
 document.addEventListener("keydown",e=>{
   if(e.target.tagName==="INPUT"||e.target.tagName==="SELECT") return;
@@ -1254,6 +1378,7 @@ const PASSCODE="9096";
     if(gi.value.trim()===PASSCODE){
       document.documentElement.setAttribute("data-unlocked","");
       try{ localStorage.setItem("madeleine_unlocked","1"); }catch(e){}
+      try{ checkDailyReminder(); }catch(e){}
       maybeBackup();
     } else {
       err.textContent="Wrong passcode"; gi.value="";
@@ -1271,5 +1396,6 @@ updateThemeIcon();
 checkAutoReset();
 renderAll();
 maybeBackup();
-setInterval(()=>{ checkAutoReset(); maybeBackup(); if($("#view-board").style.display!=="none") renderLog(); }, 60000);
+checkDailyReminder();
+setInterval(()=>{ checkAutoReset(); maybeBackup(); checkDailyReminder(); if($("#view-board").style.display!=="none") renderLog(); }, 60000);
 </script>
