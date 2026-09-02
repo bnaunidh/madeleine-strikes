@@ -1,13 +1,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Madeleine Strikes · The School of the Madeleine</title>
+<title>Hit Dashboard · The School of the Madeleine</title>
 <meta name="theme-color" content="#2f6bd8">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Strikes">
+<meta name="apple-mobile-web-app-title" content="Hit Dashboard">
 <style>
   :root{
     --bg:#f5f6f8; --panel:#ffffff; --ink:#1f2733; --muted:#6b7684;
@@ -248,7 +248,8 @@
   .modal h3{margin:0 0 3px;font-size:18px}
   .modal .who{color:var(--muted);font-size:13.5px;margin:0 0 18px}
   .reason-tags{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 4px}
-  .rtag{font-size:12.5px;padding:6px 11px;border-radius:20px;background:var(--bg);border:1px solid var(--line);color:var(--muted);transition:.12s}
+  .rtag{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;padding:6px 11px;border-radius:20px;background:var(--bg);border:1px solid var(--line);color:var(--muted);transition:.12s}
+  .rkey{display:inline-grid;place-items:center;min-width:18px;height:18px;padding:0 4px;border-radius:5px;background:var(--chip-btn);font-size:11px;font-weight:700;font-variant-numeric:tabular-nums;flex:0 0 auto}
   .rtag:hover{border-color:var(--blue);color:var(--blue)}
   .rtag.on{border-color:var(--blue);color:var(--blue);background:var(--blue-soft)}
   .modal-actions{display:flex;gap:10px;margin-top:20px}
@@ -346,7 +347,7 @@
 <div id="gate">
   <div class="gate-card">
     <div class="gate-logo"><img id="gate-logo-img" alt="School of the Madeleine"></div>
-    <h2>Madeleine Strikes</h2>
+    <h2>Hit Dashboard</h2>
     <p class="gsub">The School of the Madeleine</p>
     <input class="gate-input" id="gate-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" autocomplete="off" aria-label="Passcode">
     <div class="gate-err" id="gate-err"></div>
@@ -359,7 +360,7 @@
     <button class="brand-btn" id="brand-home" title="Back to roster">
       <div class="crest has-logo" id="crest"><img src="data:image/png;base64,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" alt="School of the Madeleine"></div>
       <div class="brand">
-        <h1>Madeleine Strikes</h1>
+        <h1>Hit Dashboard</h1>
         <p>The School of the Madeleine</p>
       </div>
     </button>
@@ -372,7 +373,7 @@
       </button>
       <button class="tab" data-view="fast">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg>
-        Fast Strike
+        Fast Hit
       </button>
       <button class="tab" data-view="totals">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l3-4 3 2 4-6"/></svg>
@@ -405,7 +406,7 @@
         </button>
         <label class="sortsel">Sort:
           <select id="sortsel">
-            <option value="strikes">Most strikes</option>
+            <option value="strikes">Most hits</option>
             <option value="name">Name</option>
             <option value="class">Class</option>
           </select>
@@ -435,15 +436,15 @@
 <div class="fast" id="view-fast">
   <div class="fast-inner">
     <div class="fast-head">
-      <h2>Fast Strike</h2>
-      <p class="sub">Tap a student to give a strike — press &amp; hold to take one back. Set a reason first if you like; it sticks, so you can tap several in a row.</p>
+      <h2>Fast Hit</h2>
+      <p class="sub">Tap a student to give a hit — press &amp; hold to take one back. Set a reason first if you like; it sticks, so you can tap several in a row.</p>
     </div>
     <div class="fast-search">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
       <input id="fast-search" placeholder="Search students…" autocomplete="off">
     </div>
     <div class="fast-reason-bar">
-      <input id="fast-reason" placeholder="Reason for the next strike (optional)" autocomplete="off">
+      <input id="fast-reason" placeholder="Reason for the next hit (optional)" autocomplete="off">
       <button id="fast-reason-clear" title="Clear reason" aria-label="Clear reason">&times;</button>
     </div>
     <div class="fast-reason-chips" id="fast-reason-chips"></div>
@@ -472,7 +473,7 @@
     <div class="set-row">
       <div>
         <div class="t">Get the app</div>
-        <div class="d" id="install-hint">Install Madeleine Strikes to your home screen for a full-screen app that opens with one tap.</div>
+        <div class="d" id="install-hint">Install Hit Dashboard to your home screen for a full-screen app that opens with one tap.</div>
       </div>
       <div class="ctl"><button class="btn btn-primary btn-sm" id="install-btn">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
@@ -481,11 +482,25 @@
   </div>
 
   <div class="panel panel-pad" style="margin-top:18px">
+    <p class="section-title">Passcode</p>
+    <div class="set-row">
+      <div>
+        <div class="t">Change the passcode</div>
+        <div class="d" id="pass-hint">4–8 digits. Saved on this device only — if you use the app on a phone too, change it there as well.</div>
+      </div>
+      <div class="ctl">
+        <input class="input" id="new-pass" type="password" inputmode="numeric" maxlength="8" placeholder="New code" autocomplete="new-password" style="width:118px;text-align:center;letter-spacing:3px">
+        <button class="btn btn-primary btn-sm" id="save-pass">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel panel-pad" style="margin-top:18px">
     <p class="section-title">Daily reminder</p>
     <div class="set-row">
       <div>
         <div class="t">Weekday summary</div>
-        <div class="d">A reminder each school day with how many strikes so far this week — or a “great job, none this week!” when it’s all clear. Shows while the app is open.</div>
+        <div class="d">A reminder each school day with how many hits so far this week — or a “great job, none this week!” when it’s all clear. Shows while the app is open.</div>
       </div>
       <div class="ctl"><div class="switch" id="notify-switch"></div></div>
     </div>
@@ -523,8 +538,8 @@
   </div>
 
   <div class="panel panel-pad" style="margin-top:18px">
-    <p class="section-title">What each strike means</p>
-    <div class="tier-warn"><b>1 strike</b> — just a warning, nothing happens.</div>
+    <p class="section-title">What each hit means</p>
+    <div class="tier-warn"><b>1 hit</b> — just a warning, nothing happens.</div>
     <div id="tier-editor"></div>
     <button class="btn btn-ghost btn-sm" id="add-tier" style="margin-top:12px">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg> Add a consequence
@@ -532,11 +547,20 @@
   </div>
 
   <div class="panel panel-pad" style="margin-top:18px">
+    <p class="section-title">Quick reasons</p>
+    <div class="tier-warn">The pills you tap when giving a hit. With the reason box empty, just press the number key to pick one, then <b>Enter</b>. Up to 10 — anything unusual you can still type out.</div>
+    <div id="reason-editor"></div>
+    <button class="btn btn-ghost btn-sm" id="add-reason" style="margin-top:12px">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg> Add a reason
+    </button>
+  </div>
+
+  <div class="panel panel-pad" style="margin-top:18px">
     <p class="section-title">Auto reset</p>
     <div class="set-row">
       <div>
-        <div class="t">Automatically reset strikes</div>
-        <div class="d">Wipe every student's current strikes on a schedule — a fresh start each week. Yearly totals are kept.</div>
+        <div class="t">Automatically reset hits</div>
+        <div class="d">Wipe every student's current hits on a schedule — a fresh start each week. Yearly totals are kept.</div>
       </div>
       <div class="ctl"><div class="switch" id="auto-switch"></div></div>
     </div>
@@ -560,13 +584,13 @@
     <div class="set-row">
       <div>
         <div class="t">Sound effects</div>
-        <div class="d">Play a sound when you add or remove a strike.</div>
+        <div class="d">Play a sound when you add or remove a hit.</div>
       </div>
       <div class="ctl"><div class="switch" id="sound-switch"></div></div>
     </div>
     <div class="set-row">
       <div>
-        <div class="t">“Strike given” sound</div>
+        <div class="t">“Hit given” sound</div>
         <div class="d" id="status-add">Built-in ding</div>
       </div>
       <div class="ctl">
@@ -578,7 +602,7 @@
     </div>
     <div class="set-row">
       <div>
-        <div class="t">“Strike removed” sound</div>
+        <div class="t">“Hit removed” sound</div>
         <div class="d" id="status-remove">Built-in tap</div>
       </div>
       <div class="ctl">
@@ -595,7 +619,7 @@
     <div class="set-row">
       <div>
         <div class="t">Save a backup now</div>
-        <div class="d">Downloads one file with all your students, strikes and history. Keep it somewhere safe.</div>
+        <div class="d">Downloads one file with all your students, hits and history. Keep it somewhere safe.</div>
       </div>
       <div class="ctl"><button class="btn btn-primary btn-sm" id="export-now">Download backup</button></div>
     </div>
@@ -641,15 +665,15 @@
     <p class="section-title">Resets</p>
     <div class="set-row">
       <div>
-        <div class="t">Reset all strikes now</div>
-        <div class="d">Sets every student's current strikes back to zero. Keeps yearly totals.</div>
+        <div class="t">Reset all hits now</div>
+        <div class="d">Sets every student's current hits back to zero. Keeps yearly totals.</div>
       </div>
-      <div class="ctl"><button class="btn btn-ghost btn-sm" id="reset-all">Reset strikes</button></div>
+      <div class="ctl"><button class="btn btn-ghost btn-sm" id="reset-all">Reset hits</button></div>
     </div>
     <div class="set-row">
       <div>
         <div class="t">Start a new school year</div>
-        <div class="d">Resets strikes AND every yearly total to zero. Keeps your students.</div>
+        <div class="d">Resets hits AND every yearly total to zero. Keeps your students.</div>
       </div>
       <div class="ctl"><button class="btn btn-ghost btn-sm" id="new-year-2">Start new year</button></div>
     </div>
@@ -663,17 +687,17 @@
   </div>
 </div>
 
-<!-- Strike reason modal -->
+<!-- Hit reason modal -->
 <div class="overlay" id="modal">
-  <div class="modal">
-    <h3>Give a strike</h3>
+  <div class="modal" tabindex="-1">
+    <h3>Give a hit</h3>
     <p class="who" id="modal-who"></p>
     <label style="font-size:12.5px;font-weight:550;color:var(--muted)">Reason <span style="font-weight:400">(optional)</span></label>
     <input class="input" id="modal-reason" placeholder="What happened?" autocomplete="off" style="margin-top:5px">
     <div class="reason-tags" id="reason-tags"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" id="modal-cancel" style="flex:1">Cancel</button>
-      <button class="btn btn-strike" id="modal-confirm" style="flex:1">Add strike</button>
+      <button class="btn btn-strike" id="modal-confirm" style="flex:1">Add hit</button>
     </div>
   </div>
 </div>
@@ -719,7 +743,10 @@ function popCount(el){
   setTimeout(()=>{ el.style.transform=""; }, 700);
 }
 const STORE = "madeleine_strikeboard_v1";
-const QUICK_REASONS = ["Talking in class","Late","No homework","Disruptive","Phone use","Disrespect"];
+const DEFAULT_REASONS = ["Talking in class","Late","No homework","Disruptive","Phone use","Disrespect"];
+function REASONS(){ const r=(typeof state!=="undefined") && state.settings && state.settings.reasons; return Array.isArray(r)?r:DEFAULT_REASONS; }
+function reasonKey(i){ return i<9 ? String(i+1) : "0"; }
+function reasonForKey(k){ const i = k==="0" ? 9 : (parseInt(k,10)-1); const l=REASONS(); const r=(i>=0&&i<l.length)?l[i]:null; return (r&&r.trim())?r.trim():null; }
 const CLASS_PRESET = ["Samuel Bird","Mia Bonilla-Martinez","Lucianna Chiarella","Massimo Dalo","Abel Dawit","Sophia Dong","Alexander Ewulum","Alexander Garcia","Maurine Hathaway","Ellis Heffelfinger","Harrison Kim","Samuel Madrid","Amelia Martinez de la Vega","Camilo Mora-Torres","Emiko Oishi","Aminah Reid","Abraham Ren","Owen Satchwell","Nina Sivarajah","Joseph Soloman","Federico Ty","Elliot Yeghoian","Caleb Zimring"];
 const AVATAR_COLORS = ["#2f6bd8","#7a4dd8","#2f9e59","#d8813c","#c94f9c","#0e9bb0","#5a6acc","#c65353"];
 
@@ -753,6 +780,7 @@ function load(){
   try{ const s=JSON.parse(localStorage.getItem(STORE)); if(s && s.students) return normalize(s); }catch(e){}
   return {students:[], log:[], settings:{auto:false,interval:"week",lastReset:Date.now(),reminders:true,sound:true,
     backup:{freq:"month",mode:"manual",last:Date.now()},
+    reasons:["Talking in class","Late","No homework","Disruptive","Phone use","Disrespect"],
     notify:{enabled:false,times:{"1":"15:00","2":"15:00","3":"15:00","4":"15:00","5":"15:00"},lastFired:null},
     tiers:[{at:2,label:"Recess check-in"},{at:3,label:"Lunch check-in"},{at:4,label:"Talk with the principal"},{at:5,label:"Call home"}]}, seq:1};
 }
@@ -763,6 +791,8 @@ function normalize(s){
   s.settings.sound ??= true;
   if(!s.settings.backup || typeof s.settings.backup!=="object") s.settings.backup={freq:"month",mode:"manual",last:Date.now()};
   s.settings.backup.freq ||= "month"; s.settings.backup.mode ||= "manual"; s.settings.backup.last ||= Date.now();
+  if(!Array.isArray(s.settings.reasons)) s.settings.reasons=DEFAULT_REASONS.slice();
+  s.settings.reasons=s.settings.reasons.slice(0,10);
   if(!s.settings.notify || typeof s.settings.notify!=="object") s.settings.notify={enabled:false,times:{},lastFired:null};
   if(!s.settings.notify.times || typeof s.settings.notify.times!=="object") s.settings.notify.times={};
   ["1","2","3","4","5"].forEach(d=>{ s.settings.notify.times[d] ||= "15:00"; });
@@ -820,15 +850,18 @@ function tierShort(label){
 function syncDone(st){ if(!st.done||typeof st.done!=="object") st.done={}; TIERS().forEach(t=>{ if(st.strikes<t.at) st.done[t.at]=false; }); }
 function dueTiers(st){ return TIERS().filter(t=> t.label.trim() && st.strikes>=t.at && !st.done[t.at]); }
 
-function checkAutoReset(){
-  const s=state.settings; if(!s.auto) return;
+function intervalWord(iv){ return iv==="day"?"daily":(iv==="week"?"weekly":"monthly"); }
+function checkAutoReset(){   // returns true if it actually wiped, so callers can re-render
+  const s=state.settings; if(!s.auto) return false;
   if(Date.now() >= s.lastReset + INTERVAL_MS[s.interval]){
     const had=state.students.some(x=>x.strikes>0);
     state.students.forEach(x=>{ x.strikes=0; x.done={}; });
     s.lastReset=Date.now();
-    if(had) state.log.unshift({t:"reset",ts:Date.now(),note:"Auto reset ("+s.interval+"ly)"});
+    if(had) state.log.unshift({t:"reset",ts:Date.now(),note:"Auto reset ("+intervalWord(s.interval)+")"});
     save();
+    return true;
   }
+  return false;
 }
 
 // actions
@@ -845,7 +878,7 @@ function giveStrike(id,reason){
   popCount(document.querySelector("#roster [data-strike='"+id+"']")?.closest(".student")?.querySelector(".count"));
   const r=reason&&reason.trim()?' — "'+reason.trim()+'"':"";
   const cons=triggered?" · "+triggered.label+" now due":"";
-  toastUndo(st.name+": "+st.strikes+" strike"+(st.strikes>1?"s":"")+r+cons, ()=>{
+  toastUndo(st.name+": "+st.strikes+" hit"+(st.strikes>1?"s":"")+r+cons, ()=>{
     st.strikes=Math.max(0,st.strikes-1); st.total=Math.max(0,(st.total||1)-1); syncDone(st); beep("remove");
     const i=state.log.findIndex(l=>l.t==="strike"&&l.id===id); if(i>-1) state.log.splice(i,1);
     save(); renderAll();
@@ -856,7 +889,7 @@ function undoStrikeOne(id){
   const st=state.students.find(x=>x.id===id); if(!st||st.strikes<=0) return;
   st.strikes--; st.total=Math.max(0,(st.total||1)-1); syncDone(st); beep("remove");
   const i=state.log.findIndex(l=>l.t==="strike"&&l.id===id); if(i>-1) state.log.splice(i,1);
-  save(); renderAll(); toast(st.name+" — removed 1 strike");
+  save(); renderAll(); toast(st.name+" — removed 1 hit");
 }
 function toggleDone(id,key){
   const st=state.students.find(x=>x.id===id); if(!st) return;
@@ -868,6 +901,7 @@ function toggleDone(id,key){
 // used on the roster: mark done, let the chip linger green then fade out & reflow
 function completeCheckin(id, at, chip){
   const st=state.students.find(x=>x.id===id); if(!st || st.done[at]) return;
+  if(st.strikes < at){ renderAll(); return; }   // view was stale (e.g. an auto-reset fired) - resync instead of writing
   st.done[at]=true;
   const label=tierLabel(at);
   state.log.unshift({t:"done",ts:Date.now(),note:label+" done · "+st.name});
@@ -894,7 +928,7 @@ function resetStudent(id){
   save(); renderAll(); toast(st.name+" reset to 0");
 }
 function removeStudent(id){ state.students=state.students.filter(x=>x.id!==id); save(); renderAll(); }
-function resetAll(){ state.students.forEach(x=>{ x.strikes=0; x.done={}; }); state.settings.lastReset=Date.now(); state.log.unshift({t:"reset",ts:Date.now(),note:"All strikes reset"}); save(); renderAll(); toast("All strikes reset to 0"); }
+function resetAll(){ state.students.forEach(x=>{ x.strikes=0; x.done={}; }); state.settings.lastReset=Date.now(); state.log.unshift({t:"reset",ts:Date.now(),note:"All hits reset"}); save(); renderAll(); toast("All hits reset to 0"); }
 function newSchoolYear(){ state.students.forEach(x=>{ x.strikes=0; x.total=0; x.done={}; }); state.settings.lastReset=Date.now(); state.log.unshift({t:"reset",ts:Date.now(),note:"New school year — all totals reset"}); save(); renderAll(); toast("New school year — totals reset"); }
 
 // ---- backup: export / import ----
@@ -904,7 +938,7 @@ function exportData(silent){
     const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
     const url=URL.createObjectURL(blob);
     const a=document.createElement("a");
-    a.href=url; a.download="madeleine-strikes-backup-"+stamp()+".json";
+    a.href=url; a.download="hit-dashboard-backup-"+stamp()+".json";
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),1500);
     if(!silent) toast("Backup downloaded");
@@ -914,9 +948,16 @@ function importData(file){
   const rd=new FileReader();
   rd.onload=()=>{
     let obj; try{ obj=JSON.parse(rd.result); }catch(e){ obj=null; }
-    if(!obj || !Array.isArray(obj.students)){ alert("That file isn't a Madeleine Strikes backup."); return; }
-    if(!confirm("Import this backup?\n\nIt will REPLACE all current students, strikes and history. This can't be undone.")) return;
-    state=normalize(obj); save(); renderAll(); toast("Backup imported ✓");
+    if(!obj || !Array.isArray(obj.students)){ alert("That file isn't a Hit Dashboard backup."); return; }
+    if(!confirm("Import this backup?\n\nIt will REPLACE all current students, hits and history. This can't be undone.")) return;
+    state=normalize(obj);
+    // A backup carries the timestamps from when it was made. Restart both clocks from now,
+    // otherwise a stale lastReset makes the auto-reset fire instantly and wipe the strikes
+    // we just restored (yearly totals survive, which is exactly how that bug looked).
+    state.settings.lastReset=Date.now();
+    if(state.settings.backup) state.settings.backup.last=Date.now();
+    if(state.settings.notify) state.settings.notify.lastFired=null;
+    save(); renderAll(); toast("Backup imported ✓");
   };
   rd.readAsText(file);
 }
@@ -977,7 +1018,7 @@ function renderStats(){
     <div class="stat"><div class="n">${total}</div><div class="l">Students</div></div>
     <div class="stat ${due?'warn':''}"><div class="n">${due}</div><div class="l">Check-ins due</div></div>
     <div class="stat ${flagged?'warn':''}"><div class="n">${flagged}</div><div class="l">${isFinite(maxAt)?`Flagged (${maxAt}+)`:"Flagged"}</div></div>
-    <div class="stat"><div class="n">${yearTotal}</div><div class="l">Strikes this year</div></div>`;
+    <div class="stat"><div class="n">${yearTotal}</div><div class="l">Hits this year</div></div>`;
 }
 function sortedStudents(){
   let list=state.students.slice();
@@ -1011,24 +1052,24 @@ function renderRoster(){
       <div class="avatar" style="background:${colorFor(x.id)}">${initials(x.name)}</div>
       <div class="s-main">
         <div class="s-name">${esc(x.name)} ${x.cls?`<span class="chip">${esc(x.cls)}</span>`:""}</div>
-        <div class="s-sub">${x.strikes} strike${x.strikes===1?"":"s"}${yearNote}</div>
+        <div class="s-sub">${x.strikes} hit${x.strikes===1?"":"s"}${yearNote}</div>
       </div>
       <div class="s-right">
       <div class="s-cons">${consHTML(x)}</div>
       <div class="s-actions">
-        <button class="step" data-undo="${x.id}" title="Remove one strike" ${x.strikes?"":"disabled"}>
+        <button class="step" data-undo="${x.id}" title="Remove one hit" ${x.strikes?"":"disabled"}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14"/></svg>
         </button>
         <div class="count ${cc}">${x.strikes}</div>
-        <button class="strike-btn" data-strike="${x.id}" ${atMax?"disabled":""} title="${atMax?`At the max (${maxAt})`:"Give a strike"}">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Strike
+        <button class="strike-btn" data-strike="${x.id}" ${atMax?"disabled":""} title="${atMax?`At the max (${maxAt})`:"Give a hit"}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Hit
         </button>
         <div class="kebab-wrap">
           <button class="kebab" data-menu="${x.id}" title="More">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>
           </button>
           <div class="menu" id="menu-${x.id}">
-            <button data-reset="${x.id}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Reset strikes to zero</button>
+            <button data-reset="${x.id}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Reset hits to zero</button>
             <div class="sep"></div>
             <button class="danger" data-del="${x.id}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg> Remove student</button>
           </div>
@@ -1043,7 +1084,7 @@ function renderLog(){
   if(!state.log.length){ el.innerHTML=`<div class="empty" style="padding:24px">No activity yet.</div>`; return; }
   el.innerHTML=state.log.slice(0,40).map(l=>{
     if(l.t==="reset"||l.t==="done") return `<div class="log-item"><span class="log-dot good"></span><div class="log-body"><div>${esc(l.note||"")}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
-    return `<div class="log-item"><span class="log-dot"></span><div class="log-body"><div><strong>${esc(l.name)}</strong>${l.cls?` <span style="color:var(--muted)">· ${esc(l.cls)}</span>`:""} — strike ${l.count}${l.reason?` <span class="log-reason">"${esc(l.reason)}"</span>`:""}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
+    return `<div class="log-item"><span class="log-dot"></span><div class="log-body"><div><strong>${esc(l.name)}</strong>${l.cls?` <span style="color:var(--muted)">· ${esc(l.cls)}</span>`:""} — hit ${l.count}${l.reason?` <span class="log-reason">"${esc(l.reason)}"</span>`:""}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
   }).join("");
 }
 function renderTotals(){
@@ -1052,10 +1093,10 @@ function renderTotals(){
   const doneCount=state.log.filter(l=>l.t==="done").length;
   const worst=state.students.slice().sort((a,b)=>(b.total||0)-(a.total||0))[0];
   $("#totals-stats").innerHTML=`
-    <div class="stat"><div class="n">${yearTotal}</div><div class="l">Strikes this year</div></div>
+    <div class="stat"><div class="n">${yearTotal}</div><div class="l">Hits this year</div></div>
     <div class="stat"><div class="n">${students}</div><div class="l">Students</div></div>
     <div class="stat"><div class="n">${doneCount}</div><div class="l">Check-ins completed</div></div>
-    <div class="stat"><div class="n" style="font-size:18px">${worst&&worst.total?esc(worst.name):"—"}</div><div class="l">Most strikes</div></div>`;
+    <div class="stat"><div class="n" style="font-size:18px">${worst&&worst.total?esc(worst.name):"—"}</div><div class="l">Most hits</div></div>`;
   const studs=state.students.slice().sort((a,b)=>(b.total||0)-(a.total||0)||a.name.localeCompare(b.name));
   const maxStud=Math.max(1,...studs.map(s=>s.total||0));
   $("#student-table").innerHTML = !studs.length
@@ -1074,10 +1115,21 @@ function renderTierEditor(){
   const tiers=TIERS();
   el.innerHTML=tiers.map((t,i)=>`
     <div class="tier-row">
-      <div class="tier-at"><input class="input tier-num" type="number" min="1" max="99" value="${t.at}" data-tier-at="${i}" aria-label="strike number"><span>strikes →</span></div>
+      <div class="tier-at"><input class="input tier-num" type="number" min="1" max="99" value="${t.at}" data-tier-at="${i}" aria-label="hit number"><span>hits →</span></div>
       <input class="input" value="${esc(t.label)}" placeholder="e.g. Call home" data-tier-label="${i}" aria-label="consequence">
       <button class="tier-del" data-tier-del="${i}" title="Remove"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
     </div>`).join("") || `<div class="tier-warn">No consequences yet — add one below.</div>`;
+}
+function renderReasonEditor(){
+  const el=$("#reason-editor"); if(!el) return;
+  const list=REASONS();
+  el.innerHTML=list.map((r,i)=>`
+    <div class="tier-row">
+      <div class="tier-at"><span class="rkey">${reasonKey(i)}</span></div>
+      <input class="input" value="${esc(r)}" placeholder="e.g. Talking in class" data-reason="${i}" aria-label="Quick reason ${reasonKey(i)}">
+      <button class="tier-del" data-reason-del="${i}" title="Remove"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+    </div>`).join("") || `<div class="tier-warn">No quick reasons yet — add one below.</div>`;
+  const add=$("#add-reason"); if(add) add.style.display = list.length>=10 ? "none" : "";
 }
 function renderSettings(){
   $("#remind-switch").classList.toggle("on", state.settings.reminders);
@@ -1101,12 +1153,15 @@ function renderSettings(){
   $("#auto-interval").value=state.settings.interval;
   $("#auto-interval-row").style.opacity=state.settings.auto?"1":".45";
   $("#auto-interval").disabled=!state.settings.auto;
-  renderTierEditor();
+  renderTierEditor(); renderReasonEditor();
+  { const ph=$("#pass-hint"); if(ph) ph.textContent = (getPasscode()===DEFAULT_PASSCODE)
+      ? "Currently the default (9096). 4\u20138 digits. Saved on this device only \u2014 if you use the app on a phone too, change it there as well."
+      : "You\u2019ve set your own passcode. 4\u20138 digits. Saved on this device only \u2014 change it separately on any other device."; }
   const note=$("#next-reset-note");
   if(state.settings.auto){ const due=state.settings.lastReset+INTERVAL_MS[state.settings.interval]; note.textContent="Next reset "+new Date(due).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}); }
   else note.textContent="Turn on to schedule automatic resets.";
   const b=$("#autoreset-banner");
-  if(state.settings.auto){ b.style.display="flex"; b.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Strikes reset automatically every ${state.settings.interval}.`; }
+  if(state.settings.auto){ b.style.display="flex"; b.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Hits reset automatically every ${state.settings.interval}.`; }
   else b.style.display="none";
 }
 function renderAll(){
@@ -1123,9 +1178,9 @@ function toastUndo(msg,undo){ const t=$("#toast"); t.className="undo"; t.innerHT
 // modal
 let modalId=null;
 function openModal(id){ const st=state.students.find(x=>x.id===id); if(!st) return; modalId=id;
-  $("#modal-who").textContent=st.name+(st.cls?` · ${st.cls}`:"")+` · currently ${st.strikes} strike${st.strikes===1?"":"s"}`;
-  $("#modal-reason").value=""; $("#reason-tags").innerHTML=QUICK_REASONS.map(r=>`<button class="rtag" data-r="${esc(r)}">${esc(r)}</button>`).join("");
-  $("#modal").classList.add("show"); setTimeout(()=>$("#modal-reason").focus(),50); }
+  $("#modal-who").textContent=st.name+(st.cls?` · ${st.cls}`:"")+` · currently ${st.strikes} hit${st.strikes===1?"":"s"}`;
+  $("#modal-reason").value=""; renderModalTags();
+  $("#modal").classList.add("show"); setTimeout(()=>{ const m=$("#modal .modal"); if(m) m.focus(); },30); }
 function closeModal(){ $("#modal").classList.remove("show"); modalId=null; }
 
 // fast
@@ -1141,15 +1196,22 @@ function renderFastGrid(){
   el.innerHTML=list.map(x=>{
     const atMax=isFinite(maxAt)&&x.strikes>=maxAt;
     const badge=x.strikes>0?`<div class="ftile-count ${atMax?'max':''}">${x.strikes}</div>`:"";
-    return `<button class="ftile ${atMax?'maxed':''}" data-fstrike="${x.id}" title="${atMax?`${esc(x.name)} is at the max — hold to remove one`:`Tap for a strike, hold to remove one`}">
+    return `<button class="ftile ${atMax?'maxed':''}" data-fstrike="${x.id}" title="${atMax?`${esc(x.name)} is at the max — hold to remove one`:`Tap for a hit, hold to remove one`}">
       ${badge}
       <div class="avatar" style="background:${colorFor(x.id)}">${initials(x.name)}</div>
       <div class="ftile-name">${esc(x.name)}</div>
-      <div class="ftile-meta">${x.cls?esc(x.cls)+" · ":""}${x.strikes} strike${x.strikes===1?"":"s"}${atMax?" · max":""}</div>
+      <div class="ftile-meta">${x.cls?esc(x.cls)+" · ":""}${x.strikes} hit${x.strikes===1?"":"s"}${atMax?" · max":""}</div>
     </button>`;
   }).join("");
 }
-function fastReasonChips(){ $("#fast-reason-chips").innerHTML=QUICK_REASONS.map(r=>`<button class="rtag" data-fr="${esc(r)}">${esc(r)}</button>`).join(""); }
+function renderModalTags(){
+  $("#reason-tags").innerHTML=REASONS().map((r,i)=> (r&&r.trim())?`<button class="rtag" data-r="${esc(r.trim())}" title="Press ${reasonKey(i)}"><span class="rkey">${reasonKey(i)}</span>${esc(r.trim())}</button>`:"").join("");
+  updateModalTags();
+}
+function updateModalTags(){ const v=$("#modal-reason").value.trim(); $$("#reason-tags .rtag").forEach(c=>c.classList.toggle("on", c.dataset.r===v)); }
+// number keys pick a reason, handled at document level and ONLY when you are not typing
+function pickReason(inp, r, after){ if(!inp) return; inp.value=(inp.value.trim()===r)?"":r; if(after) after(); }
+function fastReasonChips(){ $("#fast-reason-chips").innerHTML=REASONS().map((r,i)=> (r&&r.trim())?`<button class="rtag" data-fr="${esc(r.trim())}" title="Press ${reasonKey(i)}"><span class="rkey">${reasonKey(i)}</span>${esc(r.trim())}</button>`:"").join(""); updateReasonClear(); }
 function updateReasonClear(){
   const v=$("#fast-reason").value.trim();
   $("#fast-reason-clear").classList.toggle("show", !!$("#fast-reason").value);
@@ -1165,7 +1227,7 @@ function fastStrike(id){
 }
 function fastRemove(id){
   const st=state.students.find(x=>x.id===id); if(!st) return;
-  if(st.strikes<=0){ toast(st.name+" has no strikes to remove"); return; }
+  if(st.strikes<=0){ toast(st.name+" has no hits to remove"); return; }
   undoStrikeOne(id);   // beeps "remove", re-renders grid, toasts
   const tile=$("#fast-grid button[data-fstrike='"+id+"']");
   if(tile){ tile.classList.remove("gpulse"); void tile.offsetWidth; tile.classList.add("gpulse"); }
@@ -1236,16 +1298,17 @@ $("#roster").addEventListener("click",e=>{
 $("#reminders").addEventListener("click",e=>{ const b=e.target.closest("button[data-done]"); if(!b) return; toggleDone(+b.dataset.done, b.dataset.key); });
 $("#search").addEventListener("input",e=>{ search=e.target.value; renderRoster(); });
 $("#sortsel").onchange=e=>{ sortMode=e.target.value; renderRoster(); };
-$("#clearlog").onclick=()=>{ if(confirm("Clear the activity log? Strike counts stay the same.")){ state.log=[]; save(); renderLog(); } };
+$("#clearlog").onclick=()=>{ if(confirm("Clear the activity log? Hit counts stay the same.")){ state.log=[]; save(); renderLog(); } };
 
 $("#modal-cancel").onclick=closeModal;
 $("#modal").addEventListener("click",e=>{ if(e.target.id==="modal") closeModal(); });
-$("#reason-tags").addEventListener("click",e=>{ const b=e.target.closest(".rtag"); if(!b) return; const inp=$("#modal-reason"); inp.value=inp.value.trim()?inp.value.trim()+", "+b.dataset.r:b.dataset.r; inp.focus(); });
+$("#reason-tags").addEventListener("click",e=>{ const b=e.target.closest(".rtag"); if(!b) return; const inp=$("#modal-reason"); inp.value=(inp.value.trim()===b.dataset.r)?"":b.dataset.r; updateModalTags(); inp.focus(); });
+$("#modal-reason").addEventListener("input",updateModalTags);
 $("#modal-confirm").onclick=()=>{ if(modalId!=null){ giveStrike(modalId,$("#modal-reason").value); closeModal(); } };
 $("#modal-reason").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#modal-confirm").click(); });
 
 $("#fast-search").addEventListener("input",renderFastGrid);
-// Fast Strike tile: tap = add a strike, press & hold = remove one
+// Fast Hit tile: tap = add a hit, press & hold = remove one
 let lpTimer=null, lpId=null, lpFired=false, lpX=0, lpY=0;
 $("#fast-grid").addEventListener("pointerdown",e=>{
   const b=e.target.closest("button[data-fstrike]"); if(!b) return;
@@ -1264,6 +1327,7 @@ $("#fast-search").addEventListener("keydown",e=>{
   if(e.key!=="Enter") return;
   e.preventDefault();
   const q=$("#fast-search").value.trim().toLowerCase();
+  if(!q) return;   // an empty box must never pick "the only student"
   let list=state.students.filter(x=>x.name.toLowerCase().includes(q)||(x.cls||"").toLowerCase().includes(q));
   const exact=state.students.find(x=>x.name.toLowerCase()===q);
   const target = exact || (list.length===1 ? list[0] : null);
@@ -1277,6 +1341,9 @@ $("#auto-interval").onchange=e=>{ state.settings.interval=e.target.value; state.
 $("#tier-editor").addEventListener("input",e=>{ const t=e.target; if(t.dataset.tierLabel!==undefined){ const i=+t.dataset.tierLabel; if(state.settings.tiers[i]){ state.settings.tiers[i].label=t.value; save(); renderReminders(); renderRoster(); renderStats(); } } });
 $("#tier-editor").addEventListener("change",e=>{ const t=e.target; if(t.dataset.tierAt!==undefined){ const i=+t.dataset.tierAt; if(state.settings.tiers[i]){ state.settings.tiers[i].at=Math.max(1,Math.min(99,parseInt(t.value)||1)); sortTiers(); state.students.forEach(syncDone); save(); renderAll(); } } });
 $("#tier-editor").addEventListener("click",e=>{ const b=e.target.closest("[data-tier-del]"); if(!b) return; state.settings.tiers.splice(+b.dataset.tierDel,1); state.students.forEach(syncDone); save(); renderAll(); });
+$("#reason-editor").addEventListener("input",e=>{ const t=e.target.closest("input[data-reason]"); if(!t) return; const i=+t.dataset.reason; if(state.settings.reasons[i]!==undefined){ state.settings.reasons[i]=t.value; save(); } });
+$("#reason-editor").addEventListener("click",e=>{ const b=e.target.closest("[data-reason-del]"); if(!b) return; state.settings.reasons.splice(+b.dataset.reasonDel,1); save(); renderSettings(); });
+$("#add-reason").onclick=()=>{ const l=state.settings.reasons; if(l.length>=10) return; l.push(""); save(); renderSettings(); setTimeout(()=>{ const ins=$$("#reason-editor input[data-reason]"); if(ins.length) ins[ins.length-1].focus(); },30); };
 $("#add-tier").onclick=()=>{ const ts=state.settings.tiers||(state.settings.tiers=[]); const nextAt=ts.length?Math.min(99,Math.max(...ts.map(t=>t.at))+1):2; ts.push({at:nextAt,label:""}); sortTiers(); save(); renderAll(); setTimeout(()=>{ const inputs=$$("#tier-editor [data-tier-label]"); const target=inputs.find(inp=>state.settings.tiers[+inp.dataset.tierLabel]?.at===nextAt); (target||inputs[inputs.length-1])?.focus(); },30); };
 $("#load-class").onclick=()=>{
   const existing=new Set(state.students.map(s=>s.name.toLowerCase()));
@@ -1315,8 +1382,8 @@ $("#backup-banner").addEventListener("click",e=>{
   if(e.target.closest("#backup-now")){ exportData(false); state.settings.backup.last=Date.now(); save(); renderBackupBanner(); }
   else if(e.target.closest("#backup-later")){ backupDismissed=true; renderBackupBanner(); }
 });
-$("#reset-all").onclick=()=>{ if(confirm("Reset every student's current strikes to zero? Yearly totals are kept.")) resetAll(); };
-function confirmNewYear(){ if(confirm("Start a new school year?\n\nThis sets every student's strikes AND yearly totals back to zero. Students stay. This can't be undone.")) newSchoolYear(); }
+$("#reset-all").onclick=()=>{ if(confirm("Reset every student's current hits to zero? Yearly totals are kept.")) resetAll(); };
+function confirmNewYear(){ if(confirm("Start a new school year?\n\nThis sets every student's hits AND yearly totals back to zero. Students stay. This can't be undone.")) newSchoolYear(); }
 $("#new-year").onclick=confirmNewYear; $("#new-year-2").onclick=confirmNewYear;
 $("#wipe").onclick=()=>{ if(confirm("Delete ALL students and history? This cannot be undone.")){ state.students=[]; state.log=[]; save(); renderAll(); toast("Everything cleared"); } };
 
@@ -1340,10 +1407,17 @@ function updateInstallUI(){
   const panel=$("#app-panel");
   if(isStandalone()){ if(panel) panel.style.display="none"; return; }   // remove the "get the app" section once installed
   if(panel) panel.style.display="";
-  if(deferredPrompt){ btn.style.display=""; hint.textContent="Install Madeleine Strikes for a full-screen app that opens with one tap."; return; }
+  if(deferredPrompt){ btn.style.display=""; hint.textContent="Install Hit Dashboard for a full-screen app that opens with one tap."; return; }
   if(isIOS()){ btn.style.display="none"; hint.innerHTML="On iPhone or iPad: tap the <b>Share</b> icon, then <b>Add to Home Screen</b>."; return; }
   btn.style.display="none"; hint.innerHTML="To install: open your browser menu → <b>Install app</b> / <b>Add to Home screen</b> (Chrome, Edge or Android).";
 }
+$("#save-pass").onclick=()=>{
+  const v=$("#new-pass").value.trim();
+  if(!/^\d{4,8}$/.test(v)){ alert("Please choose a passcode of 4 to 8 digits."); $("#new-pass").focus(); return; }
+  try{ localStorage.setItem("madeleine_passcode", v); }catch(e){ alert("Couldn't save the passcode on this device."); return; }
+  $("#new-pass").value=""; renderSettings(); toast("Passcode changed \u2713");
+};
+$("#new-pass").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#save-pass").click(); });
 $("#install-btn").onclick=()=>{ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.finally(()=>{ deferredPrompt=null; updateInstallUI(); }); } };
 if("serviceWorker" in navigator){ window.addEventListener("load",()=>{ navigator.serviceWorker.register("sw.js").catch(()=>{}); }); }
 
@@ -1366,14 +1440,14 @@ function notifyStatusText(){
 function strikesThisWeek(){ const cut=Date.now()-7*864e5; return state.log.filter(l=>l.t==="strike" && l.ts>=cut); }
 function notifyMessage(){
   const wk=strikesThisWeek(), n=wk.length;
-  if(n===0) return "🎉 Great job — no strikes this week!";
+  if(n===0) return "🎉 Great job — no hits this week!";
   const kids=new Set(wk.map(l=>l.id)).size;
-  return `${n} strike${n>1?"s":""} this week · ${kids} student${kids>1?"s":""}.`;
+  return `${n} hit${n>1?"s":""} this week · ${kids} student${kids>1?"s":""}.`;
 }
 function fireReminder(){
   const body=notifyMessage();
   toast(body);
-  try{ if("Notification" in window && Notification.permission==="granted") new Notification("Madeleine Strikes",{body,icon:"icon-192.png",tag:"daily-strikes"}); }catch(e){}
+  try{ if("Notification" in window && Notification.permission==="granted") new Notification("Hit Dashboard",{body,icon:"icon-192.png",tag:"daily-strikes"}); }catch(e){}
 }
 function pad2(n){ return String(n).padStart(2,"0"); }
 function dateKey(d){ return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
@@ -1395,18 +1469,33 @@ $("#notify-test").onclick=fireReminder;
 
 // keyboard
 document.addEventListener("keydown",e=>{
-  if(e.target.tagName==="INPUT"||e.target.tagName==="SELECT") return;
-  if(e.key==="f"||e.key==="F") switchView("fast");
-  if(e.key==="Escape"){ if($("#modal").classList.contains("show")) closeModal(); else if($("#bulk-modal").classList.contains("show")) closeBulk(); else closeMenus(); }
+  const tag=e.target.tagName||"";
+  const typing = tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||e.target.isContentEditable;
+  if(e.key==="Escape"){ if($("#modal").classList.contains("show")) closeModal(); else if($("#bulk-modal").classList.contains("show")) closeBulk(); else closeMenus(); return; }
+  if(typing || e.metaKey || e.ctrlKey || e.altKey) return;
+  const modalOpen=$("#modal").classList.contains("show");
+  const bulkOpen=$("#bulk-modal").classList.contains("show");
+  if(bulkOpen) return;
+  if(modalOpen && e.key==="Enter"){ e.preventDefault(); $("#modal-confirm").click(); return; }
+  if(/^[0-9]$/.test(e.key)){
+    const r=reasonForKey(e.key); if(!r) return;
+    if(modalOpen){ e.preventDefault(); pickReason($("#modal-reason"), r, updateModalTags); return; }
+    if($("#view-fast").classList.contains("show")){ e.preventDefault(); pickReason($("#fast-reason"), r, updateReasonClear); return; }
+    return;
+  }
+  // any other single character while the hit modal is open starts typing a custom reason
+  if(modalOpen && e.key.length===1){ $("#modal-reason").focus(); return; }
+  if(!modalOpen && (e.key==="f"||e.key==="F")) switchView("fast");
 });
 
 // passcode gate
-const PASSCODE="9096";
+const DEFAULT_PASSCODE="9096";
+function getPasscode(){ try{ const p=localStorage.getItem("madeleine_passcode"); return (p&&/^\d{4,8}$/.test(p))?p:DEFAULT_PASSCODE; }catch(e){ return DEFAULT_PASSCODE; } }
 (function initGate(){
   const gi=$("#gate-input"), err=$("#gate-err");
   const ci=document.querySelector("#crest img"); if(ci) $("#gate-logo-img").src=ci.src;
   function tryUnlock(){
-    if(gi.value.trim()===PASSCODE){
+    if(gi.value.trim()===getPasscode()){
       document.documentElement.setAttribute("data-unlocked","");
       try{ localStorage.setItem("madeleine_unlocked","1"); }catch(e){}
       try{ checkDailyReminder(); }catch(e){}
@@ -1430,5 +1519,5 @@ renderAll();
 maybeBackup();
 checkDailyReminder();
 if(document.documentElement.hasAttribute("data-unlocked")) animView("board");
-setInterval(()=>{ checkAutoReset(); maybeBackup(); checkDailyReminder(); if($("#view-board").style.display!=="none") renderLog(); }, 60000);
+setInterval(()=>{ const wiped=checkAutoReset(); maybeBackup(); checkDailyReminder(); if(wiped) renderAll(); else if($("#view-board").style.display!=="none") renderLog(); }, 60000);
 </script>

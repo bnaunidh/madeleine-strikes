@@ -1,7 +1,7 @@
 {
-  "name": "Madeleine Strikes",
-  "short_name": "Strikes",
-  "description": "Strike & behavior tracker for The School of the Madeleine",
+  "name": "Hit Dashboard",
+  "short_name": "Hits",
+  "description": "Hit & behavior dashboard for The School of the Madeleine",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",
@@ -9,8 +9,23 @@
   "background_color": "#f5f6f8",
   "theme_color": "#2f6bd8",
   "icons": [
-    { "src": "icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" },
-    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+    {
+      "src": "icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    }
   ]
 }
