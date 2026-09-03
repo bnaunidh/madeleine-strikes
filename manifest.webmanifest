@@ -1,7 +1,7 @@
 {
-  "name": "Hit Dashboard",
-  "short_name": "Hits",
-  "description": "Hit & behavior dashboard for The School of the Madeleine",
+  "name": "The Madeleine Dashboard",
+  "short_name": "Madeleine",
+  "description": "Strikes and hits dashboard for The School of the Madeleine",
   "start_url": ".",
   "scope": ".",
   "display": "standalone",

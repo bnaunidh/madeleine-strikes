@@ -1,13 +1,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Hit Dashboard · The School of the Madeleine</title>
+<title>The Madeleine Dashboard · The School of the Madeleine</title>
 <meta name="theme-color" content="#2f6bd8">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="Hit Dashboard">
+<meta name="apple-mobile-web-app-title" content="Madeleine">
 <style>
   :root{
     --bg:#f5f6f8; --panel:#ffffff; --ink:#1f2733; --muted:#6b7684;
@@ -279,6 +279,21 @@
 
   /* Passcode gate */
   #gate{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:200;padding:20px}
+  #chooser{position:fixed;inset:0;background:var(--bg);display:grid;place-items:center;z-index:210;padding:20px}
+  :root[data-chosen] #chooser{display:none}
+  .ch-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:34px 30px;width:100%;max-width:460px;text-align:center}
+  .ch-card h2{margin:0 0 2px;font-size:20px;letter-spacing:-.01em}
+  .ch-opts{display:flex;gap:12px;margin-top:6px}
+  @media(max-width:520px){.ch-opts{flex-direction:column}}
+  .ch-opt{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;padding:20px 14px;border-radius:16px;border:1px solid var(--line);background:var(--bg);cursor:pointer;transition:.15s}
+  .ch-opt:hover{transform:translateY(-2px);box-shadow:var(--shadow)}
+  .ch-opt.strikes:hover{border-color:var(--red)}
+  .ch-opt.hits:hover{border-color:var(--green)}
+  .ch-ico{width:46px;height:46px;border-radius:14px;display:grid;place-items:center;color:#fff}
+  .ch-opt.strikes .ch-ico{background:var(--red)}
+  .ch-opt.hits .ch-ico{background:var(--green)}
+  .ch-t{font-weight:650;font-size:14.5px}
+  .ch-d{font-size:12.5px;color:var(--muted)}
   :root[data-unlocked] #gate{display:none}
   .gate-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:34px 30px;width:100%;max-width:330px;text-align:center}
   .gate-logo{width:70px;height:70px;border-radius:18px;margin:0 auto 16px;background:transparent;display:grid;place-items:center;overflow:hidden;padding:0;box-shadow:0 8px 22px rgba(47,107,216,.32)}
@@ -293,6 +308,19 @@
   @keyframes shake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-7px)}40%,80%{transform:translateX(7px)}}
 
   .btn:active:not(:disabled){transform:scale(.97)}
+  /* Hit (points) mode recolours the give-action green */
+  :root[data-mode="hits"] .strike-btn{background:var(--green)}
+  :root[data-mode="hits"] .strike-btn:hover{background:var(--green-dark)}
+  :root[data-mode="hits"] .strike-btn:disabled:hover{background:var(--green)}
+  :root[data-mode="hits"] .count.has,:root[data-mode="hits"] .ftile-count{background:var(--green-soft);color:var(--green)}
+  :root[data-mode="hits"] .count.max,:root[data-mode="hits"] .ftile-count.max{background:var(--green);color:#fff}
+  :root[data-mode="hits"] .ftile.pulse{animation:tilepulseg .55s ease-out}
+  :root[data-mode="hits"] .stat.warn .n{color:var(--green)}
+  :root[data-mode="hits"] .log-dot{background:var(--green)}
+  .mode-btn{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 11px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-size:12.5px;font-weight:650;transition:.15s;flex:0 0 auto}
+  .mode-btn:hover{color:var(--ink);border-color:var(--blue)}
+  .mode-dot{width:9px;height:9px;border-radius:50%;background:var(--red)}
+  :root[data-mode="hits"] .mode-dot{background:var(--green)}
   /* reminder time rows */
   .notify-day{padding:10px 0}
   .notify-day .t{font-weight:550;font-size:14px}
@@ -344,10 +372,30 @@
 
 </script>
 
+<div id="chooser">
+  <div class="ch-card">
+    <div class="gate-logo"><img id="ch-logo-img" alt="School of the Madeleine"></div>
+    <h2>The Madeleine Dashboard</h2>
+    <p class="gsub">Which one are you opening?</p>
+    <div class="ch-opts">
+      <button class="ch-opt strikes" data-mode="strikes">
+        <span class="ch-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 9v4M12 17h.01"/><path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/></svg></span>
+        <span class="ch-t">Strike Dashboard</span>
+        <span class="ch-d">For something bad</span>
+      </button>
+      <button class="ch-opt hits" data-mode="hits">
+        <span class="ch-ico"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2 15 9l7 .5-5.3 4.6L18.5 21 12 17.3 5.5 21l1.8-6.9L2 9.5 9 9z"/></svg></span>
+        <span class="ch-t">Hit Dashboard</span>
+        <span class="ch-d">Points for something good</span>
+      </button>
+    </div>
+  </div>
+</div>
+
 <div id="gate">
   <div class="gate-card">
     <div class="gate-logo"><img id="gate-logo-img" alt="School of the Madeleine"></div>
-    <h2>Hit Dashboard</h2>
+    <h2 id="gate-title">Strike Dashboard</h2>
     <p class="gsub">The School of the Madeleine</p>
     <input class="gate-input" id="gate-input" type="password" inputmode="numeric" pattern="[0-9]*" maxlength="8" placeholder="••••" autocomplete="off" aria-label="Passcode">
     <div class="gate-err" id="gate-err"></div>
@@ -360,11 +408,13 @@
     <button class="brand-btn" id="brand-home" title="Back to roster">
       <div class="crest has-logo" id="crest"><img src="data:image/png;base64,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" alt="School of the Madeleine"></div>
       <div class="brand">
-        <h1>Hit Dashboard</h1>
+        <h1 id="brand-title">Strike Dashboard</h1>
         <p>The School of the Madeleine</p>
       </div>
     </button>
     <div class="topbar-spacer"></div>
+    <button class="mode-btn" id="mode-toggle" title="Switch dashboard"><span class="mode-dot"></span><span id="mode-label">Strikes</span>
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 16H3m0 0 3-3m-3 3 3 3"/><path d="M17 8h4m0 0-3-3m3 3-3 3"/></svg></button>
     <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode"></button>
     <div class="tabs">
       <button class="tab active" data-view="board">
@@ -373,7 +423,7 @@
       </button>
       <button class="tab" data-view="fast">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg>
-        Fast Hit
+        <span id="tab-fast-label">Fast Strike</span>
       </button>
       <button class="tab" data-view="totals">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l3-4 3 2 4-6"/></svg>
@@ -406,7 +456,7 @@
         </button>
         <label class="sortsel">Sort:
           <select id="sortsel">
-            <option value="strikes">Most hits</option>
+            <option value="strikes">Most strikes</option>
             <option value="name">Name</option>
             <option value="class">Class</option>
           </select>
@@ -436,15 +486,15 @@
 <div class="fast" id="view-fast">
   <div class="fast-inner">
     <div class="fast-head">
-      <h2>Fast Hit</h2>
-      <p class="sub">Tap a student to give a hit — press &amp; hold to take one back. Set a reason first if you like; it sticks, so you can tap several in a row.</p>
+      <h2 id="fast-title">Fast Strike</h2>
+      <p class="sub" id="fast-sub">Tap a student to give a strike — press &amp; hold to take one back. Set a reason first if you like; it sticks, so you can tap several in a row.</p>
     </div>
     <div class="fast-search">
       <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4-4"/></svg>
       <input id="fast-search" placeholder="Search students…" autocomplete="off">
     </div>
     <div class="fast-reason-bar">
-      <input id="fast-reason" placeholder="Reason for the next hit (optional)" autocomplete="off">
+      <input id="fast-reason" placeholder="Reason for the next strike (optional)" autocomplete="off">
       <button id="fast-reason-clear" title="Clear reason" aria-label="Clear reason">&times;</button>
     </div>
     <div class="fast-reason-chips" id="fast-reason-chips"></div>
@@ -473,7 +523,7 @@
     <div class="set-row">
       <div>
         <div class="t">Get the app</div>
-        <div class="d" id="install-hint">Install Hit Dashboard to your home screen for a full-screen app that opens with one tap.</div>
+        <div class="d" id="install-hint">Install The Madeleine Dashboard to your home screen for a full-screen app that opens with one tap.</div>
       </div>
       <div class="ctl"><button class="btn btn-primary btn-sm" id="install-btn">
         <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 3v12m0 0 4-4m-4 4-4-4"/><path d="M4 17v2a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-2"/></svg>
@@ -495,12 +545,12 @@
     </div>
   </div>
 
-  <div class="panel panel-pad" style="margin-top:18px">
+  <div class="panel panel-pad" id="panel-reminder" style="margin-top:18px">
     <p class="section-title">Daily reminder</p>
     <div class="set-row">
       <div>
         <div class="t">Weekday summary</div>
-        <div class="d">A reminder each school day with how many hits so far this week — or a “great job, none this week!” when it’s all clear. Shows while the app is open.</div>
+        <div class="d">A reminder each school day with how many strikes so far this week — or a “great job, none this week!” when it’s all clear. Shows while the app is open.</div>
       </div>
       <div class="ctl"><div class="switch" id="notify-switch"></div></div>
     </div>
@@ -515,7 +565,7 @@
     </div>
   </div>
 
-  <div class="panel panel-pad" style="margin-top:18px">
+  <div class="panel panel-pad" id="panel-checkins" style="margin-top:18px">
     <p class="section-title">Check-in reminders</p>
     <div class="set-row">
       <div>
@@ -537,9 +587,9 @@
     </div>
   </div>
 
-  <div class="panel panel-pad" style="margin-top:18px">
-    <p class="section-title">What each hit means</p>
-    <div class="tier-warn"><b>1 hit</b> — just a warning, nothing happens.</div>
+  <div class="panel panel-pad" id="panel-consequences" style="margin-top:18px">
+    <p class="section-title">What each strike means</p>
+    <div class="tier-warn"><b>1 strike</b> — just a warning, nothing happens.</div>
     <div id="tier-editor"></div>
     <button class="btn btn-ghost btn-sm" id="add-tier" style="margin-top:12px">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg> Add a consequence
@@ -559,8 +609,8 @@
     <p class="section-title">Auto reset</p>
     <div class="set-row">
       <div>
-        <div class="t">Automatically reset hits</div>
-        <div class="d">Wipe every student's current hits on a schedule — a fresh start each week. Yearly totals are kept.</div>
+        <div class="t">Automatically reset counts</div>
+        <div class="d">Wipe every student's current strikes and hits on a schedule — a fresh start each week. Yearly totals are kept.</div>
       </div>
       <div class="ctl"><div class="switch" id="auto-switch"></div></div>
     </div>
@@ -584,13 +634,13 @@
     <div class="set-row">
       <div>
         <div class="t">Sound effects</div>
-        <div class="d">Play a sound when you add or remove a hit.</div>
+        <div class="d">Play a sound when you add or take away a strike or a hit.</div>
       </div>
       <div class="ctl"><div class="switch" id="sound-switch"></div></div>
     </div>
     <div class="set-row">
       <div>
-        <div class="t">“Hit given” sound</div>
+        <div class="t">Sound for a strike</div>
         <div class="d" id="status-add">Built-in ding</div>
       </div>
       <div class="ctl">
@@ -602,7 +652,7 @@
     </div>
     <div class="set-row">
       <div>
-        <div class="t">“Hit removed” sound</div>
+        <div class="t">Sound for a hit</div>
         <div class="d" id="status-remove">Built-in tap</div>
       </div>
       <div class="ctl">
@@ -619,7 +669,7 @@
     <div class="set-row">
       <div>
         <div class="t">Save a backup now</div>
-        <div class="d">Downloads one file with all your students, hits and history. Keep it somewhere safe.</div>
+        <div class="d">Downloads one file with all your students, strikes, hits and history. Keep it somewhere safe.</div>
       </div>
       <div class="ctl"><button class="btn btn-primary btn-sm" id="export-now">Download backup</button></div>
     </div>
@@ -665,15 +715,15 @@
     <p class="section-title">Resets</p>
     <div class="set-row">
       <div>
-        <div class="t">Reset all hits now</div>
-        <div class="d">Sets every student's current hits back to zero. Keeps yearly totals.</div>
+        <div class="t">Reset all counts now</div>
+        <div class="d">Sets every student's current strikes and hits back to zero. Keeps yearly totals.</div>
       </div>
-      <div class="ctl"><button class="btn btn-ghost btn-sm" id="reset-all">Reset hits</button></div>
+      <div class="ctl"><button class="btn btn-ghost btn-sm" id="reset-all">Reset counts</button></div>
     </div>
     <div class="set-row">
       <div>
         <div class="t">Start a new school year</div>
-        <div class="d">Resets hits AND every yearly total to zero. Keeps your students.</div>
+        <div class="d">Resets strikes, hits AND every yearly total to zero. Keeps your students.</div>
       </div>
       <div class="ctl"><button class="btn btn-ghost btn-sm" id="new-year-2">Start new year</button></div>
     </div>
@@ -690,14 +740,14 @@
 <!-- Hit reason modal -->
 <div class="overlay" id="modal">
   <div class="modal" tabindex="-1">
-    <h3>Give a hit</h3>
+    <h3 id="modal-title">Give a strike</h3>
     <p class="who" id="modal-who"></p>
     <label style="font-size:12.5px;font-weight:550;color:var(--muted)">Reason <span style="font-weight:400">(optional)</span></label>
     <input class="input" id="modal-reason" placeholder="What happened?" autocomplete="off" style="margin-top:5px">
     <div class="reason-tags" id="reason-tags"></div>
     <div class="modal-actions">
       <button class="btn btn-ghost" id="modal-cancel" style="flex:1">Cancel</button>
-      <button class="btn btn-strike" id="modal-confirm" style="flex:1">Add hit</button>
+      <button class="btn btn-strike" id="modal-confirm" style="flex:1">Add strike</button>
     </div>
   </div>
 </div>
@@ -760,11 +810,13 @@ const CICONS = {
   home:'<path d="M3 10l9-7 9 7v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M9 21V12h6v9"/>',
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   warn:'<path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
+  knife:'<path d="M12 2.5 15 9.5H9z"/><path d="M7.5 12h9"/><path d="M12 12v9"/>',
   clip:'<rect x="8" y="3" width="8" height="4" rx="1"/><path d="M9 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3"/>'
 };
 function icoSvg(key,w){ w=w||16; return `<svg class="cic" width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${CICONS[key]||CICONS.clip}</svg>`; }
 function tierIconKey(label){
   const l=(label||"").toLowerCase();
+  if(/execut/.test(l)) return "knife";
   if(/recess|play|yard|break|outside/.test(l)) return "sun";
   if(/lunch|food|eat|cafeteria|snack/.test(l)) return "fork";
   if(/princip|office|dean|admin|head/.test(l)) return "person";
@@ -776,9 +828,38 @@ function tierIconKey(label){
 }
 
 let state = load();
+
+// ---------- modes: strikes (bad) vs hits (points for good) ----------
+const MODES={
+  strikes:{n:"strike",N:"Strike",p:"strikes",P:"Strikes",dash:"Strike Dashboard",log:"strike"},
+  hits:{n:"hit",N:"Hit",p:"hits",P:"Hits",dash:"Hit Dashboard",log:"hit"}
+};
+function isHits(){ return state.mode==="hits"; }
+function W(){ return MODES[isHits()?"hits":"strikes"]; }
+function cntOf(x){ return isHits() ? (x.hits||0) : (x.strikes||0); }
+function yearOf(x){ return isHits() ? (x.hitTotal||0) : (x.total||0); }
+function setCnt(x,v){ if(isHits()) x.hits=v; else x.strikes=v; }
+function setYear(x,v){ if(isHits()) x.hitTotal=v; else x.total=v; }
+function plural(n,w){ return n+" "+w+(n===1?"":"s"); }
+function applyMode(){
+  document.documentElement.setAttribute("data-mode", isHits()?"hits":"strikes");
+  const h=$("#brand-title"); if(h) h.textContent=W().dash;
+  const ft=$("#tab-fast-label"); if(ft) ft.textContent="Fast "+W().N;
+  const so=$("#sortsel"); if(so && so.options[0]) so.options[0].textContent="Most "+W().p;
+  const mt=$("#mode-toggle"); if(mt) mt.title="Switch to the "+(isHits()?"Strike":"Hit")+" Dashboard";
+  const ml=$("#mode-label"); if(ml) ml.textContent=isHits()?"Hits":"Strikes";
+  const gt=$("#gate-title"); if(gt) gt.textContent=W().dash;
+  const mo=$("#modal-title"); if(mo) mo.textContent="Give a "+W().n;
+  const mc=$("#modal-confirm"); if(mc) mc.textContent="Add "+W().n;
+  const ft2=$("#fast-title"); if(ft2) ft2.textContent="Fast "+W().N;
+  const fs=$("#fast-sub"); if(fs) fs.innerHTML="Tap a student to give a "+W().n+" — press &amp; hold to take one back. Set a reason first if you like; it sticks, so you can tap several in a row.";
+  const fr=$("#fast-reason"); if(fr) fr.placeholder="Reason for the next "+W().n+" (optional)";
+  const rl=$("#reminder-word"); if(rl) rl.textContent=W().p;
+}
+function setMode(m){ state.mode=(m==="hits")?"hits":"strikes"; save(); applyMode(); renderAll(); }
 function load(){
   try{ const s=JSON.parse(localStorage.getItem(STORE)); if(s && s.students) return normalize(s); }catch(e){}
-  return {students:[], log:[], settings:{auto:false,interval:"week",lastReset:Date.now(),reminders:true,sound:true,
+  return {students:[], log:[], mode:"strikes", settings:{auto:false,interval:"week",lastReset:Date.now(),reminders:true,sound:true,
     backup:{freq:"month",mode:"manual",last:Date.now()},
     reasons:["Talking in class","Late","No homework","Disruptive","Phone use","Disrespect"],
     notify:{enabled:false,times:{"1":"15:00","2":"15:00","3":"15:00","4":"15:00","5":"15:00"},lastFired:null},
@@ -802,9 +883,10 @@ function normalize(s){
   }
   s.settings.tiers.sort((a,b)=>a.at-b.at);
   s.students.forEach(x=>{
-    x.strikes ||= 0; x.total ??= x.strikes;
+    x.strikes ||= 0; x.total ??= x.strikes; x.hits ||= 0; x.hitTotal ??= (x.hits||0);
     if(!x.done || typeof x.done!=="object" || ("recess" in x.done) || ("lunch" in x.done)) x.done={};
   });
+  s.mode = (s.mode==="hits") ? "hits" : "strikes";
   s.seq ||= (Math.max(0,...s.students.map(x=>x.id||0))+1);
   return s;
 }
@@ -854,8 +936,8 @@ function intervalWord(iv){ return iv==="day"?"daily":(iv==="week"?"weekly":"mont
 function checkAutoReset(){   // returns true if it actually wiped, so callers can re-render
   const s=state.settings; if(!s.auto) return false;
   if(Date.now() >= s.lastReset + INTERVAL_MS[s.interval]){
-    const had=state.students.some(x=>x.strikes>0);
-    state.students.forEach(x=>{ x.strikes=0; x.done={}; });
+    const had=state.students.some(x=>x.strikes>0||x.hits>0);
+    state.students.forEach(x=>{ x.strikes=0; x.hits=0; x.done={}; });
     s.lastReset=Date.now();
     if(had) state.log.unshift({t:"reset",ts:Date.now(),note:"Auto reset ("+intervalWord(s.interval)+")"});
     save();
@@ -865,31 +947,34 @@ function checkAutoReset(){   // returns true if it actually wiped, so callers ca
 }
 
 // actions
-function addStudent(name,cls){ name=name.trim(); if(!name) return false; state.students.push({id:state.seq++,name,cls:cls.trim(),strikes:0,total:0,done:{}}); save(); return true; }
-function giveStrike(id,reason){
+function addStudent(name,cls){ name=name.trim(); if(!name) return false; state.students.push({id:state.seq++,name,cls:cls.trim(),strikes:0,total:0,hits:0,hitTotal:0,done:{}}); save(); return true; }
+function giveStrike(id,reason){          // gives one mark in the CURRENT mode
   const st=state.students.find(x=>x.id===id); if(!st) return null;
-  const cap=maxTierAt();
+  const w=W(), hits=isHits();
+  const cap=hits?Infinity:maxTierAt();
   if(isFinite(cap) && st.strikes>=cap){ toast(st.name+" is already at "+cap+" — the last step ("+tierLabel(cap)+"). Reset when it's handled."); return null; }
-  st.strikes++; st.total=(st.total||0)+1; beep("add");
-  const triggered=TIERS().find(t=> t.label.trim() && st.strikes===t.at);
-  state.log.unshift({t:"strike",ts:Date.now(),id,name:st.name,cls:st.cls,reason:(reason||"").trim(),count:st.strikes});
+  setCnt(st, cntOf(st)+1); setYear(st, yearOf(st)+1);
+  beep(hits?"remove":"add");             // a point sounds light, a strike sounds heavy
+  const triggered=hits?null:TIERS().find(t=> t.label.trim() && st.strikes===t.at);
+  state.log.unshift({t:w.log,ts:Date.now(),id,name:st.name,cls:st.cls,reason:(reason||"").trim(),count:cntOf(st)});
   if(state.log.length>300) state.log.length=300;
   save(); renderAll();
   popCount(document.querySelector("#roster [data-strike='"+id+"']")?.closest(".student")?.querySelector(".count"));
   const r=reason&&reason.trim()?' — "'+reason.trim()+'"':"";
   const cons=triggered?" · "+triggered.label+" now due":"";
-  toastUndo(st.name+": "+st.strikes+" hit"+(st.strikes>1?"s":"")+r+cons, ()=>{
-    st.strikes=Math.max(0,st.strikes-1); st.total=Math.max(0,(st.total||1)-1); syncDone(st); beep("remove");
-    const i=state.log.findIndex(l=>l.t==="strike"&&l.id===id); if(i>-1) state.log.splice(i,1);
+  toastUndo(st.name+": "+plural(cntOf(st),w.n)+r+cons, ()=>{
+    setCnt(st,Math.max(0,cntOf(st)-1)); setYear(st,Math.max(0,yearOf(st)-1)); syncDone(st); beep(hits?"add":"remove");
+    const i=state.log.findIndex(l=>l.t===w.log&&l.id===id); if(i>-1) state.log.splice(i,1);
     save(); renderAll();
   });
   return triggered;
 }
 function undoStrikeOne(id){
-  const st=state.students.find(x=>x.id===id); if(!st||st.strikes<=0) return;
-  st.strikes--; st.total=Math.max(0,(st.total||1)-1); syncDone(st); beep("remove");
-  const i=state.log.findIndex(l=>l.t==="strike"&&l.id===id); if(i>-1) state.log.splice(i,1);
-  save(); renderAll(); toast(st.name+" — removed 1 hit");
+  const st=state.students.find(x=>x.id===id); if(!st||cntOf(st)<=0) return;
+  const w=W();
+  setCnt(st,cntOf(st)-1); setYear(st,Math.max(0,yearOf(st)-1)); syncDone(st); beep(isHits()?"add":"remove");
+  const i=state.log.findIndex(l=>l.t===w.log&&l.id===id); if(i>-1) state.log.splice(i,1);
+  save(); renderAll(); toast(st.name+" — removed 1 "+w.n);
 }
 function toggleDone(id,key){
   const st=state.students.find(x=>x.id===id); if(!st) return;
@@ -923,13 +1008,13 @@ function completeCheckin(id, at, chip){
 }
 function resetStudent(id){
   const st=state.students.find(x=>x.id===id); if(!st) return;
-  const prev=st.strikes; st.strikes=0; st.done={};
-  if(prev>0) state.log.unshift({t:"reset",ts:Date.now(),note:"Reset "+st.name});
-  save(); renderAll(); toast(st.name+" reset to 0");
+  const prev=cntOf(st); setCnt(st,0); if(!isHits()) st.done={};
+  if(prev>0) state.log.unshift({t:"reset",ts:Date.now(),note:"Reset "+st.name+" ("+W().p+")"});
+  save(); renderAll(); toast(st.name+" — "+W().p+" reset to 0");
 }
 function removeStudent(id){ state.students=state.students.filter(x=>x.id!==id); save(); renderAll(); }
-function resetAll(){ state.students.forEach(x=>{ x.strikes=0; x.done={}; }); state.settings.lastReset=Date.now(); state.log.unshift({t:"reset",ts:Date.now(),note:"All hits reset"}); save(); renderAll(); toast("All hits reset to 0"); }
-function newSchoolYear(){ state.students.forEach(x=>{ x.strikes=0; x.total=0; x.done={}; }); state.settings.lastReset=Date.now(); state.log.unshift({t:"reset",ts:Date.now(),note:"New school year — all totals reset"}); save(); renderAll(); toast("New school year — totals reset"); }
+function resetAll(){ state.students.forEach(x=>{ x.strikes=0; x.hits=0; x.done={}; }); state.settings.lastReset=Date.now(); state.log.unshift({t:"reset",ts:Date.now(),note:"All strikes and hits reset"}); save(); renderAll(); toast("Strikes and hits reset to 0"); }
+function newSchoolYear(){ state.students.forEach(x=>{ x.strikes=0; x.total=0; x.hits=0; x.hitTotal=0; x.done={}; }); state.settings.lastReset=Date.now(); state.log.unshift({t:"reset",ts:Date.now(),note:"New school year — all totals reset"}); save(); renderAll(); toast("New school year — totals reset"); }
 
 // ---- backup: export / import ----
 function stamp(){ const d=new Date(); const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
@@ -938,7 +1023,7 @@ function exportData(silent){
     const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
     const url=URL.createObjectURL(blob);
     const a=document.createElement("a");
-    a.href=url; a.download="hit-dashboard-backup-"+stamp()+".json";
+    a.href=url; a.download="madeleine-dashboard-backup-"+stamp()+".json";
     document.body.appendChild(a); a.click(); a.remove();
     setTimeout(()=>URL.revokeObjectURL(url),1500);
     if(!silent) toast("Backup downloaded");
@@ -948,8 +1033,8 @@ function importData(file){
   const rd=new FileReader();
   rd.onload=()=>{
     let obj; try{ obj=JSON.parse(rd.result); }catch(e){ obj=null; }
-    if(!obj || !Array.isArray(obj.students)){ alert("That file isn't a Hit Dashboard backup."); return; }
-    if(!confirm("Import this backup?\n\nIt will REPLACE all current students, hits and history. This can't be undone.")) return;
+    if(!obj || !Array.isArray(obj.students)){ alert("That file isn't a Madeleine Dashboard backup."); return; }
+    if(!confirm("Import this backup?\n\nIt will REPLACE all current students, strikes, hits and history. This can't be undone.")) return;
     state=normalize(obj);
     // A backup carries the timestamps from when it was made. Restart both clocks from now,
     // otherwise a stale lastReset makes the auto-reset fire instantly and wipe the strikes
@@ -987,7 +1072,7 @@ function renderBackupBanner(){
 let sortMode="strikes", search="";
 function renderReminders(){
   const el=$("#reminders");
-  if(!state.settings.reminders){ el.innerHTML=""; return; }
+  if(!state.settings.reminders || isHits()){ el.innerHTML=""; return; }
   const groups=state.students.map(x=>({x,tiers:dueTiers(x)})).filter(g=>g.tiers.length);
   const total=groups.reduce((a,g)=>a+g.tiers.length,0);
   if(!total){ el.innerHTML=""; return; }
@@ -1013,22 +1098,30 @@ function renderStats(){
   const due=state.students.reduce((a,x)=>a+dueTiers(x).length,0);
   const maxAt=maxTierAt();
   const flagged=isFinite(maxAt)?state.students.filter(x=>x.strikes>=maxAt).length:0;
-  const yearTotal=state.students.reduce((a,x)=>a+(x.total||0),0);
-  $("#stats").innerHTML=`
+  const w=W();
+  const yearTotal=state.students.reduce((a,x)=>a+yearOf(x),0);
+  const weekN=marksThisWeek().length;
+  const best=state.students.slice().sort((a,b)=>yearOf(b)-yearOf(a))[0];
+  $("#stats").innerHTML = isHits() ? `
+    <div class="stat"><div class="n">${total}</div><div class="l">Students</div></div>
+    <div class="stat ${weekN?'warn':''}"><div class="n">${weekN}</div><div class="l">Hits this week</div></div>
+    <div class="stat"><div class="n" style="font-size:18px">${best&&yearOf(best)?esc(best.name.split(" ")[0]):"—"}</div><div class="l">Most points</div></div>
+    <div class="stat"><div class="n">${yearTotal}</div><div class="l">Hits this year</div></div>` : `
     <div class="stat"><div class="n">${total}</div><div class="l">Students</div></div>
     <div class="stat ${due?'warn':''}"><div class="n">${due}</div><div class="l">Check-ins due</div></div>
     <div class="stat ${flagged?'warn':''}"><div class="n">${flagged}</div><div class="l">${isFinite(maxAt)?`Flagged (${maxAt}+)`:"Flagged"}</div></div>
-    <div class="stat"><div class="n">${yearTotal}</div><div class="l">Hits this year</div></div>`;
+    <div class="stat"><div class="n">${yearTotal}</div><div class="l">Strikes this year</div></div>`;
 }
 function sortedStudents(){
   let list=state.students.slice();
   if(search){ const q=search.toLowerCase(); list=list.filter(x=>x.name.toLowerCase().includes(q)||(x.cls||"").toLowerCase().includes(q)); }
-  if(sortMode==="strikes") list.sort((a,b)=>b.strikes-a.strikes||a.name.localeCompare(b.name));
+  if(sortMode==="strikes") list.sort((a,b)=>cntOf(b)-cntOf(a)||a.name.localeCompare(b.name));
   if(sortMode==="name") list.sort((a,b)=>a.name.localeCompare(b.name));
   if(sortMode==="class") list.sort((a,b)=>(a.cls||"").localeCompare(b.cls||"",undefined,{numeric:true})||a.name.localeCompare(b.name));
   return list;
 }
 function consHTML(x){
+  if(isHits()) return "";      // consequences belong to strikes only
   const maxAt=maxTierAt();
   return dueTiers(x).map(t=>{
     const top=t.at===maxAt;
@@ -1043,33 +1136,34 @@ function renderRoster(){
     <div>Type a name in the row below to add your first student.</div></div>`; return; }
   const list=sortedStudents();
   if(!list.length){ el.innerHTML=`<div class="empty">No matches for "${esc(search)}".</div>`; return; }
-  const maxAt=maxTierAt();
+  const maxAt=maxTierAt(); const w=W();
   el.innerHTML=list.map(x=>{
-    const atMax=isFinite(maxAt)&&x.strikes>=maxAt;
-    const cc=x.strikes>=maxAt?"max":(x.strikes>0?"has":"");
-    const yearNote=(x.total||0)>x.strikes?` · <b>${x.total}</b> this year`:"";
+    const n=cntOf(x), yr=yearOf(x);
+    const atMax=!isHits()&&isFinite(maxAt)&&n>=maxAt;
+    const cc=(!isHits()&&n>=maxAt)?"max":(n>0?"has":"");
+    const yearNote=yr>n?` · <b>${yr}</b> this year`:"";
     return `<div class="student">
       <div class="avatar" style="background:${colorFor(x.id)}">${initials(x.name)}</div>
       <div class="s-main">
         <div class="s-name">${esc(x.name)} ${x.cls?`<span class="chip">${esc(x.cls)}</span>`:""}</div>
-        <div class="s-sub">${x.strikes} hit${x.strikes===1?"":"s"}${yearNote}</div>
+        <div class="s-sub">${plural(n,w.n)}${yearNote}</div>
       </div>
       <div class="s-right">
       <div class="s-cons">${consHTML(x)}</div>
       <div class="s-actions">
-        <button class="step" data-undo="${x.id}" title="Remove one hit" ${x.strikes?"":"disabled"}>
+        <button class="step" data-undo="${x.id}" title="Remove one ${w.n}" ${n?"":"disabled"}>
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6"><path d="M5 12h14"/></svg>
         </button>
-        <div class="count ${cc}">${x.strikes}</div>
-        <button class="strike-btn" data-strike="${x.id}" ${atMax?"disabled":""} title="${atMax?`At the max (${maxAt})`:"Give a hit"}">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>Hit
+        <div class="count ${cc}">${n}</div>
+        <button class="strike-btn" data-strike="${x.id}" ${atMax?"disabled":""} title="${atMax?`At the max (${maxAt})`:`Give a ${w.n}`}">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg>${w.N}
         </button>
         <div class="kebab-wrap">
           <button class="kebab" data-menu="${x.id}" title="More">
             <svg width="17" height="17" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="5" r="1.7"/><circle cx="12" cy="12" r="1.7"/><circle cx="12" cy="19" r="1.7"/></svg>
           </button>
           <div class="menu" id="menu-${x.id}">
-            <button data-reset="${x.id}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Reset hits to zero</button>
+            <button data-reset="${x.id}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Reset ${w.p} to zero</button>
             <div class="sep"></div>
             <button class="danger" data-del="${x.id}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg> Remove student</button>
           </div>
@@ -1084,30 +1178,32 @@ function renderLog(){
   if(!state.log.length){ el.innerHTML=`<div class="empty" style="padding:24px">No activity yet.</div>`; return; }
   el.innerHTML=state.log.slice(0,40).map(l=>{
     if(l.t==="reset"||l.t==="done") return `<div class="log-item"><span class="log-dot good"></span><div class="log-body"><div>${esc(l.note||"")}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
-    return `<div class="log-item"><span class="log-dot"></span><div class="log-body"><div><strong>${esc(l.name)}</strong>${l.cls?` <span style="color:var(--muted)">· ${esc(l.cls)}</span>`:""} — hit ${l.count}${l.reason?` <span class="log-reason">"${esc(l.reason)}"</span>`:""}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
+    const isHit=l.t==="hit";
+    return `<div class="log-item"><span class="log-dot" style="background:var(--${isHit?"green":"red"})"></span><div class="log-body"><div><strong>${esc(l.name)}</strong>${l.cls?` <span style="color:var(--muted)">· ${esc(l.cls)}</span>`:""} — ${isHit?"hit":"strike"} ${l.count}${l.reason?` <span class="log-reason">"${esc(l.reason)}"</span>`:""}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
   }).join("");
 }
 function renderTotals(){
-  const students=state.students.length;
-  const yearTotal=state.students.reduce((a,x)=>a+(x.total||0),0);
+  const students=state.students.length, w=W();
+  const yearTotal=state.students.reduce((a,x)=>a+yearOf(x),0);
   const doneCount=state.log.filter(l=>l.t==="done").length;
-  const worst=state.students.slice().sort((a,b)=>(b.total||0)-(a.total||0))[0];
+  const worst=state.students.slice().sort((a,b)=>yearOf(b)-yearOf(a))[0];
   $("#totals-stats").innerHTML=`
-    <div class="stat"><div class="n">${yearTotal}</div><div class="l">Hits this year</div></div>
+    <div class="stat"><div class="n">${yearTotal}</div><div class="l">${w.P} this year</div></div>
     <div class="stat"><div class="n">${students}</div><div class="l">Students</div></div>
-    <div class="stat"><div class="n">${doneCount}</div><div class="l">Check-ins completed</div></div>
-    <div class="stat"><div class="n" style="font-size:18px">${worst&&worst.total?esc(worst.name):"—"}</div><div class="l">Most hits</div></div>`;
-  const studs=state.students.slice().sort((a,b)=>(b.total||0)-(a.total||0)||a.name.localeCompare(b.name));
-  const maxStud=Math.max(1,...studs.map(s=>s.total||0));
+    ${isHits()?`<div class="stat"><div class="n">${marksThisWeek().length}</div><div class="l">Hits this week</div></div>`
+              :`<div class="stat"><div class="n">${doneCount}</div><div class="l">Check-ins completed</div></div>`}
+    <div class="stat"><div class="n" style="font-size:18px">${worst&&yearOf(worst)?esc(worst.name):"—"}</div><div class="l">Most ${w.p}</div></div>`;
+  const studs=state.students.slice().sort((a,b)=>yearOf(b)-yearOf(a)||a.name.localeCompare(b.name));
+  const maxStud=Math.max(1,...studs.map(s=>yearOf(s)));
   $("#student-table").innerHTML = !studs.length
     ? `<tbody><tr><td style="color:var(--muted)">No students yet.</td></tr></tbody>`
     : `<thead><tr><th>Student</th><th>Class</th><th class="num">Now</th><th class="num">This year</th><th style="width:26%"></th></tr></thead>
        <tbody>${studs.map(s=>`<tr>
          <td><div class="tname"><div class="avatar" style="background:${colorFor(s.id)}">${initials(s.name)}</div>${esc(s.name)}</div></td>
          <td>${s.cls?esc(s.cls):'<span style="color:var(--muted)">—</span>'}</td>
-         <td class="num">${s.strikes}</td>
-         <td class="num">${s.total||0}</td>
-         <td><div class="barwrap"><div class="bar" style="width:${Math.round((s.total||0)/maxStud*100)}%"></div></div></td>
+         <td class="num">${cntOf(s)}</td>
+         <td class="num">${yearOf(s)}</td>
+         <td><div class="barwrap"><div class="bar" style="background:var(--${isHits()?"green":"red"});width:${Math.round(yearOf(s)/maxStud*100)}%"></div></div></td>
        </tr>`).join("")}</tbody>`;
 }
 function renderTierEditor(){
@@ -1115,7 +1211,7 @@ function renderTierEditor(){
   const tiers=TIERS();
   el.innerHTML=tiers.map((t,i)=>`
     <div class="tier-row">
-      <div class="tier-at"><input class="input tier-num" type="number" min="1" max="99" value="${t.at}" data-tier-at="${i}" aria-label="hit number"><span>hits →</span></div>
+      <div class="tier-at"><input class="input tier-num" type="number" min="1" max="99" value="${t.at}" data-tier-at="${i}" aria-label="strike number"><span>strikes →</span></div>
       <input class="input" value="${esc(t.label)}" placeholder="e.g. Call home" data-tier-label="${i}" aria-label="consequence">
       <button class="tier-del" data-tier-del="${i}" title="Remove"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
     </div>`).join("") || `<div class="tier-warn">No consequences yet — add one below.</div>`;
@@ -1154,6 +1250,7 @@ function renderSettings(){
   $("#auto-interval-row").style.opacity=state.settings.auto?"1":".45";
   $("#auto-interval").disabled=!state.settings.auto;
   renderTierEditor(); renderReasonEditor();
+  ["#panel-checkins","#panel-consequences","#panel-reminder"].forEach(sel=>{ const el=$(sel); if(el) el.style.display=isHits()?"none":""; });
   { const ph=$("#pass-hint"); if(ph) ph.textContent = (getPasscode()===DEFAULT_PASSCODE)
       ? "Currently the default (9096). 4\u20138 digits. Saved on this device only \u2014 if you use the app on a phone too, change it there as well."
       : "You\u2019ve set your own passcode. 4\u20138 digits. Saved on this device only \u2014 change it separately on any other device."; }
@@ -1192,15 +1289,16 @@ function renderFastGrid(){
   const el=$("#fast-grid");
   if(!state.students.length){ el.innerHTML=`<div class="empty" style="grid-column:1/-1;padding:40px">Add students on the Roster tab first.</div>`; return; }
   if(!list.length){ el.innerHTML=`<div class="empty" style="grid-column:1/-1;padding:40px">No match for "${esc(q)}".</div>`; return; }
-  const maxAt=maxTierAt();
+  const maxAt=maxTierAt(); const w=W();
   el.innerHTML=list.map(x=>{
-    const atMax=isFinite(maxAt)&&x.strikes>=maxAt;
-    const badge=x.strikes>0?`<div class="ftile-count ${atMax?'max':''}">${x.strikes}</div>`:"";
-    return `<button class="ftile ${atMax?'maxed':''}" data-fstrike="${x.id}" title="${atMax?`${esc(x.name)} is at the max — hold to remove one`:`Tap for a hit, hold to remove one`}">
+    const n=cntOf(x);
+    const atMax=!isHits()&&isFinite(maxAt)&&n>=maxAt;
+    const badge=n>0?`<div class="ftile-count ${atMax?'max':''}">${n}</div>`:"";
+    return `<button class="ftile ${atMax?'maxed':''}" data-fstrike="${x.id}" title="${atMax?`${esc(x.name)} is at the max — hold to remove one`:`Tap for a ${w.n}, hold to remove one`}">
       ${badge}
       <div class="avatar" style="background:${colorFor(x.id)}">${initials(x.name)}</div>
       <div class="ftile-name">${esc(x.name)}</div>
-      <div class="ftile-meta">${x.cls?esc(x.cls)+" · ":""}${x.strikes} hit${x.strikes===1?"":"s"}${atMax?" · max":""}</div>
+      <div class="ftile-meta">${x.cls?esc(x.cls)+" · ":""}${plural(n,w.n)}${atMax?" · max":""}</div>
     </button>`;
   }).join("");
 }
@@ -1219,15 +1317,15 @@ function updateReasonClear(){
 }
 function fastStrike(id){
   const st=state.students.find(x=>x.id===id); if(!st) return;
-  const before=st.strikes;
+  const before=cntOf(st);
   giveStrike(id, $("#fast-reason").value);       // beeps, toasts w/ undo, re-renders grid
-  if(st.strikes===before) return;                 // capped — giveStrike already notified
+  if(cntOf(st)===before) return;                 // capped — giveStrike already notified
   const tile=$("#fast-grid button[data-fstrike='"+id+"']");
   if(tile){ tile.classList.remove("pulse"); void tile.offsetWidth; tile.classList.add("pulse"); popCount(tile.querySelector(".ftile-count")); }
 }
 function fastRemove(id){
   const st=state.students.find(x=>x.id===id); if(!st) return;
-  if(st.strikes<=0){ toast(st.name+" has no hits to remove"); return; }
+  if(cntOf(st)<=0){ toast(st.name+" has no "+W().p+" to remove"); return; }
   undoStrikeOne(id);   // beeps "remove", re-renders grid, toasts
   const tile=$("#fast-grid button[data-fstrike='"+id+"']");
   if(tile){ tile.classList.remove("gpulse"); void tile.offsetWidth; tile.classList.add("gpulse"); }
@@ -1252,6 +1350,7 @@ document.addEventListener("click",e=>{ if(!e.target.closest(".kebab-wrap")) clos
 // events
 $$(".tab").forEach(t=>t.onclick=()=>switchView(t.dataset.view));
 $("#brand-home").onclick=()=>switchView("board");
+$("#mode-toggle").onclick=()=>{ setMode(isHits()?"strikes":"hits"); toast(isHits()?"Hit Dashboard — points for good stuff":"Strike Dashboard"); };
 
 function doAdd(){
   const n=$("#f-name").value, c=$("#f-class").value;
@@ -1382,7 +1481,7 @@ $("#backup-banner").addEventListener("click",e=>{
   if(e.target.closest("#backup-now")){ exportData(false); state.settings.backup.last=Date.now(); save(); renderBackupBanner(); }
   else if(e.target.closest("#backup-later")){ backupDismissed=true; renderBackupBanner(); }
 });
-$("#reset-all").onclick=()=>{ if(confirm("Reset every student's current hits to zero? Yearly totals are kept.")) resetAll(); };
+$("#reset-all").onclick=()=>{ if(confirm("Reset every student's current strikes and hits to zero? Yearly totals are kept.")) resetAll(); };
 function confirmNewYear(){ if(confirm("Start a new school year?\n\nThis sets every student's hits AND yearly totals back to zero. Students stay. This can't be undone.")) newSchoolYear(); }
 $("#new-year").onclick=confirmNewYear; $("#new-year-2").onclick=confirmNewYear;
 $("#wipe").onclick=()=>{ if(confirm("Delete ALL students and history? This cannot be undone.")){ state.students=[]; state.log=[]; save(); renderAll(); toast("Everything cleared"); } };
@@ -1407,7 +1506,7 @@ function updateInstallUI(){
   const panel=$("#app-panel");
   if(isStandalone()){ if(panel) panel.style.display="none"; return; }   // remove the "get the app" section once installed
   if(panel) panel.style.display="";
-  if(deferredPrompt){ btn.style.display=""; hint.textContent="Install Hit Dashboard for a full-screen app that opens with one tap."; return; }
+  if(deferredPrompt){ btn.style.display=""; hint.textContent="Install The Madeleine Dashboard for a full-screen app that opens with one tap."; return; }
   if(isIOS()){ btn.style.display="none"; hint.innerHTML="On iPhone or iPad: tap the <b>Share</b> icon, then <b>Add to Home Screen</b>."; return; }
   btn.style.display="none"; hint.innerHTML="To install: open your browser menu → <b>Install app</b> / <b>Add to Home screen</b> (Chrome, Edge or Android).";
 }
@@ -1437,17 +1536,18 @@ function notifyStatusText(){
   if(Notification.permission==="denied") return "Weekends are off. Notifications are blocked in your browser — you’ll still get an in-app message.";
   return "Weekends are off. You’ll be asked to allow notifications; either way you’ll get an in-app message.";
 }
+function marksThisWeek(){ const cut=Date.now()-7*864e5; const k=W().log; return state.log.filter(l=>l.t===k && l.ts>=cut); }
 function strikesThisWeek(){ const cut=Date.now()-7*864e5; return state.log.filter(l=>l.t==="strike" && l.ts>=cut); }
 function notifyMessage(){
   const wk=strikesThisWeek(), n=wk.length;
-  if(n===0) return "🎉 Great job — no hits this week!";
+  if(n===0) return "🎉 Great job — no strikes this week!";
   const kids=new Set(wk.map(l=>l.id)).size;
-  return `${n} hit${n>1?"s":""} this week · ${kids} student${kids>1?"s":""}.`;
+  return `${n} strike${n>1?"s":""} this week · ${kids} student${kids>1?"s":""}.`;
 }
 function fireReminder(){
   const body=notifyMessage();
   toast(body);
-  try{ if("Notification" in window && Notification.permission==="granted") new Notification("Hit Dashboard",{body,icon:"icon-192.png",tag:"daily-strikes"}); }catch(e){}
+  try{ if("Notification" in window && Notification.permission==="granted") new Notification("Madeleine Dashboard",{body,icon:"icon-192.png",tag:"daily-strikes"}); }catch(e){}
 }
 function pad2(n){ return String(n).padStart(2,"0"); }
 function dateKey(d){ return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.getDate()); }
@@ -1488,6 +1588,18 @@ document.addEventListener("keydown",e=>{
   if(!modalOpen && (e.key==="f"||e.key==="F")) switchView("fast");
 });
 
+// ---------- entry: choose a dashboard, then the passcode ----------
+(function initChooser(){
+  const ci=document.querySelector("#crest img"); if(ci) $("#ch-logo-img").src=ci.src;
+  $("#chooser").addEventListener("click",e=>{
+    const b=e.target.closest("[data-mode]"); if(!b) return;
+    setMode(b.dataset.mode);
+    document.documentElement.setAttribute("data-chosen","");
+    if(!document.documentElement.hasAttribute("data-unlocked")) setTimeout(()=>$("#gate-input").focus(),60);
+    else { try{ checkDailyReminder(); }catch(e){} try{ animView("board"); }catch(e){} }
+  });
+})();
+
 // passcode gate
 const DEFAULT_PASSCODE="9096";
 function getPasscode(){ try{ const p=localStorage.getItem("madeleine_passcode"); return (p&&/^\d{4,8}$/.test(p))?p:DEFAULT_PASSCODE; }catch(e){ return DEFAULT_PASSCODE; } }
@@ -1509,11 +1621,12 @@ function getPasscode(){ try{ const p=localStorage.getItem("madeleine_passcode");
   $("#gate-go").onclick=tryUnlock;
   gi.addEventListener("keydown",e=>{ if(e.key==="Enter") tryUnlock(); });
   gi.addEventListener("input",()=>{ err.textContent=""; });
-  if(!document.documentElement.hasAttribute("data-unlocked")) setTimeout(()=>gi.focus(),60);
+  if(!document.documentElement.hasAttribute("data-unlocked") && document.documentElement.hasAttribute("data-chosen")) setTimeout(()=>gi.focus(),60);
 })();
 
 // boot
 updateThemeIcon();
+applyMode();
 checkAutoReset();
 renderAll();
 maybeBackup();
