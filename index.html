@@ -880,7 +880,8 @@ function load(){
     tiers:[{at:2,label:"Recess check-in"},{at:3,label:"Lunch check-in"},{at:4,label:"Talk with the principal"},{at:5,label:"Call home"}]}, seq:1};
 }
 function normalize(s){
-  s.students ||= []; s.log ||= []; s.settings ||= {};
+  s.students = Array.isArray(s.students) ? s.students.filter(x=>x && typeof x.name==="string" && x.name.trim()) : [];
+  if(!Array.isArray(s.log)) s.log=[]; s.settings ||= {};
   s.settings.auto ??= false; s.settings.interval ||= "week";
   s.settings.lastReset ||= Date.now(); s.settings.reminders ??= true;
   s.settings.sound ??= true;
@@ -895,11 +896,13 @@ function normalize(s){
     const r=s.settings.recessAt||2, l=s.settings.lunchAt||3;
     s.settings.tiers=[{at:r,label:"Recess check-in"},{at:l,label:"Lunch check-in"},{at:4,label:"Talk with the principal"},{at:5,label:"Call home"}];
   }
+  s.settings.tiers = s.settings.tiers.filter(x=>x && typeof x.label==="string" && Number.isFinite(+x.at)).map(x=>({at:+x.at,label:x.label}));
   s.settings.tiers.sort((a,b)=>a.at-b.at);
   s.students.forEach(x=>{
     x.strikes ||= 0; x.total ??= x.strikes; x.hits ||= 0; x.hitTotal ??= (x.hits||0);
     if(!x.done || typeof x.done!=="object" || ("recess" in x.done) || ("lunch" in x.done)) x.done={};
   });
+  if(!Number.isFinite(s.doneTotal)) s.doneTotal=s.log.filter(l=>l&&l.t==="done").length;
   s.mode = (s.mode==="hits") ? "hits" : "strikes";
   s.seq ||= (Math.max(0,...s.students.map(x=>x.id||0))+1);
   return s;
@@ -943,7 +946,12 @@ function tierShort(label){
   s=s.charAt(0).toUpperCase()+s.slice(1);
   return s.length>13 ? s.slice(0,12).trim()+"…" : s;
 }
-function syncDone(st){ if(!st.done||typeof st.done!=="object") st.done={}; TIERS().forEach(t=>{ if(st.strikes<t.at) st.done[t.at]=false; }); }
+function syncDone(st){
+  if(!st.done||typeof st.done!=="object") st.done={};
+  const live=new Set(TIERS().map(t=>String(t.at)));
+  Object.keys(st.done).forEach(k=>{ if(!live.has(k)) delete st.done[k]; });   // a renumbered rung must not start out "done"
+  TIERS().forEach(t=>{ if(st.strikes<t.at) st.done[t.at]=false; });
+}
 function dueTiers(st){ return TIERS().filter(t=> t.label.trim() && st.strikes>=t.at && !st.done[t.at]); }
 
 function intervalWord(iv){ return iv==="day"?"daily":(iv==="week"?"weekly":"monthly"); }
@@ -992,7 +1000,7 @@ function undoStrikeOne(id){
 }
 function toggleDone(id,key){
   const st=state.students.find(x=>x.id===id); if(!st) return;
-  const at=+key, now=!st.done[at]; st.done[at]=now;
+  const at=+key, now=!st.done[at]; st.done[at]=now; state.doneTotal=Math.max(0,(state.doneTotal||0)+(now?1:-1));
   const label=tierLabel(at);
   if(now) state.log.unshift({t:"done",ts:Date.now(),note:label+" done · "+st.name});
   save(); renderAll(); toast(st.name+" · "+label+(now?" ✓":" reopened"));
@@ -1001,14 +1009,14 @@ function toggleDone(id,key){
 function completeCheckin(id, at, chip){
   const st=state.students.find(x=>x.id===id); if(!st || st.done[at]) return;
   if(st.strikes < at){ renderAll(); return; }   // view was stale (e.g. an auto-reset fired) - resync instead of writing
-  st.done[at]=true;
+  st.done[at]=true; state.doneTotal=(state.doneTotal||0)+1;
   const label=tierLabel(at);
   state.log.unshift({t:"done",ts:Date.now(),note:label+" done · "+st.name});
   save();
   renderReminders(); renderStats(); renderLog(); renderBackupBanner();
   if($("#view-totals").style.display!=="none") renderTotals();
   toastUndo(st.name+" · "+tierShort(label)+" done ✓", ()=>{
-    st.done[at]=false;
+    st.done[at]=false; state.doneTotal=Math.max(0,(state.doneTotal||0)-1);
     const i=state.log.findIndex(l=>l.t==="done"&&l.note===label+" done · "+st.name);
     if(i>-1) state.log.splice(i,1);
     save(); renderAll();
@@ -1049,14 +1057,24 @@ function importData(file){
     let obj; try{ obj=JSON.parse(rd.result); }catch(e){ obj=null; }
     if(!obj || !Array.isArray(obj.students)){ alert("That file isn't a Madeleine Dashboard backup."); return; }
     if(!confirm("Import this backup?\n\nIt will REPLACE all current students, strikes, hits and history. This can't be undone.")) return;
-    state=normalize(obj);
-    // A backup carries the timestamps from when it was made. Restart both clocks from now,
-    // otherwise a stale lastReset makes the auto-reset fire instantly and wipe the strikes
-    // we just restored (yearly totals survive, which is exactly how that bug looked).
-    state.settings.lastReset=Date.now();
-    if(state.settings.backup) state.settings.backup.last=Date.now();
-    if(state.settings.notify) state.settings.notify.lastFired=null;
-    save(); applyMode(); renderAll(); toast("Backup imported ✓");
+    // Render BEFORE saving: a file that isn't really a backup must not be able to persist
+    // a state the app can't draw (that used to brick it with no way back).
+    const prev=state, rawCount=obj.students.length;   // normalize() mutates obj, so count first
+    try{
+      state=normalize(obj);
+      // A backup carries the timestamps from when it was made. Restart both clocks from now,
+      // otherwise a stale lastReset makes the auto-reset fire instantly and wipe the strikes
+      // we just restored (yearly totals survive, which is exactly how that bug looked).
+      state.settings.lastReset=Date.now();
+      if(state.settings.backup) state.settings.backup.last=Date.now();
+      if(state.settings.notify) state.settings.notify.lastFired=null;
+      applyMode(); renderAll();
+    }catch(err){
+      state=prev; try{ applyMode(); renderAll(); }catch(e2){}
+      alert("That file isn't a Madeleine Dashboard backup."); return;
+    }
+    if(!state.students.length && rawCount){ state=prev; applyMode(); renderAll(); alert("That file isn't a Madeleine Dashboard backup."); return; }
+    save(); toast("Backup imported ✓");
   };
   rd.readAsText(file);
 }
@@ -1199,7 +1217,7 @@ function renderLog(){
 function renderTotals(){
   const students=state.students.length, w=W();
   const yearTotal=state.students.reduce((a,x)=>a+yearOf(x),0);
-  const doneCount=state.log.filter(l=>l.t==="done").length;
+  const doneCount=state.doneTotal||0;
   const worst=state.students.slice().sort((a,b)=>yearOf(b)-yearOf(a))[0];
   $("#totals-stats").innerHTML=`
     <div class="stat"><div class="n">${yearTotal}</div><div class="l">${w.P} this year</div></div>
@@ -1264,7 +1282,7 @@ function renderSettings(){
   $("#auto-interval-row").style.opacity=state.settings.auto?"1":".45";
   $("#auto-interval").disabled=!state.settings.auto;
   renderTierEditor(); renderReasonEditor();
-  ["#panel-checkins","#panel-consequences","#panel-reminder"].forEach(sel=>{ const el=$(sel); if(el) el.style.display=isHits()?"none":""; });
+  ["#panel-checkins","#panel-consequences"].forEach(sel=>{ const el=$(sel); if(el) el.style.display=isHits()?"none":""; });
   { const ph=$("#pass-hint"); if(ph) ph.textContent = (getPasscode()===DEFAULT_PASSCODE)
       ? "Currently the default (9096). 4\u20138 digits. Saved on this device only \u2014 if you use the app on a phone too, change it there as well."
       : "You\u2019ve set your own passcode. 4\u20138 digits. Saved on this device only \u2014 change it separately on any other device."; }
@@ -1457,12 +1475,21 @@ $("#remind-switch").onclick=()=>{ state.settings.reminders=!state.settings.remin
 $("#auto-switch").onclick=()=>{ state.settings.auto=!state.settings.auto; if(state.settings.auto) state.settings.lastReset=Date.now(); save(); renderSettings(); };
 $("#auto-interval").onchange=e=>{ state.settings.interval=e.target.value; state.settings.lastReset=Date.now(); save(); renderSettings(); };
 $("#tier-editor").addEventListener("input",e=>{ const t=e.target; if(t.dataset.tierLabel!==undefined){ const i=+t.dataset.tierLabel; if(state.settings.tiers[i]){ state.settings.tiers[i].label=t.value; save(); renderReminders(); renderRoster(); renderStats(); } } });
-$("#tier-editor").addEventListener("change",e=>{ const t=e.target; if(t.dataset.tierAt!==undefined){ const i=+t.dataset.tierAt; if(state.settings.tiers[i]){ state.settings.tiers[i].at=Math.max(1,Math.min(99,parseInt(t.value)||1)); sortTiers(); state.students.forEach(syncDone); save(); renderAll(); } } });
+$("#tier-editor").addEventListener("change",e=>{ const t=e.target; if(t.dataset.tierAt===undefined) return;
+  const i=+t.dataset.tierAt; if(!state.settings.tiers[i]) return;
+  const v=Math.max(1,Math.min(99,parseInt(t.value)||1));
+  const clash=state.settings.tiers.find((o,j)=>j!==i && o.at===v);
+  if(clash){ toast("“"+(clash.label||"Another consequence")+"” is already at "+v+" — pick a different number."); renderTierEditor(); return; }
+  state.settings.tiers[i].at=v; sortTiers(); state.students.forEach(syncDone); save(); renderAll();
+});
 $("#tier-editor").addEventListener("click",e=>{ const b=e.target.closest("[data-tier-del]"); if(!b) return; state.settings.tiers.splice(+b.dataset.tierDel,1); state.students.forEach(syncDone); save(); renderAll(); });
 $("#reason-editor").addEventListener("input",e=>{ const t=e.target.closest("input[data-reason]"); if(!t) return; const i=+t.dataset.reason; if(state.settings.reasons[i]!==undefined){ state.settings.reasons[i]=t.value; save(); } });
 $("#reason-editor").addEventListener("click",e=>{ const b=e.target.closest("[data-reason-del]"); if(!b) return; state.settings.reasons.splice(+b.dataset.reasonDel,1); save(); renderSettings(); });
 $("#add-reason").onclick=()=>{ const l=state.settings.reasons; if(l.length>=10) return; l.push(""); save(); renderSettings(); setTimeout(()=>{ const ins=$$("#reason-editor input[data-reason]"); if(ins.length) ins[ins.length-1].focus(); },30); };
-$("#add-tier").onclick=()=>{ const ts=state.settings.tiers||(state.settings.tiers=[]); const nextAt=ts.length?Math.min(99,Math.max(...ts.map(t=>t.at))+1):2; ts.push({at:nextAt,label:""}); sortTiers(); save(); renderAll(); setTimeout(()=>{ const inputs=$$("#tier-editor [data-tier-label]"); const target=inputs.find(inp=>state.settings.tiers[+inp.dataset.tierLabel]?.at===nextAt); (target||inputs[inputs.length-1])?.focus(); },30); };
+$("#add-tier").onclick=()=>{ const ts=state.settings.tiers||(state.settings.tiers=[]); let nextAt=ts.length?Math.min(99,Math.max(...ts.map(t=>t.at))+1):2;
+  while(ts.some(t=>t.at===nextAt) && nextAt<99) nextAt++;
+  if(ts.some(t=>t.at===nextAt)){ toast("No free strike number left — free one up first."); return; }
+  ts.push({at:nextAt,label:""}); sortTiers(); save(); renderAll(); setTimeout(()=>{ const inputs=$$("#tier-editor [data-tier-label]"); const target=inputs.find(inp=>state.settings.tiers[+inp.dataset.tierLabel]?.at===nextAt); (target||inputs[inputs.length-1])?.focus(); },30); };
 $("#load-class").onclick=()=>{
   const existing=new Set(state.students.map(s=>s.name.toLowerCase()));
   let n=0;
@@ -1533,7 +1560,11 @@ $("#save-pass").onclick=()=>{
   const v=$("#new-pass").value.trim();
   if(!/^\d{4,8}$/.test(v)){ alert("Please choose a passcode of 4 to 8 digits."); $("#new-pass").focus(); return; }
   try{ localStorage.setItem("madeleine_passcode", v); }catch(e){ alert("Couldn't save the passcode on this device."); return; }
-  $("#new-pass").value=""; renderSettings(); toast("Passcode changed \u2713");
+  $("#new-pass").value="";
+  try{ localStorage.removeItem("madeleine_unlocked"); }catch(e){}
+  document.documentElement.removeAttribute("data-unlocked"); updateInert();
+  renderSettings(); toast("Passcode changed — unlock with the new code");
+  setTimeout(()=>{ const g=$("#gate-input"); if(g){ g.value=""; g.focus(); } },60);
 };
 $("#new-pass").addEventListener("keydown",e=>{ if(e.key==="Enter") $("#save-pass").click(); });
 $("#install-btn").onclick=()=>{ if(deferredPrompt){ deferredPrompt.prompt(); deferredPrompt.userChoice.finally(()=>{ deferredPrompt=null; updateInstallUI(); }); } };
@@ -1589,6 +1620,7 @@ $("#notify-test").onclick=fireReminder;
 
 // keyboard
 document.addEventListener("keydown",e=>{
+  if(!document.documentElement.hasAttribute("data-chosen") || !document.documentElement.hasAttribute("data-unlocked")) return;
   const tag=e.target.tagName||"";
   const typing = tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||e.target.isContentEditable;
   if(e.key==="Escape"){ if($("#modal").classList.contains("show")) closeModal(); else if($("#bulk-modal").classList.contains("show")) closeBulk(); else closeMenus(); return; }
