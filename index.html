@@ -295,6 +295,7 @@
   .ch-t{font-weight:650;font-size:14.5px}
   .ch-d{font-size:12.5px;color:var(--muted)}
   :root[data-unlocked] #gate{display:none}
+  :root:not([data-chosen]) #gate{display:none}
   .gate-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:34px 30px;width:100%;max-width:330px;text-align:center}
   .gate-logo{width:70px;height:70px;border-radius:18px;margin:0 auto 16px;background:transparent;display:grid;place-items:center;overflow:hidden;padding:0;box-shadow:0 8px 22px rgba(47,107,216,.32)}
   .gate-logo img{object-fit:cover}
@@ -317,6 +318,13 @@
   :root[data-mode="hits"] .ftile.pulse{animation:tilepulseg .55s ease-out}
   :root[data-mode="hits"] .stat.warn .n{color:var(--green)}
   :root[data-mode="hits"] .log-dot{background:var(--green)}
+  .modeseg{display:flex;gap:3px;background:var(--bg);padding:3px;border-radius:11px;border:1px solid var(--line);flex:0 0 auto}
+  .modeseg button{display:inline-flex;align-items:center;gap:6px;padding:6px 11px;border-radius:8px;font-size:12.5px;font-weight:650;color:var(--muted);transition:.15s;white-space:nowrap}
+  .modeseg button:hover{color:var(--ink)}
+  .modeseg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(20,28,45,.09)}
+  .ms-dot{width:8px;height:8px;border-radius:50%;background:var(--line);flex:0 0 auto;transition:.15s}
+  .modeseg button[data-setmode="strikes"].on .ms-dot{background:var(--red)}
+  .modeseg button[data-setmode="hits"].on .ms-dot{background:var(--green)}
   .mode-btn{display:inline-flex;align-items:center;gap:7px;height:32px;padding:0 11px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--muted);font-size:12.5px;font-weight:650;transition:.15s;flex:0 0 auto}
   .mode-btn:hover{color:var(--ink);border-color:var(--blue)}
   .mode-dot{width:9px;height:9px;border-radius:50%;background:var(--red)}
@@ -413,8 +421,10 @@
       </div>
     </button>
     <div class="topbar-spacer"></div>
-    <button class="mode-btn" id="mode-toggle" title="Switch dashboard"><span class="mode-dot"></span><span id="mode-label">Strikes</span>
-      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M7 16H3m0 0 3-3m-3 3 3 3"/><path d="M17 8h4m0 0-3-3m3 3-3 3"/></svg></button>
+    <div class="modeseg" id="modeseg" role="group" aria-label="Choose dashboard">
+      <button data-setmode="strikes" title="Strike Dashboard — for something bad"><span class="ms-dot"></span>Strikes</button>
+      <button data-setmode="hits" title="Hit Dashboard — points for something good"><span class="ms-dot"></span>Hits</button>
+    </div>
     <button class="theme-toggle" id="theme-toggle" title="Toggle dark mode" aria-label="Toggle dark mode"></button>
     <div class="tabs">
       <button class="tab active" data-view="board">
@@ -846,8 +856,7 @@ function applyMode(){
   const h=$("#brand-title"); if(h) h.textContent=W().dash;
   const ft=$("#tab-fast-label"); if(ft) ft.textContent="Fast "+W().N;
   const so=$("#sortsel"); if(so && so.options[0]) so.options[0].textContent="Most "+W().p;
-  const mt=$("#mode-toggle"); if(mt) mt.title="Switch to the "+(isHits()?"Strike":"Hit")+" Dashboard";
-  const ml=$("#mode-label"); if(ml) ml.textContent=isHits()?"Hits":"Strikes";
+  $$("#modeseg button").forEach(b=>b.classList.toggle("on", b.dataset.setmode===(isHits()?"hits":"strikes")));
   const gt=$("#gate-title"); if(gt) gt.textContent=W().dash;
   const mo=$("#modal-title"); if(mo) mo.textContent="Give a "+W().n;
   const mc=$("#modal-confirm"); if(mc) mc.textContent="Add "+W().n;
@@ -855,6 +864,10 @@ function applyMode(){
   const fs=$("#fast-sub"); if(fs) fs.innerHTML="Tap a student to give a "+W().n+" — press &amp; hold to take one back. Set a reason first if you like; it sticks, so you can tap several in a row.";
   const fr=$("#fast-reason"); if(fr) fr.placeholder="Reason for the next "+W().n+" (optional)";
   const rl=$("#reminder-word"); if(rl) rl.textContent=W().p;
+}
+function updateInert(){
+  const blocked = !document.documentElement.hasAttribute("data-chosen") || !document.documentElement.hasAttribute("data-unlocked");
+  [".topbar","#view-board","#view-fast","#view-totals","#view-settings"].forEach(s=>{ const el=document.querySelector(s); if(el) el.inert=blocked; });
 }
 function setMode(m){ state.mode=(m==="hits")?"hits":"strikes"; save(); applyMode(); renderAll(); }
 function load(){
@@ -1042,7 +1055,7 @@ function importData(file){
     state.settings.lastReset=Date.now();
     if(state.settings.backup) state.settings.backup.last=Date.now();
     if(state.settings.notify) state.settings.notify.lastFired=null;
-    save(); renderAll(); toast("Backup imported ✓");
+    save(); applyMode(); renderAll(); toast("Backup imported ✓");
   };
   rd.readAsText(file);
 }
@@ -1258,7 +1271,7 @@ function renderSettings(){
   if(state.settings.auto){ const due=state.settings.lastReset+INTERVAL_MS[state.settings.interval]; note.textContent="Next reset "+new Date(due).toLocaleDateString(undefined,{weekday:"short",month:"short",day:"numeric"}); }
   else note.textContent="Turn on to schedule automatic resets.";
   const b=$("#autoreset-banner");
-  if(state.settings.auto){ b.style.display="flex"; b.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Hits reset automatically every ${state.settings.interval}.`; }
+  if(state.settings.auto){ b.style.display="flex"; b.innerHTML=`<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg> Strikes and hits reset automatically every ${state.settings.interval}.`; }
   else b.style.display="none";
 }
 function renderAll(){
@@ -1269,13 +1282,13 @@ function renderAll(){
 
 // toast
 let toastTimer;
-function toast(msg){ const t=$("#toast"); t.className=""; t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2600); }
+function toast(msg){ const t=$("#toast"); t.className=""; t.onclick=null; t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2600); }
 function toastUndo(msg,undo){ const t=$("#toast"); t.className="undo"; t.innerHTML=esc(msg)+' <span class="u">Undo</span>'; t.classList.add("show"); t.onclick=()=>{ undo(); t.classList.remove("show"); t.onclick=null; }; clearTimeout(toastTimer); toastTimer=setTimeout(()=>{t.classList.remove("show");t.onclick=null;},5000); }
 
 // modal
 let modalId=null;
 function openModal(id){ const st=state.students.find(x=>x.id===id); if(!st) return; modalId=id;
-  $("#modal-who").textContent=st.name+(st.cls?` · ${st.cls}`:"")+` · currently ${st.strikes} hit${st.strikes===1?"":"s"}`;
+  $("#modal-who").textContent=st.name+(st.cls?` · ${st.cls}`:"")+` · currently ${plural(cntOf(st),W().n)}`;
   $("#modal-reason").value=""; renderModalTags();
   $("#modal").classList.add("show"); setTimeout(()=>{ const m=$("#modal .modal"); if(m) m.focus(); },30); }
 function closeModal(){ $("#modal").classList.remove("show"); modalId=null; }
@@ -1350,7 +1363,12 @@ document.addEventListener("click",e=>{ if(!e.target.closest(".kebab-wrap")) clos
 // events
 $$(".tab").forEach(t=>t.onclick=()=>switchView(t.dataset.view));
 $("#brand-home").onclick=()=>switchView("board");
-$("#mode-toggle").onclick=()=>{ setMode(isHits()?"strikes":"hits"); toast(isHits()?"Hit Dashboard — points for good stuff":"Strike Dashboard"); };
+$("#modeseg").addEventListener("click",e=>{
+  const b=e.target.closest("[data-setmode]"); if(!b) return;
+  const want=b.dataset.setmode; if((want==="hits")===isHits()) return;
+  setMode(want);
+  toast(isHits()?"Hit Dashboard — points for something good":"Strike Dashboard — for something bad");
+});
 
 function doAdd(){
   const n=$("#f-name").value, c=$("#f-class").value;
@@ -1554,6 +1572,7 @@ function dateKey(d){ return d.getFullYear()+"-"+pad2(d.getMonth()+1)+"-"+pad2(d.
 function checkDailyReminder(){
   const nt=state.settings.notify; if(!nt||!nt.enabled) return;
   if(!document.documentElement.hasAttribute("data-unlocked")) return;
+  if(!document.documentElement.hasAttribute("data-chosen")) return;   // still on the chooser
   const now=new Date(), day=now.getDay();
   if(day<1||day>5) return;
   const t=(nt.times[String(day)]||"15:00").split(":");
@@ -1592,9 +1611,9 @@ document.addEventListener("keydown",e=>{
 (function initChooser(){
   const ci=document.querySelector("#crest img"); if(ci) $("#ch-logo-img").src=ci.src;
   $("#chooser").addEventListener("click",e=>{
-    const b=e.target.closest("[data-mode]"); if(!b) return;
+    const b=e.target.closest(".ch-opt"); if(!b) return;
     setMode(b.dataset.mode);
-    document.documentElement.setAttribute("data-chosen","");
+    document.documentElement.setAttribute("data-chosen",""); updateInert();
     if(!document.documentElement.hasAttribute("data-unlocked")) setTimeout(()=>$("#gate-input").focus(),60);
     else { try{ checkDailyReminder(); }catch(e){} try{ animView("board"); }catch(e){} }
   });
@@ -1608,7 +1627,7 @@ function getPasscode(){ try{ const p=localStorage.getItem("madeleine_passcode");
   const ci=document.querySelector("#crest img"); if(ci) $("#gate-logo-img").src=ci.src;
   function tryUnlock(){
     if(gi.value.trim()===getPasscode()){
-      document.documentElement.setAttribute("data-unlocked","");
+      document.documentElement.setAttribute("data-unlocked",""); updateInert();
       try{ localStorage.setItem("madeleine_unlocked","1"); }catch(e){}
       try{ checkDailyReminder(); }catch(e){}
       try{ animView("board"); }catch(e){}
@@ -1627,6 +1646,7 @@ function getPasscode(){ try{ const p=localStorage.getItem("madeleine_passcode");
 // boot
 updateThemeIcon();
 applyMode();
+updateInert();
 checkAutoReset();
 renderAll();
 maybeBackup();
