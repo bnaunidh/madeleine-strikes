@@ -608,7 +608,7 @@
 
   <div class="panel panel-pad" style="margin-top:18px">
     <p class="section-title">Quick reasons</p>
-    <div class="tier-warn">The pills you tap when giving a hit. With the reason box empty, just press the number key to pick one, then <b>Enter</b>. Up to 10 — anything unusual you can still type out.</div>
+    <div class="tier-warn" id="reason-help">The pills you tap when giving a strike or a hit. With the reason box empty, just press the number key to pick one, then <b>Enter</b>. Up to 10 — anything unusual you can still type out.</div>
     <div id="reason-editor"></div>
     <button class="btn btn-ghost btn-sm" id="add-reason" style="margin-top:12px">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M12 5v14M5 12h14"/></svg> Add a reason
@@ -857,6 +857,7 @@ function applyMode(){
   const ft=$("#tab-fast-label"); if(ft) ft.textContent="Fast "+W().N;
   const so=$("#sortsel"); if(so && so.options[0]) so.options[0].textContent="Most "+W().p;
   $$("#modeseg button").forEach(b=>b.classList.toggle("on", b.dataset.setmode===(isHits()?"hits":"strikes")));
+  const rh=$("#reason-help"); if(rh) rh.innerHTML="The pills you tap when giving a "+W().n+". With the reason box empty, just press the number key to pick one, then <b>Enter</b>. Up to 10 — anything unusual you can still type out.";
   const gt=$("#gate-title"); if(gt) gt.textContent=W().dash;
   const mo=$("#modal-title"); if(mo) mo.textContent="Give a "+W().n;
   const mc=$("#modal-confirm"); if(mc) mc.textContent="Add "+W().n;
@@ -1415,7 +1416,7 @@ $("#roster").addEventListener("click",e=>{
 $("#reminders").addEventListener("click",e=>{ const b=e.target.closest("button[data-done]"); if(!b) return; toggleDone(+b.dataset.done, b.dataset.key); });
 $("#search").addEventListener("input",e=>{ search=e.target.value; renderRoster(); });
 $("#sortsel").onchange=e=>{ sortMode=e.target.value; renderRoster(); };
-$("#clearlog").onclick=()=>{ if(confirm("Clear the activity log? Hit counts stay the same.")){ state.log=[]; save(); renderLog(); } };
+$("#clearlog").onclick=()=>{ if(confirm("Clear the activity log? Strike and hit counts stay the same.")){ state.log=[]; save(); renderLog(); } };
 
 $("#modal-cancel").onclick=closeModal;
 $("#modal").addEventListener("click",e=>{ if(e.target.id==="modal") closeModal(); });
@@ -1500,7 +1501,7 @@ $("#backup-banner").addEventListener("click",e=>{
   else if(e.target.closest("#backup-later")){ backupDismissed=true; renderBackupBanner(); }
 });
 $("#reset-all").onclick=()=>{ if(confirm("Reset every student's current strikes and hits to zero? Yearly totals are kept.")) resetAll(); };
-function confirmNewYear(){ if(confirm("Start a new school year?\n\nThis sets every student's hits AND yearly totals back to zero. Students stay. This can't be undone.")) newSchoolYear(); }
+function confirmNewYear(){ if(confirm("Start a new school year?\n\nThis sets every student's strikes, hits AND yearly totals back to zero. Students stay. This can't be undone.")) newSchoolYear(); }
 $("#new-year").onclick=confirmNewYear; $("#new-year-2").onclick=confirmNewYear;
 $("#wipe").onclick=()=>{ if(confirm("Delete ALL students and history? This cannot be undone.")){ state.students=[]; state.log=[]; save(); renderAll(); toast("Everything cleared"); } };
 
