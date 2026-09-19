@@ -415,6 +415,14 @@
   .ibtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--muted);display:grid;place-items:center;transition:.12s}
   .ibtn:hover{color:var(--ink);border-color:var(--green)}
   .ibtn.on{background:var(--green-soft);border-color:var(--green-line);color:var(--green-dark)}
+  :root[data-mode="strikes"] #tier-editor .ibtn.on{background:var(--red-soft);border-color:var(--red);color:var(--red-dark)}
+  :root[data-mode="strikes"] #tier-editor .iconpick:hover,:root[data-mode="strikes"] #tier-editor .ibtn:hover{border-color:var(--red)}
+  .ibtn[data-icon=""]{width:auto;padding:0 10px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+  .beta-tag{display:inline-block;margin-left:7px;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--amber-ink);background:var(--amber-soft);border:1px solid var(--amber-line);border-radius:20px;padding:2px 7px;vertical-align:1px}
+  .chip[data-tint]{color:#fff;border:0}
+  .chip[data-tint="c1"]{background:var(--c1)} .chip[data-tint="c2"]{background:var(--c2)} .chip[data-tint="c3"]{background:var(--c3)}
+  .chip[data-tint="c4"]{background:var(--c4)} .chip[data-tint="c5"]{background:var(--c5)} .chip[data-tint="c6"]{background:var(--c6)}
+  .chip[data-tint="c7"]{background:var(--c7)} .chip[data-tint="c8"]{background:var(--c8)}
   :root[data-mode="hits"] .cin{border-color:var(--green-line);background:var(--green-soft);color:var(--green-dark)}
   .new-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);background:var(--blue-soft);border-radius:20px;padding:4px 11px}
   .new-list{list-style:none;margin:14px 0 4px;padding:0;text-align:left}
@@ -818,6 +826,18 @@
     <p class="section-title">Classes</p>
     <div class="tier-warn" id="class-help">Give a class its own code and it stays hidden — on the roster, the graph, everywhere — until someone puts the code in. Leave the box empty and the class is open to anyone who can get past the main passcode.</div>
     <div id="class-editor"></div>
+  </div>
+
+  <div class="panel panel-pad" id="panel-beta" style="margin-top:18px">
+    <p class="section-title">Class tools <span class="beta-tag">Beta</span></p>
+    <div class="set-row">
+      <div>
+        <div class="t">Turn on class tools</div>
+        <div class="d">Rename a class, give it a colour, or move everyone in it somewhere else. These are new — take a backup first if you have a lot of records.</div>
+      </div>
+      <div class="ctl"><div class="switch" id="beta-switch"></div></div>
+    </div>
+    <div id="beta-tools" style="display:none;margin-top:6px"></div>
   </div>
 
   <div class="panel panel-pad" id="panel-test" style="margin-top:18px">
@@ -1236,7 +1256,7 @@ function normalize(s){
     const r=s.settings.recessAt||2, l=s.settings.lunchAt||3;
     s.settings.tiers=[{at:r,label:"Recess check-in"},{at:l,label:"Lunch check-in"},{at:4,label:"Talk with the principal"},{at:5,label:"Call home"}];
   }
-  s.settings.tiers = s.settings.tiers.filter(x=>x && typeof x.label==="string" && Number.isFinite(+x.at)).map(x=>({at:+x.at,label:x.label}));
+  s.settings.tiers = s.settings.tiers.filter(x=>x && typeof x.label==="string" && Number.isFinite(+x.at)).map(x=>({at:+x.at,label:x.label,icon:typeof x.icon==="string"?x.icon:""}));
   s.settings.tiers.sort((a,b)=>a.at-b.at);
   if(!Array.isArray(s.settings.rewards))
     s.settings.rewards=[{at:3,label:"Free choice time",icon:"star"},{at:5,label:"Note home",icon:"heart"},{at:10,label:"Prize box",icon:"gift"}];
@@ -1264,6 +1284,8 @@ function normalize(s){
   s.settings.analytics.group = s.settings.analytics.group==="cat" ? "cat" : "reason";
   if(["week","month","q","year","all"].indexOf(s.settings.analytics.range)<0) s.settings.analytics.range="month";
   if(!s.settings.classCodes || typeof s.settings.classCodes!=="object") s.settings.classCodes={};
+  if(!s.settings.classColors || typeof s.settings.classColors!=="object") s.settings.classColors={};
+  s.settings.beta = s.settings.beta===true;
   s.settings.checkinNudge = s.settings.checkinNudge===true;
   if(!Number.isFinite(s.settings.checkinLead)) s.settings.checkinLead=5;
   if(!Array.isArray(s.settings.breaks) || !s.settings.breaks.length)
@@ -1351,11 +1373,16 @@ function beep(kind){ if(!state.settings.sound) return; playSound(sfxSrc(kind), 0
 // tiers
 function TIERS(){ return state.settings.tiers||[]; }
 const REWARD_ICONS=["star","gift","trophy","medal","smile","heart","ticket","book","music","ball","crown","sun"];
+const CONSEQ_ICONS=["warn","clock","person","phone","home","sun","fork","clip","book","ball","music","knife"];
+const CONSEQ_ICON_LABELS={warn:"Warning",clock:"Time out",person:"Principal",phone:"Phone call",home:"Home",sun:"Recess",fork:"Lunch",clip:"Note",book:"Work",ball:"No games",music:"Quiet",knife:"\u2026"};
 const REWARD_ICON_LABELS={star:"Star",gift:"Gift",trophy:"Trophy",medal:"Medal",smile:"Smiley",heart:"Heart",ticket:"Ticket",book:"Book",music:"Music",ball:"Ball",crown:"Crown",sun:"Sun"};
 function REWARDS(){ const r=state.settings.rewards; return Array.isArray(r)?r:(state.settings.rewards=[]); }
 function LADDER(){ return isHits() ? REWARDS() : TIERS(); }
 function doneOf(x){ if(isHits()){ if(!x.rdone||typeof x.rdone!=="object") x.rdone={}; return x.rdone; } if(!x.done||typeof x.done!=="object") x.done={}; return x.done; }
-function ladderIcon(t){ return isHits() ? (REWARD_ICONS.indexOf(t.icon)>-1?t.icon:"star") : tierIconKey(t.label); }
+function ladderIcon(t){
+  if(isHits()) return REWARD_ICONS.indexOf(t.icon)>-1 ? t.icon : "star";
+  return CONSEQ_ICONS.indexOf(t.icon)>-1 ? t.icon : tierIconKey(t.label);
+}
 function sortTiers(){ (state.settings.tiers||[]).sort((a,b)=>a.at-b.at); (state.settings.rewards||[]).sort((a,b)=>a.at-b.at); }
 function maxTierAt(){ const ts=LADDER().filter(t=>t.label.trim()); return ts.length ? ts[ts.length-1].at : Infinity; }
 function tierLabel(at){ const t=LADDER().find(t=>t.at===+at); return t?t.label:(isHits()?"Reward":"Check-in"); }
@@ -1606,7 +1633,7 @@ function renderRoster(){
     return `<div class="student">
       <div class="s-avatar-wrap">${avatarHTML(x)}<button class="photo-btn" data-photo="${x.id}" title="${photoOf(x)?"Change":"Add"} a photo of ${esc(x.name)}" aria-label="${photoOf(x)?"Change":"Add"} a photo of ${esc(x.name)}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button></div>
       <div class="s-main">
-        <div class="s-name">${esc(x.name)} ${x.cls?`<span class="chip">${esc(x.cls)}</span>`:""}</div>
+        <div class="s-name">${esc(x.name)} ${x.cls?`<span class="chip"${classTint(x.cls)?` data-tint="${classTint(x.cls)}"`:""}>${esc(x.cls)}</span>`:""}</div>
         <div class="s-sub">${plural(n,w.n)}${yearNote}</div>
       </div>
       <div class="s-right">
@@ -1690,7 +1717,9 @@ function renderTierEditor(){
     <div class="tier-row">
       <div class="tier-at"><input class="input tier-num" type="number" min="1" max="99" value="${t.at}" data-tier-at="${i}" aria-label="strike number"><span>strikes →</span></div>
       <input class="input" value="${esc(t.label)}" placeholder="e.g. Call home" data-tier-label="${i}" aria-label="consequence">
+      <button class="iconpick" data-tier-icon="${i}" title="Choose an icon" aria-label="Choose an icon">${icoSvg(CONSEQ_ICONS.indexOf(t.icon)>-1?t.icon:tierIconKey(t.label),16)}</button>
       <button class="tier-del" data-tier-del="${i}" title="Remove"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+      <div class="iconbar" data-tier-bar="${i}">${CONSEQ_ICONS.map(k=>`<button class="ibtn ${k===(CONSEQ_ICONS.indexOf(t.icon)>-1?t.icon:tierIconKey(t.label))?"on":""}" data-settiericon="${i}" data-icon="${k}" title="${CONSEQ_ICON_LABELS[k]}" aria-label="${CONSEQ_ICON_LABELS[k]}">${icoSvg(k,16)}</button>`).join("")}${t.icon?`<button class="ibtn" data-settiericon="${i}" data-icon="" title="Back to automatic" aria-label="Back to automatic">auto</button>`:""}</div>
     </div>`).join("") || `<div class="tier-warn">No consequences yet — add one below.</div>`;
 }
 function renderReasonEditor(){
@@ -1738,7 +1767,7 @@ function renderSettings(){
   if(!inside("#reward-editor")) renderRewardEditor();
   if(!inside("#reason-editor")) renderReasonEditor();
   if(!inside("#class-editor")) renderClassEditor();
-  renderBreakEditor(); renderLogins(); renderTestPanel(); dbStatus(); applyLayout();
+  renderBreakEditor(); if(!inside("#beta-tools")) renderBeta(); renderLogins(); renderTestPanel(); dbStatus(); applyLayout();
   { const c=$("#cc-code"), u=$("#cc-url"); if(c&&document.activeElement!==c) c.value=DB().code; if(u&&document.activeElement!==u) u.value=DB().url; }
   ["#panel-checkins","#panel-consequences"].forEach(sel=>{ const el=$(sel); if(el) el.style.display=isHits()?"none":""; });
   { const el=$("#panel-rewards"); if(el) el.style.display=isHits()?"":"none"; }
@@ -2027,7 +2056,7 @@ function dbPayload(){
           name:l.name,cls:l.cls||"",reason:l.reason||"",category:categoryOf(l.reason),count:l.count||0}; }),
     logins: (state.logins||[]).slice(0,25),
     settingsTs: state.settings.ts||0,
-    settings: {reasons:REASONS(),reasonCats:REASON_CATS(),catMap:CATMAP(),tiers:state.settings.tiers,rewards:REWARDS(),classCodes:CLASS_CODES()}};
+    settings: {reasons:REASONS(),reasonCats:REASON_CATS(),catMap:CATMAP(),tiers:state.settings.tiers,rewards:REWARDS(),classCodes:CLASS_CODES(),classColors:CLASS_COLORS()}};
 }
 function dbMerge(res){
   if(!res||!Array.isArray(res.students)) return 0;
@@ -2075,6 +2104,7 @@ function dbMerge(res){
     if(Array.isArray(t.reasonCats)) state.settings.reasonCats=t.reasonCats.slice(0,10);
     if(t.catMap&&typeof t.catMap==="object") state.settings.catMap=t.catMap;
     if(t.classCodes&&typeof t.classCodes==="object") state.settings.classCodes=t.classCodes;
+    if(t.classColors&&typeof t.classColors==="object") state.settings.classColors=t.classColors;
     if(Array.isArray(t.tiers)&&t.tiers.length) state.settings.tiers=t.tiers;
     if(Array.isArray(t.rewards)) state.settings.rewards=t.rewards;
     state.settings.ts=+res.settingsTs||0; changed++;
@@ -2319,6 +2349,59 @@ function clearPhoto(id){ const st=state.students.find(x=>x.id===id); if(!st) ret
 let photoTarget=null;
 function pickPhoto(id){ photoTarget=id; $("#photo-file").value=""; $("#photo-file").click(); }
 
+// ================= beta: class tools =================
+function betaOn(){ return !!state.settings.beta; }
+const CLASS_TINTS=["","c1","c2","c3","c4","c5","c6","c7","c8"];
+function CLASS_COLORS(){ const m=state.settings.classColors; return (m&&typeof m==="object")?m:(state.settings.classColors={}); }
+function classTint(c){ const v=CLASS_COLORS()[clsKey(c)]; return CLASS_TINTS.indexOf(v)>0 ? v : ""; }
+function renameClass(oldName,newName){
+  const from=clsKey(oldName), to=String(newName||"").trim();
+  if(!from || !to) return false;
+  if(clsKey(to)!==from && state.students.some(x=>clsKey(x.cls)===clsKey(to)) && !confirm("“"+to+"” already exists. Merge them together?")) return false;
+  let n=0;
+  state.students.forEach(x=>{ if(clsKey(x.cls)===from){ x.cls=to; n++; } });
+  // carry the code and the colour across
+  const code=CLASS_CODES()[from], tint=CLASS_COLORS()[from];
+  if(code){ CLASS_CODES()[clsKey(to)]=code; delete CLASS_CODES()[from]; if(classUnlocked(from)) unlockClass(to); lockClass(from); }
+  if(tint){ CLASS_COLORS()[clsKey(to)]=tint; delete CLASS_COLORS()[from]; }
+  if(clsKey(activeClass())===from) setActiveClass(to);
+  bumpSettings(); save(); renderAll(); dbNudge();
+  toast("Renamed — "+n+" student"+(n===1?"":"s")+" moved to "+to);
+  return true;
+}
+function moveClass(fromName,toName){
+  const from=clsKey(fromName), to=String(toName||"").trim();
+  const who=state.students.filter(x=>clsKey(x.cls)===from && inScope(x));
+  if(!who.length){ toast("Nobody to move."); return; }
+  if(!confirm("Move "+who.length+" student"+(who.length===1?"":"s")+" from “"+fromName+"” to “"+(to||"no class")+"”?")) return;
+  who.forEach(x=>x.cls=to);
+  save(); renderAll(); dbNudge();
+  toast("Moved "+who.length+" student"+(who.length===1?"":"s"));
+}
+function renderBeta(){
+  const el=$("#beta-tools"); if(!el) return;
+  const sw=$("#beta-switch"); if(sw) sw.classList.toggle("on", betaOn());
+  el.style.display = betaOn() ? "" : "none";
+  if(!betaOn()) return;
+  const list=classList().filter(([k])=>classUnlocked(k));
+  el.innerHTML = !list.length
+    ? `<div class="tier-warn">No classes you can edit. Put a class name on a student first.</div>`
+    : list.map(([k,label])=>`
+      <div class="tier-row">
+        <input class="input" value="${esc(label)}" data-renamecls="${esc(k)}" aria-label="Class name" style="flex:1 1 140px;min-width:0">
+        <select class="input" data-tintcls="${esc(k)}" aria-label="Colour for ${esc(label)}" style="width:118px">
+          <option value=""${classTint(k)?"":" selected"}>No colour</option>
+          ${CLASS_TINTS.slice(1).map((t,i)=>`<option value="${t}"${classTint(k)===t?" selected":""}>Colour ${i+1}</option>`).join("")}
+        </select>
+        <select class="input" data-movecls="${esc(k)}" aria-label="Move everyone in ${esc(label)}" style="width:150px">
+          <option value="__">Move everyone to…</option>
+          ${list.filter(([k2])=>k2!==k).map(([k2,l2])=>`<option value="${esc(l2)}">${esc(l2)}</option>`).join("")}
+          <option value="">No class</option>
+        </select>
+        <span style="color:var(--muted);font-size:12.5px">${state.students.filter(x=>clsKey(x.cls)===k).length}</span>
+      </div>`).join("");
+}
+
 // toast
 let toastTimer;
 function toast(msg){ const t=$("#toast"); t.className=""; t.onclick=null; t.textContent=msg; t.classList.add("show"); clearTimeout(toastTimer); toastTimer=setTimeout(()=>t.classList.remove("show"),2600); }
@@ -2505,6 +2588,12 @@ $("#tier-editor").addEventListener("change",e=>{ const t=e.target; if(t.dataset.
   const clash=state.settings.tiers.find((o,j)=>j!==i && o.at===v);
   if(clash){ toast("“"+(clash.label||"Another consequence")+"” is already at "+v+" — pick a different number."); renderTierEditor(); return; }
   state.settings.tiers[i].at=v; sortTiers(); state.students.forEach(syncDone); save(); renderAll();
+});
+$("#tier-editor").addEventListener("click",e=>{
+  const pick=e.target.closest("[data-tier-icon]");
+  if(pick){ const bar=$('[data-tier-bar="'+pick.dataset.tierIcon+'"]'); if(bar){ const open=bar.classList.contains("open"); $$(".iconbar").forEach(x=>x.classList.remove("open")); if(!open) bar.classList.add("open"); } return; }
+  const set=e.target.closest("[data-settiericon]");
+  if(set){ const i=+set.dataset.settiericon; if(TIERS()[i]) TIERS()[i].icon=set.dataset.icon; bumpSettings(); save(); renderTierEditor(); renderAll(); dbNudge(); return; }
 });
 $("#tier-editor").addEventListener("click",e=>{ const b=e.target.closest("[data-tier-del]"); if(!b) return; state.settings.tiers.splice(+b.dataset.tierDel,1); state.students.forEach(syncDone); save(); renderAll(); });
 $("#reason-editor").addEventListener("input",e=>{ const t=e.target.closest("input[data-reason]"); if(!t) return; const i=+t.dataset.reason; if(state.settings.reasons[i]!==undefined){ state.settings.reasons[i]=t.value; bumpSettings(); save(); dbNudge(); } });
@@ -2837,6 +2926,21 @@ $("#add-reward").onclick=()=>{
   const used=new Set(r.map(t=>t.at)); let at=1; while(used.has(at)) at++;
   r.push({at,label:"",icon:REWARD_ICONS[r.length%REWARD_ICONS.length]}); sortTiers(); bumpSettings(); save(); renderAll();
 };
+// ---- beta class tools ----
+$("#beta-switch").onclick=()=>{ state.settings.beta=!state.settings.beta; bumpSettings(); save(); renderBeta(); };
+$("#beta-tools").addEventListener("change",e=>{
+  const t=e.target.closest("[data-tintcls]");
+  if(t){ const k=t.dataset.tintcls; if(t.value) CLASS_COLORS()[k]=t.value; else delete CLASS_COLORS()[k]; bumpSettings(); save(); renderAll(); dbNudge(); return; }
+  const m=e.target.closest("[data-movecls]");
+  if(m){ const k=m.dataset.movecls; if(m.value!=="__"){ const label=classList().find(([kk])=>kk===k); moveClass(label?label[1]:k, m.value); } m.value="__"; return; }
+});
+$("#beta-tools").addEventListener("keydown",e=>{ const r=e.target.closest("[data-renamecls]"); if(r&&e.key==="Enter"){ e.preventDefault(); r.blur(); } });
+$("#beta-tools").addEventListener("blur",e=>{
+  const r=e.target.closest("[data-renamecls]"); if(!r) return;
+  const k=r.dataset.renamecls, was=classList().find(([kk])=>kk===k);
+  if(!was || clsKey(r.value)===k || !r.value.trim()){ renderBeta(); return; }
+  renameClass(was[1], r.value);
+},true);
 $("#layout-switch").onclick=toggleLayout;
 $("#cls-go").onclick=tryClassCode;
 $("#cls-cancel").onclick=closeClassModal;
