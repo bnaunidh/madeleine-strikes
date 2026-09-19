@@ -1267,10 +1267,13 @@ function normalize(s){
     x.strikes ||= 0; x.total ??= x.strikes; x.hits ||= 0; x.hitTotal ??= (x.hits||0);
     if(!x.done || typeof x.done!=="object" || ("recess" in x.done) || ("lunch" in x.done)) x.done={};
     if(!x.rdone || typeof x.rdone!=="object") x.rdone={};
+    if(!Number.isFinite(x.addedTs)) x.addedTs=0;
   });
   if(!Number.isFinite(s.doneTotal)) s.doneTotal=s.log.filter(l=>l&&l.t==="done").length;
   s.logins = Array.isArray(s.logins) ? s.logins.filter(l=>l&&Number.isFinite(+l.ts)).slice(0,25) : [];
   if(!Number.isFinite(s.epoch)) s.epoch=0;
+  if(!s.epochs || typeof s.epochs!=="object") s.epochs={};
+  s.gone = Array.isArray(s.gone) ? s.gone.filter(t=>t&&typeof t.key==="string"&&Number.isFinite(+t.ts)).slice(0,500) : [];
   if(!s.settings.catMap || typeof s.settings.catMap!=="object") s.settings.catMap={};
   if(!Array.isArray(s.settings.reasonCats)){
     s.settings.reasonCats = s.settings.reasons.map(r=>DEFAULT_CATS[String(r||"").trim()]||"");
@@ -1407,7 +1410,7 @@ function checkAutoReset(){   // returns true if it actually wiped, so callers ca
   const s=state.settings; if(!s.auto) return false;
   if(Date.now() >= s.lastReset + INTERVAL_MS[s.interval]){
     const had=state.students.some(x=>x.strikes>0||x.hits>0);
-    state.students.forEach(x=>{ x.strikes=0; x.hits=0; x.done={}; });
+    state.students.forEach(x=>{ x.strikes=0; x.hits=0; x.done={}; x.rdone={}; });
     s.lastReset=Date.now(); state.epoch=(state.epoch||0)+1;
     if(had) state.log.unshift({t:"reset",ts:Date.now(),note:"Auto reset ("+intervalWord(s.interval)+")"});
     save();
@@ -1417,7 +1420,7 @@ function checkAutoReset(){   // returns true if it actually wiped, so callers ca
 }
 
 // actions
-function addStudent(name,cls){ name=name.trim(); if(!name) return false; state.students.push({id:state.seq++,name,cls:cls.trim(),strikes:0,total:0,hits:0,hitTotal:0,done:{}}); save(); return true; }
+function addStudent(name,cls){ name=name.trim(); if(!name) return false; state.students.push({id:state.seq++,name,cls:cls.trim(),strikes:0,total:0,hits:0,hitTotal:0,done:{},rdone:{},addedTs:Date.now()}); save(); return true; }
 function giveStrike(id,reason){          // gives one mark in the CURRENT mode
   const st=state.students.find(x=>x.id===id); if(!st||!inScope(st)) return null;
   const w=W(), hits=isHits();
@@ -1483,9 +1486,9 @@ function resetStudent(id){
   if(prev>0) state.log.unshift({t:"reset",ts:Date.now(),note:"Reset "+st.name+" ("+W().p+")"});
   save(); renderAll(); toast(st.name+" — "+W().p+" reset to 0");
 }
-function removeStudent(id){ state.students=state.students.filter(x=>x.id!==id); pruneHidden(); save(); renderAll(); dbNudge(); }
-function resetAll(){ state.students.forEach(x=>{ x.strikes=0; x.hits=0; x.done={}; }); state.settings.lastReset=Date.now(); state.epoch=(state.epoch||0)+1; state.log.unshift({t:"reset",ts:Date.now(),note:"All strikes and hits reset"}); save(); renderAll(); toast("Strikes and hits reset to 0"); }
-function newSchoolYear(){ state.students.forEach(x=>{ x.strikes=0; x.total=0; x.hits=0; x.hitTotal=0; x.done={}; }); state.settings.lastReset=Date.now(); state.epoch=(state.epoch||0)+1; state.log.unshift({t:"reset",ts:Date.now(),note:"New school year — all totals reset"}); save(); renderAll(); toast("New school year — totals reset"); }
+function removeStudent(id){ const x=state.students.find(y=>y.id===id); tombstone(x); state.students=state.students.filter(y=>y.id!==id); pruneHidden(); save(); renderAll(); dbNudge(); }
+function resetAll(){ const list=scoped(); list.forEach(x=>{ x.strikes=0; x.hits=0; x.done={}; x.rdone={}; }); state.settings.lastReset=Date.now(); bumpEpochFor(list); state.log.unshift({t:"reset",ts:Date.now(),note:"All strikes and hits reset"}); save(); renderAll(); toast("Strikes and hits reset to 0"); }
+function newSchoolYear(){ const list=scoped(); list.forEach(x=>{ x.strikes=0; x.total=0; x.hits=0; x.hitTotal=0; x.done={}; x.rdone={}; }); state.settings.lastReset=Date.now(); bumpEpochFor(list); state.log.unshift({t:"reset",ts:Date.now(),note:"New school year — all totals reset"}); save(); renderAll(); toast("New school year — totals reset"); }
 
 // ---- backup: export / import ----
 function stamp(){ const d=new Date(); const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
@@ -1819,11 +1822,12 @@ function isTest(x){ return !!(x&&x.test===true); }
 function testStudent(){ return state.students.find(isTest)||null; }
 function addTestStudent(){
   if(testStudent()) return;
-  state.students.push({id:state.seq++,name:TEST_NAME,cls:"",strikes:0,total:0,hits:0,hitTotal:0,done:{},test:true});
+  state.students.push({id:state.seq++,name:TEST_NAME,cls:"",strikes:0,total:0,hits:0,hitTotal:0,done:{},rdone:{},test:true,addedTs:Date.now()});
   save(); renderAll(); toast("TEST STUDENT added — try tapping "+W().N+" on them");
 }
 function removeTestStudent(){
   const t=testStudent(); if(!t) return;
+  tombstone(t);
   state.students=state.students.filter(x=>!isTest(x));
   state.log=state.log.filter(l=>!(l&&l.id===t.id));
   pruneHidden(); save(); renderAll(); toast("TEST STUDENT removed");
@@ -2041,14 +2045,34 @@ function exportSheets(){
 // ================= The Database (sync) =================
 function DB(){ const d=state.settings.db||(state.settings.db={}); if(typeof d.code!=="string") d.code=""; if(typeof d.url!=="string") d.url=""; return d; }
 function dbOn(){ const d=DB(); return !!(d.url&&d.code); }
+function EPOCHS(){ const e=state.epochs; return (e&&typeof e==="object")?e:(state.epochs={}); }
+function epochFor(x){ return Math.max(state.epoch||0, EPOCHS()[clsKey(x&&x.cls)]||0); }
+function bumpEpochFor(list){                     // a scoped reset must not outrank classes it never touched
+  const keys=new Set(list.map(x=>clsKey(x.cls)));
+  keys.forEach(k=>{ EPOCHS()[k]=(EPOCHS()[k]||state.epoch||0)+1; });
+}
+function GONE(){ const g=state.gone; return Array.isArray(g)?g:(state.gone=[]); }
+function tombstone(x){
+  if(!x) return;
+  const k=studentKey(x), now=Date.now();
+  const g=GONE().filter(t=>t&&t.key!==k);
+  g.unshift({key:k,ts:now});
+  state.gone=g.filter(t=>now-(t.ts||0) < 180*864e5).slice(0,500);   // half a year is plenty
+}
+function isGone(key,addedTs){
+  const t=GONE().find(t=>t&&t.key===key);
+  return !!t && (t.ts||0) >= (addedTs||0);
+}
 function studentKey(x){ return String(x.name||"").trim().toLowerCase().replace(/\s+/g," ")+"|"+clsKey(x.cls); }
 function newEid(){ return deviceId()+"-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,6); }
 let dbBusy=false, dbTimer=null, dbPhase="idle";
 
 function dbPayload(){
   return {v:1, code:DB().code, device:deviceId(), deviceName:deviceName(), epoch:state.epoch||0,
+    gone: GONE(),
     students: state.students.map(x=>({key:studentKey(x),name:x.name,cls:x.cls||"",strikes:x.strikes||0,total:x.total||0,
-      hits:x.hits||0,hitTotal:x.hitTotal||0,done:x.done||{},test:!!x.test,
+      hits:x.hits||0,hitTotal:x.hitTotal||0,done:x.done||{},rdone:x.rdone||{},test:!!x.test,
+      ep:epochFor(x), addedTs:x.addedTs||0,
       lastStrike:lastMark(x,"strike"),lastHit:lastMark(x,"hit")})),
     events: state.log.filter(l=>l&&(l.t==="strike"||l.t==="hit")&&l.eid).slice(0,400)
       .map(l=>{ const x=state.students.find(s=>s.id===l.id);
@@ -2061,27 +2085,40 @@ function dbPayload(){
 function dbMerge(res){
   if(!res||!Array.isArray(res.students)) return 0;
   let changed=0;
-  const rE=+res.epoch||0, lE=state.epoch||0;
-  const pick=(a,b)=> rE>lE ? b : (rE<lE ? a : Math.max(a,b));   // most marks wins; a newer reset wins outright
+  // tombstones travel both ways; a student re-added after the tombstone survives it
+  if(Array.isArray(res.gone)){
+    const mine=new Map(GONE().map(t=>[t.key,t.ts||0]));
+    res.gone.forEach(t=>{ if(t&&t.key && (mine.get(t.key)||0) < (t.ts||0)) mine.set(t.key,t.ts||0); });
+    state.gone=[...mine.entries()].map(([key,ts])=>({key,ts})).sort((a,b)=>b.ts-a.ts).slice(0,500);
+    const before=state.students.length;
+    state.students=state.students.filter(x=>!isGone(studentKey(x), x.addedTs||0));
+    if(state.students.length!==before){ pruneHidden(); changed+=before-state.students.length; }
+  }
   const byKey=new Map(state.students.map(x=>[studentKey(x),x]));
   res.students.forEach(r=>{
     if(!r||!r.name||!r.key) return;
+    if(isGone(r.key, +r.addedTs||0)) return;                    // we deleted them; don't take them back
+    const rE=+r.ep||+res.epoch||0, lE=byKey.has(r.key) ? epochFor(byKey.get(r.key)) : (state.epoch||0);
+    const pick=(a,b)=> rE>lE ? b : (rE<lE ? a : Math.max(a,b)); // most marks wins; a newer reset for THAT class wins
     let x=byKey.get(r.key);
-    if(!x){ x={id:state.seq++,name:r.name,cls:r.cls||"",strikes:0,total:0,hits:0,hitTotal:0,done:{},test:!!r.test};
+    if(!x){ x={id:state.seq++,name:r.name,cls:r.cls||"",strikes:0,total:0,hits:0,hitTotal:0,done:{},rdone:{},test:!!r.test,addedTs:+r.addedTs||Date.now()};
             state.students.push(x); byKey.set(r.key,x); changed++; }
     const ns=pick(x.strikes||0,+r.strikes||0), nh=pick(x.hits||0,+r.hits||0);
     const nt=pick(x.total||0,+r.total||0), nht=pick(x.hitTotal||0,+r.hitTotal||0);   // a newer year-reset must win
     if(ns!==(x.strikes||0)||nh!==(x.hits||0)||nt!==(x.total||0)||nht!==(x.hitTotal||0)) changed++;
     x.strikes=ns; x.hits=nh; x.total=nt; x.hitTotal=nht;
     if(r.done&&typeof r.done==="object") Object.keys(r.done).forEach(k=>{ if(r.done[k]) x.done[k]=true; });
+    if(r.rdone&&typeof r.rdone==="object"){ if(!x.rdone) x.rdone={}; Object.keys(r.rdone).forEach(k=>{ if(r.rdone[k]) x.rdone[k]=true; }); }
+    if(+r.ep>epochFor(x)) EPOCHS()[clsKey(x.cls)]=+r.ep;
     syncDone(x);
   });
-  if(rE>lE) state.epoch=rE;
+  if((+res.epoch||0) > (state.epoch||0)) state.epoch=+res.epoch||0;
   if(Array.isArray(res.events)){
     const have=new Set(state.log.map(l=>l&&l.eid).filter(Boolean));
     const add=[];
     res.events.forEach(e=>{
       if(!e||!e.eid||have.has(e.eid)) return;
+      if(isGone(e.key,0)) return;
       const x=byKey.get(e.key); if(!x) return;                   // never land a mark on a guessed student
       add.push({t:e.t==="hit"?"hit":"strike",ts:+e.ts||Date.now(),id:x.id,name:x.name,cls:x.cls||"",
                 reason:e.reason||"",count:+e.count||0,eid:e.eid});
@@ -2190,6 +2227,14 @@ function logInScope(l){
   return noteSafe(l.note);
 }
 function scopeLabel(){ const a=activeClass(); return a ? String(a) : "Everyone"; }
+// say plainly what a destructive action will and will not touch
+function scopeNote(){
+  const n=scoped().length, hidden=state.students.length-n;
+  const a=activeClass();
+  let s = a ? ("the "+n+" student"+(n===1?"":"s")+" in "+a) : (n+" student"+(n===1?"":"s"));
+  if(hidden) s += "\n\n"+hidden+" student"+(hidden===1?" in a locked class is":"s in locked classes are")+" NOT affected.";
+  return s;
+}
 
 function renderClassSwitch(){
   const wrap=$("#classwrap"); if(!wrap) return;
@@ -2640,10 +2685,19 @@ $("#backup-banner").addEventListener("click",e=>{
   if(e.target.closest("#backup-now")){ exportData(false); state.settings.backup.last=Date.now(); save(); renderBackupBanner(); }
   else if(e.target.closest("#backup-later")){ backupDismissed=true; renderBackupBanner(); }
 });
-$("#reset-all").onclick=()=>{ if(confirm("Reset every student's current strikes and hits to zero? Yearly totals are kept.")) resetAll(); };
-function confirmNewYear(){ if(confirm("Start a new school year?\n\nThis sets every student's strikes, hits AND yearly totals back to zero. Students stay. This can't be undone.")) newSchoolYear(); }
+$("#reset-all").onclick=()=>{ if(!scoped().length){ toast("Nothing to reset here."); return; } if(confirm("Reset current strikes and hits to zero for "+scopeNote()+"\n\nYearly totals are kept.")) resetAll(); };
+function confirmNewYear(){ if(!scoped().length){ toast("Nothing to reset here."); return; } if(confirm("Start a new school year for "+scopeNote()+"\n\nStrikes, hits AND yearly totals go back to zero. The students stay. This can't be undone.")) newSchoolYear(); }
 $("#new-year").onclick=confirmNewYear; $("#new-year-2").onclick=confirmNewYear;
-$("#wipe").onclick=()=>{ if(confirm("Delete ALL students and history? This cannot be undone.")){ state.students=[]; state.log=[]; save(); renderAll(); toast("Everything cleared"); } };
+$("#wipe").onclick=()=>{
+  const list=scoped();
+  if(!list.length){ toast("Nothing to delete here."); return; }
+  if(!confirm("Delete "+scopeNote()+"\n\nTheir records go too. This cannot be undone.")) return;
+  const ids=new Set(list.map(x=>x.id));
+  list.forEach(tombstone);
+  state.students=state.students.filter(x=>!ids.has(x.id));
+  state.log=state.log.filter(l=>l && (l.id==null ? noteSafe(l.note) : !ids.has(l.id)));
+  pruneHidden(); save(); renderAll(); dbNudge(); toast("Deleted "+list.length+" student"+(list.length===1?"":"s"));
+};
 
 // theme
 function currentTheme(){ const e=document.documentElement.getAttribute("data-theme"); if(e) return e; return window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches?"dark":"light"; }

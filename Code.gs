@@ -77,6 +77,7 @@ function handle_(b) {
     return {
       ok: true,
       epoch: merged.epoch,
+      gone: merged.gone,
       students: merged.students,
       events: merged.events.slice(-MAX_EVENTS),
       logins: merged.logins.slice(0, 25),
@@ -92,28 +93,41 @@ function handle_(b) {
 
 /** Same rule as the app: most marks wins, and a newer reset wins outright. */
 function merge_(store, b) {
-  var rE = Number(b.epoch) || 0, lE = Number(store.epoch) || 0;
-  var epoch = Math.max(rE, lE);
-  var pick = function (mine, theirs) {
-    if (rE > lE) return theirs;                // the device has reset more recently than the sheet
-    if (rE < lE) return mine;
-    return Math.max(mine, theirs);
-  };
+  var epoch = Math.max(Number(b.epoch) || 0, Number(store.epoch) || 0);
+
+  // tombstones: a removal travels to every device, and survives here so a device
+  // that has been offline for a week cannot push the student back.
+  var gone = {};
+  (store.gone || []).forEach(function (t) { if (t && t.key) gone[t.key] = Math.max(gone[t.key] || 0, Number(t.ts) || 0); });
+  (b.gone || []).forEach(function (t) { if (t && t.key) gone[t.key] = Math.max(gone[t.key] || 0, Number(t.ts) || 0); });
+  var goneList = Object.keys(gone).map(function (k) { return { key: k, ts: gone[k] }; })
+    .sort(function (x, y) { return y.ts - x.ts; }).slice(0, 500);
+  var buried = function (key, addedTs) { return gone[key] != null && gone[key] >= (Number(addedTs) || 0); };
 
   var byKey = {};
-  (store.students || []).forEach(function (s) { byKey[s.key] = s; });
+  (store.students || []).forEach(function (s) { if (!buried(s.key, s.addedTs)) byKey[s.key] = s; });
 
   (b.students || []).forEach(function (r) {
     if (!r || !r.key || !r.name) return;
+    if (buried(r.key, r.addedTs)) return;
     var s = byKey[r.key];
-    if (!s) { s = { key: r.key, name: r.name, cls: r.cls || "", strikes: 0, total: 0, hits: 0, hitTotal: 0, done: {}, test: false }; byKey[r.key] = s; }
+    if (!s) { s = { key: r.key, name: r.name, cls: r.cls || "", strikes: 0, total: 0, hits: 0, hitTotal: 0, done: {}, rdone: {}, test: false, addedTs: Number(r.addedTs) || 0, ep: 0 }; byKey[r.key] = s; }
+    // the epoch is per student now, so a reset of one class cannot outrank another
+    var rE = Number(r.ep) || Number(b.epoch) || 0, lE = Number(s.ep) || 0;
+    var pick = function (mine, theirs) {
+      if (rE > lE) return theirs;
+      if (rE < lE) return mine;
+      return Math.max(mine, theirs);
+    };
     s.name = r.name; s.cls = r.cls || "";
     s.strikes  = pick(Number(s.strikes) || 0,  Number(r.strikes) || 0);
     s.hits     = pick(Number(s.hits) || 0,     Number(r.hits) || 0);
     s.total    = pick(Number(s.total) || 0,    Number(r.total) || 0);      // a newer year-reset wins
     s.hitTotal = pick(Number(s.hitTotal) || 0, Number(r.hitTotal) || 0);
+    s.ep = Math.max(rE, lE);
     s.test = !!r.test;
-    if (r.done) Object.keys(r.done).forEach(function (k) { if (r.done[k]) { s.done = s.done || {}; s.done[k] = true; } });
+    if (r.done)  Object.keys(r.done).forEach(function (k) { if (r.done[k]) { s.done = s.done || {}; s.done[k] = true; } });
+    if (r.rdone) Object.keys(r.rdone).forEach(function (k) { if (r.rdone[k]) { s.rdone = s.rdone || {}; s.rdone[k] = true; } });
     if (r.lastStrike && r.lastStrike.when) s.lastStrike = r.lastStrike;
     if (r.lastHit && r.lastHit.when) s.lastHit = r.lastHit;
     s.updated = new Date().toISOString();
@@ -143,7 +157,7 @@ function merge_(store, b) {
   var settings = store.settings || {}, settingsTs = Number(store.settingsTs) || 0;
   if (b.settings && (Number(b.settingsTs) || 0) > settingsTs) { settings = b.settings; settingsTs = Number(b.settingsTs) || 0; }
 
-  return { epoch: epoch, students: students, events: events, logins: logins,
+  return { epoch: epoch, gone: goneList, students: students, events: events, logins: logins,
            settings: settings, settingsTs: settingsTs, newEvents: fresh };
 }
 
@@ -254,13 +268,13 @@ function readStore_(code) {
     for (var i = 0; i < n; i++) parts.push(props.getProperty("store:" + code + ":" + i) || "");
     raw = parts.join("");
   }
-  if (!raw) return { epoch: 0, students: [], events: [], logins: [], settings: {}, settingsTs: 0 };
+  if (!raw) return { epoch: 0, gone: [], students: [], events: [], logins: [], settings: {}, settingsTs: 0 };
   try { return JSON.parse(raw); }
-  catch (e) { return { epoch: 0, students: [], events: [], logins: [], settings: {}, settingsTs: 0 }; }
+  catch (e) { return { epoch: 0, gone: [], students: [], events: [], logins: [], settings: {}, settingsTs: 0 }; }
 }
 
 function writeStore_(code, m) {
-  var keep = { epoch: m.epoch, students: m.students, events: m.events.slice(-2000),
+  var keep = { epoch: m.epoch, gone: m.gone, students: m.students, events: m.events.slice(-2000),
                logins: m.logins, settings: stripHeavy_(m.settings), settingsTs: m.settingsTs };
   var raw = JSON.stringify(keep);
   var props = PropertiesService.getDocumentProperties();
