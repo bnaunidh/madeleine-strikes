@@ -78,6 +78,8 @@
   .theme-toggle{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--panel);color:var(--muted);display:grid;place-items:center;transition:.15s;flex:0 0 auto}
   .theme-toggle:hover{background:var(--bg);color:var(--ink)}
   .tabbar{border-top:1px solid var(--line-soft);background:var(--panel)}
+  .tabbar .tab.active{background:var(--bg);color:var(--ink);box-shadow:none}
+  :root[data-layout="classic"] .tabbar .tab.active{background:var(--panel);box-shadow:0 1px 3px rgba(20,28,45,.09)}
   .tabbar>.tabs{max-width:1060px;margin:0 auto;padding:7px 20px;background:transparent;border-radius:0;gap:6px}
   .tabs{display:flex;gap:4px;background:var(--bg);padding:4px;border-radius:11px}
   .tab{padding:9px 16px;border-radius:9px;font-size:13.5px;font-weight:550;color:var(--muted);transition:.15s;display:flex;align-items:center;gap:8px;white-space:nowrap}
@@ -278,7 +280,7 @@
   .switch.on::after{left:21px}
   .tier-warn{color:var(--muted);font-size:13px;padding:2px 0 12px}
   .tier-warn b{color:var(--ink)}
-  .tier-row{display:flex;align-items:center;gap:10px;padding:6px 0}
+  .tier-row{display:flex;flex-wrap:wrap;align-items:center;gap:10px;padding:6px 0}
   .tier-at{display:flex;align-items:center;gap:8px;color:var(--muted);font-size:13px;flex:0 0 auto;white-space:nowrap}
   .tier-num{width:60px;text-align:center;padding:9px 6px}
   .tier-row>.input{flex:1;min-width:0}
@@ -406,8 +408,21 @@
   .set-group:first-of-type{margin-top:6px}
   .set-group span{font-size:12.5px;font-weight:450;color:var(--muted);letter-spacing:0}
   .set-group+.panel{margin-top:0!important}
+  .new-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);background:var(--blue-soft);border-radius:20px;padding:4px 11px}
+  .new-list{list-style:none;margin:14px 0 4px;padding:0;text-align:left}
+  .new-list li{display:flex;flex-direction:column;gap:1px;padding:9px 0;border-top:1px solid var(--line-soft);font-size:13.5px}
+  .new-list li:first-child{border-top:0}
+  .new-list b{font-weight:650}
+  .new-list span{color:var(--muted);font-size:12.5px;line-height:1.45}
+  .avatar.haspic{background-size:cover;background-position:center;color:transparent}
+  .avatar.haspic[data-test="1"]{box-shadow:0 0 0 2px var(--amber-line)}
+  .photo-btn{position:absolute;right:-3px;bottom:-3px;width:19px;height:19px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--muted);display:grid;place-items:center;opacity:0;transition:.15s}
+  .s-avatar-wrap{position:relative;flex:0 0 auto}
+  .student:hover .photo-btn,.photo-btn:focus-visible{opacity:1}
+  .photo-btn:hover{color:var(--ink);border-color:var(--blue)}
+  @media(hover:none){ .photo-btn{opacity:1} }
   /* ---- classic layout (Settings can switch back to it) ---- */
-  :root[data-layout="classic"] .topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center}
+  :root[data-layout="classic"] .topbar{display:flex;flex-wrap:wrap;align-items:center;justify-content:center;max-width:1060px;margin:0 auto;padding-right:20px}
   :root[data-layout="classic"] .topbar-inner{flex:1 1 auto;max-width:none;margin:0;padding-right:6px;width:auto}
   :root[data-layout="classic"] .tabbar{flex:0 0 auto;border-top:none;background:transparent}
   :root[data-layout="classic"] .tabbar>.tabs{max-width:none;margin:0;padding:4px;background:var(--bg);border-radius:11px;gap:4px}
@@ -470,7 +485,7 @@
   .tier-row>.catsel{flex:0 0 auto;width:168px;padding:9px 10px;font-size:13px;cursor:pointer}
   .catsel[data-empty="1"]{color:var(--muted)}
   .cdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;display:inline-block;background:var(--c-other)}
-  @media(max-width:560px){ .tier-row>.catsel{width:100%;order:5} }
+  @media(max-width:560px){ .tier-row>.catsel{flex:1 1 100%;width:100%;min-width:0;order:5} .tier-row>.input[data-reason]{flex:1 1 auto;min-width:0} }
 
   /* ---- The Database ---- */
   .log-dot.db{background:var(--blue)}
@@ -696,6 +711,13 @@
       </div>
       <div class="ctl"><div class="switch" id="layout-switch"></div></div>
     </div>
+    <div class="set-row">
+      <div>
+        <div class="t">What’s new</div>
+        <div class="d">The notes from the latest update.</div>
+      </div>
+      <div class="ctl"><button class="btn btn-ghost btn-sm" id="show-new">Show me</button></div>
+    </div>
   </div>
 
   <div class="panel panel-pad" style="margin-top:18px">
@@ -735,6 +757,29 @@
           <svg class="ic" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>
           Preview</button></div>
       </div>
+    </div>
+  </div>
+
+  <div class="panel panel-pad" id="panel-breaks" style="margin-top:18px">
+    <p class="section-title">Check-in nudges</p>
+    <div class="set-row">
+      <div>
+        <div class="t">Remind me before a break</div>
+        <div class="d">A few minutes before recess or lunch, the app says who you still need to check in with — by name.</div>
+      </div>
+      <div class="ctl"><div class="switch" id="checkin-switch"></div></div>
+    </div>
+    <div id="checkin-config" style="display:none">
+      <div class="set-row">
+        <div>
+          <div class="t">How early</div>
+          <div class="d">Minutes before the break.</div>
+        </div>
+        <div class="ctl"><input class="input" id="checkin-lead" type="number" min="0" max="30" style="width:84px;text-align:center"></div>
+      </div>
+      <p class="section-title" style="margin-top:14px">Break times</p>
+      <div id="break-editor"></div>
+      <button class="btn btn-ghost btn-sm" id="add-break" style="margin-top:12px">+ Add a break</button>
     </div>
   </div>
 
@@ -1017,6 +1062,18 @@
   </div>
 </div>
 
+<div class="overlay" id="new-modal">
+  <div class="modal">
+    <div class="new-badge">What’s new</div>
+    <h3 style="margin-top:8px">The dashboard just got an update</h3>
+    <ul class="new-list" id="new-list"></ul>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="new-ok" style="flex:1">Got it</button>
+    </div>
+  </div>
+</div>
+<input type="file" id="photo-file" accept="image/*" style="display:none">
+
 <div class="overlay" id="cls-modal">
   <div class="modal">
     <h3>Class code</h3>
@@ -1175,6 +1232,13 @@ function normalize(s){
   s.settings.analytics.group = s.settings.analytics.group==="cat" ? "cat" : "reason";
   if(["week","month","q","year","all"].indexOf(s.settings.analytics.range)<0) s.settings.analytics.range="month";
   if(!s.settings.classCodes || typeof s.settings.classCodes!=="object") s.settings.classCodes={};
+  s.settings.checkinNudge = s.settings.checkinNudge===true;
+  if(!Number.isFinite(s.settings.checkinLead)) s.settings.checkinLead=5;
+  if(!Array.isArray(s.settings.breaks) || !s.settings.breaks.length)
+    s.settings.breaks=[{t:"09:40",l:"AM recess"},{t:"11:30",l:"Lunch"},{t:"13:40",l:"PM recess"}];
+  s.settings.breaks=s.settings.breaks.filter(b=>b&&typeof b.t==="string"&&/^\d{1,2}:\d{2}$/.test(b.t)).slice(0,8)
+    .map(b=>({t:b.t,l:typeof b.l==="string"&&b.l.trim()?b.l:"Break"}));
+  s.students.forEach(x=>{ if(typeof x.pic!=="string"||!x.pic.startsWith("data:image")) delete x.pic; });
   if(!s.settings.db || typeof s.settings.db!=="object") s.settings.db={};
   if(typeof s.settings.db.code!=="string") s.settings.db.code="";
   if(typeof s.settings.db.url!=="string") s.settings.db.url="";
@@ -1288,7 +1352,7 @@ function checkAutoReset(){   // returns true if it actually wiped, so callers ca
 // actions
 function addStudent(name,cls){ name=name.trim(); if(!name) return false; state.students.push({id:state.seq++,name,cls:cls.trim(),strikes:0,total:0,hits:0,hitTotal:0,done:{}}); save(); return true; }
 function giveStrike(id,reason){          // gives one mark in the CURRENT mode
-  const st=state.students.find(x=>x.id===id); if(!st) return null;
+  const st=state.students.find(x=>x.id===id); if(!st||!inScope(st)) return null;
   const w=W(), hits=isHits();
   const cap=hits?Infinity:maxTierAt();
   if(isFinite(cap) && st.strikes>=cap){ toast(st.name+" is already at "+cap+" — the last step ("+tierLabel(cap)+"). Reset when it's handled."); return null; }
@@ -1309,7 +1373,7 @@ function giveStrike(id,reason){          // gives one mark in the CURRENT mode
   return triggered;
 }
 function undoStrikeOne(id){
-  const st=state.students.find(x=>x.id===id); if(!st||cntOf(st)<=0) return;
+  const st=state.students.find(x=>x.id===id); if(!st||!inScope(st)||cntOf(st)<=0) return;
   const w=W();
   setCnt(st,cntOf(st)-1); setYear(st,Math.max(0,yearOf(st)-1)); syncDone(st); beep(isHits()?"add":"remove");
   const i=state.log.findIndex(l=>l.t===w.log&&l.id===id); if(i>-1) state.log.splice(i,1);
@@ -1434,7 +1498,7 @@ function renderReminders(){
     </div>
     ${groups.map(g=>`<div class="cl-row">
       <div class="cl-who">
-        <div class="avatar" style="background:${colorFor(g.x.id)}">${initials(g.x.name)}</div>
+        ${avatarHTML(g.x)}
         <div class="cl-who-t"><div class="cl-name">${esc(g.x.name)}${g.x.cls?` <span class="cls">${esc(g.x.cls)}</span>`:""}</div>
         <div class="cl-labels">${g.tiers.map(t=>esc(tierShort(t.label))).join(" · ")}</div></div>
       </div>
@@ -1480,6 +1544,13 @@ function consHTML(x){
 }
 function renderRoster(){
   const el=$("#roster");
+  if(state.students.length && !scoped().length){
+    const locked=classList().filter(([k])=>classCode(k)&&!classUnlocked(k));
+    el.innerHTML=`<div class="empty">${locked.length?`<b>${esc(locked[0][1])}</b> is locked.`:"Nothing in this class yet."}
+      <div style="margin-top:10px">${locked.map(([k,l])=>`<button class="btn btn-primary btn-sm" data-unlockcls="${esc(l)}" style="margin-right:6px">Unlock ${esc(l)}</button>`).join("")}
+      <button class="btn btn-ghost btn-sm" data-showall="1">Show everyone</button></div></div>`;
+    return;
+  }
   if(!state.students.length){ el.innerHTML=`<div class="empty">
     <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/></svg>
     <div style="font-weight:600;color:var(--ink)">No students yet</div>
@@ -1493,7 +1564,7 @@ function renderRoster(){
     const cc=(!isHits()&&n>=maxAt)?"max":(n>0?"has":"");
     const yearNote=yr>n?` · <b>${yr}</b> this year`:"";
     return `<div class="student">
-      <div class="avatar" style="background:${colorFor(x.id)}">${initials(x.name)}</div>
+      <div class="s-avatar-wrap">${avatarHTML(x)}<button class="photo-btn" data-photo="${x.id}" title="${photoOf(x)?"Change":"Add"} a photo of ${esc(x.name)}" aria-label="${photoOf(x)?"Change":"Add"} a photo of ${esc(x.name)}"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg></button></div>
       <div class="s-main">
         <div class="s-name">${esc(x.name)} ${x.cls?`<span class="chip">${esc(x.cls)}</span>`:""}</div>
         <div class="s-sub">${plural(n,w.n)}${yearNote}</div>
@@ -1514,6 +1585,7 @@ function renderRoster(){
           </button>
           <div class="menu" id="menu-${x.id}">
             <button data-reset="${x.id}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/></svg> Reset ${w.p} to zero</button>
+            ${photoOf(x)?`<button data-nopic="${x.id}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18"/><path d="M21 15l-5-5L5 21"/><path d="M21 5v10M3 19V5a2 2 0 0 1 2-2h10"/></svg> Remove photo</button>`:""}
             <div class="sep"></div>
             <button class="danger" data-del="${x.id}"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg> Remove student</button>
           </div>
@@ -1525,8 +1597,8 @@ function renderRoster(){
 }
 function renderLog(){
   const el=$("#log");
-  if(!state.log.length){ el.innerHTML=`<div class="empty" style="padding:24px">No activity yet.</div>`; return; }
-  el.innerHTML=state.log.slice(0,40).map(l=>{
+  if(!state.log.filter(logInScope).length){ el.innerHTML=`<div class="empty" style="padding:24px">No activity yet.</div>`; return; }
+  el.innerHTML=state.log.filter(logInScope).slice(0,40).map(l=>{
     if(l.t==="db") return `<div class="log-item"><span class="log-dot db"></span><div class="log-body"><div>${esc(l.note||"")}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
     if(l.t!=="strike"&&l.t!=="hit"&&l.t!=="reset"&&l.t!=="done") return "";
     if(l.t==="reset"||l.t==="done") return `<div class="log-item"><span class="log-dot good"></span><div class="log-body"><div>${esc(l.note||"")}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
@@ -1552,7 +1624,7 @@ function renderTotals(){
     ? `<tbody><tr><td style="color:var(--muted)">No students yet.</td></tr></tbody>`
     : `<thead><tr><th>Student</th><th>Class</th><th class="num">Now</th><th class="num">This year</th><th style="width:26%"></th></tr></thead>
        <tbody>${studs.map(s=>`<tr>
-         <td><div class="tname"><div class="avatar" style="background:${colorFor(s.id)}">${initials(s.name)}</div>${esc(s.name)}</div></td>
+         <td><div class="tname">${avatarHTML(s)}${esc(s.name)}</div></td>
          <td>${s.cls?esc(s.cls):'<span style="color:var(--muted)">—</span>'}</td>
          <td class="num">${cntOf(s)}</td>
          <td class="num">${yearOf(s)}</td>
@@ -1608,7 +1680,12 @@ function renderSettings(){
   $("#auto-interval").value=state.settings.interval;
   $("#auto-interval-row").style.opacity=state.settings.auto?"1":".45";
   $("#auto-interval").disabled=!state.settings.auto;
-  renderTierEditor(); renderReasonEditor(); renderClassEditor(); renderLogins(); renderTestPanel(); dbStatus(); applyLayout();
+  const busy=document.activeElement;
+  const inside=sel=>{ const el=$(sel); return el && busy && el.contains(busy); };
+  if(!inside("#tier-editor")) renderTierEditor();
+  if(!inside("#reason-editor")) renderReasonEditor();
+  if(!inside("#class-editor")) renderClassEditor();
+  renderBreakEditor(); renderLogins(); renderTestPanel(); dbStatus(); applyLayout();
   { const c=$("#cc-code"), u=$("#cc-url"); if(c&&document.activeElement!==c) c.value=DB().code; if(u&&document.activeElement!==u) u.value=DB().url; }
   ["#panel-checkins","#panel-consequences"].forEach(sel=>{ const el=$(sel); if(el) el.style.display=isHits()?"none":""; });
   { const ph=$("#pass-hint"); if(ph) ph.textContent = (getPasscode()===DEFAULT_PASSCODE)
@@ -1798,7 +1875,8 @@ function renderAnalytics(anim){
   if(d.rows.length && d.zero.length){ zl.style.display=""; zl.innerHTML=`<b>No ${esc(w.p)} ${A_RW[a.range]}:</b> ${d.zero.map(x=>esc(x.name)).join(", ")}`; }
   else zl.style.display="none";
   $("#a-legend").innerHTML=d.order.map(k=>`<button class="aleg ${aMuted.has(k)?"off":""}" data-aser="${esc(k)}" aria-pressed="${!aMuted.has(k)}" title="${aMuted.has(k)?"Show":"Hide"} ${esc(seriesLabel(k))} in the graph"><span class="a-sw" style="background:${seriesColor(k)}"></span>${esc(seriesLabel(k))}<span class="aleg-n">${d.ser.get(k)}</span></button>`).join("");
-  const hid=A().hidden.map(id=>state.students.find(x=>x.id===id)).filter(Boolean);
+  const vmap=new Map(scoped().map(x=>[x.id,x]));
+  const hid=A().hidden.map(id=>vmap.get(id)).filter(Boolean);
   $("#a-hidden").innerHTML=hid.length?`<div class="hidebar">
     <span class="sp">Hidden from this graph only — nothing is deleted, and their strikes still count everywhere else.</span>
     <div class="hidegrid">${hid.map(x=>`<button class="hchip off" data-ashow="${x.id}" title="Show ${esc(x.name)} again"><span class="hdot" style="background:${colorFor(x.id)}">${esc(initials(x.name))}</span><span class="hn">${esc(x.name)}</span></button>`).join("")}
@@ -1850,7 +1928,8 @@ function csvRoster(){
 }
 function csvEvents(){
   const rows=[["When","Date","Time","Weekday","Student","Class","Type","Reason","Category","Count after"]];
-  state.log.filter(l=>l&&(l.t==="strike"||l.t==="hit")).slice().reverse().forEach(l=>{
+  const vis=visIds();
+  state.log.filter(l=>l&&(l.t==="strike"||l.t==="hit")&&vis.has(l.id)).slice().reverse().forEach(l=>{
     const k=csvWhen(l.ts), r=(l.reason||"").trim();
     rows.push([k.d+" "+k.t,k.d,k.t,k.w,l.name||"",l.cls||"",l.t==="hit"?"Hit":"Strike",r,categoryOf(r),Number.isFinite(l.count)?l.count:""]);
   });
@@ -1879,7 +1958,7 @@ function exportSheets(){
 // ================= The Database (sync) =================
 function DB(){ const d=state.settings.db||(state.settings.db={}); if(typeof d.code!=="string") d.code=""; if(typeof d.url!=="string") d.url=""; return d; }
 function dbOn(){ const d=DB(); return !!(d.url&&d.code); }
-function studentKey(x){ return String(x.name||"").trim().toLowerCase().replace(/\s+/g," ")+"|"+String(x.cls||"").trim().toLowerCase(); }
+function studentKey(x){ return String(x.name||"").trim().toLowerCase().replace(/\s+/g," ")+"|"+clsKey(x.cls); }
 function newEid(){ return deviceId()+"-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,6); }
 let dbBusy=false, dbTimer=null, dbPhase="idle";
 
@@ -1894,7 +1973,7 @@ function dbPayload(){
           name:l.name,cls:l.cls||"",reason:l.reason||"",category:categoryOf(l.reason),count:l.count||0}; }),
     logins: (state.logins||[]).slice(0,25),
     settingsTs: state.settings.ts||0,
-    settings: {reasons:REASONS(),reasonCats:REASON_CATS(),catMap:CATMAP(),tiers:state.settings.tiers}};
+    settings: {reasons:REASONS(),reasonCats:REASON_CATS(),catMap:CATMAP(),tiers:state.settings.tiers,classCodes:CLASS_CODES()}};
 }
 function dbMerge(res){
   if(!res||!Array.isArray(res.students)) return 0;
@@ -1908,7 +1987,7 @@ function dbMerge(res){
     if(!x){ x={id:state.seq++,name:r.name,cls:r.cls||"",strikes:0,total:0,hits:0,hitTotal:0,done:{},test:!!r.test};
             state.students.push(x); byKey.set(r.key,x); changed++; }
     const ns=pick(x.strikes||0,+r.strikes||0), nh=pick(x.hits||0,+r.hits||0);
-    const nt=Math.max(x.total||0,+r.total||0), nht=Math.max(x.hitTotal||0,+r.hitTotal||0);
+    const nt=pick(x.total||0,+r.total||0), nht=pick(x.hitTotal||0,+r.hitTotal||0);   // a newer year-reset must win
     if(ns!==(x.strikes||0)||nh!==(x.hits||0)||nt!==(x.total||0)||nht!==(x.hitTotal||0)) changed++;
     x.strikes=ns; x.hits=nh; x.total=nt; x.hitTotal=nht;
     if(r.done&&typeof r.done==="object") Object.keys(r.done).forEach(k=>{ if(r.done[k]) x.done[k]=true; });
@@ -1941,6 +2020,7 @@ function dbMerge(res){
     if(Array.isArray(t.reasons)) state.settings.reasons=t.reasons.slice(0,10);
     if(Array.isArray(t.reasonCats)) state.settings.reasonCats=t.reasonCats.slice(0,10);
     if(t.catMap&&typeof t.catMap==="object") state.settings.catMap=t.catMap;
+    if(t.classCodes&&typeof t.classCodes==="object") state.settings.classCodes=t.classCodes;
     if(Array.isArray(t.tiers)&&t.tiers.length) state.settings.tiers=t.tiers;
     state.settings.ts=+res.settingsTs||0; changed++;
   }
@@ -2001,19 +2081,37 @@ function classUnlocked(c){
 }
 function unlockClass(c){ try{ localStorage.setItem("madeleine_cls_"+clsKey(c),"1"); }catch(e){} }
 function lockClass(c){ try{ localStorage.removeItem("madeleine_cls_"+clsKey(c)); }catch(e){} }
-function activeClass(){ try{ return localStorage.getItem("madeleine_class")||""; }catch(e){ return ""; } }
+function activeClass(){
+  let c=""; try{ c=localStorage.getItem("madeleine_class")||""; }catch(e){}
+  if(c && !state.students.some(x=>clsKey(x.cls)===clsKey(c))){ try{ localStorage.removeItem("madeleine_class"); }catch(e){} return ""; }
+  return c;
+}
 function setActiveClass(c){ try{ c ? localStorage.setItem("madeleine_class",c) : localStorage.removeItem("madeleine_class"); }catch(e){} }
 // a locked class is invisible everywhere until its code is given — otherwise the code means nothing
 function canSee(x){ return classUnlocked(x.cls); }
 function inScope(x){ const a=activeClass(); return canSee(x) && (!a || clsKey(x.cls)===clsKey(a)); }
 function scoped(){ return state.students.filter(inScope); }
+function visIds(){ return new Set(scoped().map(x=>x.id)); }
+function anyLocked(){ return classList().some(([k])=>classCode(k)&&!classUnlocked(k)); }
+// a note like "Lunch check-in done - Ana Ruiz" carries a name but no id
+function noteSafe(note){
+  if(!note) return true;
+  const n=String(note).toLowerCase();
+  return !state.students.some(x=>!inScope(x) && x.name && n.includes(String(x.name).toLowerCase()));
+}
+function logInScope(l){
+  if(!l) return false;
+  if(l.id!=null){ const x=state.students.find(y=>y.id===l.id); return x ? inScope(x) : classUnlocked(l.cls); }
+  return noteSafe(l.note);
+}
 function scopeLabel(){ const a=activeClass(); return a ? String(a) : "Everyone"; }
 
 function renderClassSwitch(){
   const wrap=$("#classwrap"); if(!wrap) return;
   const list=classList();
-  wrap.style.display = list.length>1 ? "" : "none";
-  if(list.length<2) return;
+  const need = list.length>1 || !!activeClass() || list.some(([k])=>classCode(k));
+  wrap.style.display = need ? "" : "none";
+  if(!need) return;
   const a=clsKey(activeClass());
   wrap.innerHTML=`<select class="input" id="classsel" aria-label="Which class">
     <option value=""${a?"":" selected"}>Everyone</option>
@@ -2051,10 +2149,120 @@ function renderClassEditor(){
     : list.map(([k,label])=>`
       <div class="tier-row">
         <div class="tier-at" style="min-width:0;flex:1 1 auto"><b style="font-size:13.5px">${esc(label)}</b><span style="color:var(--muted);font-size:12.5px">&nbsp;· ${state.students.filter(s=>clsKey(s.cls)===k).length} students</span></div>
-        <input class="input" type="text" inputmode="numeric" maxlength="8" placeholder="No code" value="${esc(CLASS_CODES()[k]||"")}" data-clscode="${esc(k)}" aria-label="Code for ${esc(label)}" style="width:110px;text-align:center;letter-spacing:3px">
+        <input class="input" type="password" inputmode="numeric" maxlength="8" placeholder="${classCode(k)&&!classUnlocked(k)?"Code set":"No code"}" value="${classCode(k)&&!classUnlocked(k)?"":esc(CLASS_CODES()[k]||"")}" data-clscode="${esc(k)}" aria-label="Code for ${esc(label)}" style="width:110px;text-align:center;letter-spacing:3px">
         ${classCode(k)&&classUnlocked(k)?`<button class="btn btn-ghost btn-sm" data-clslock="${esc(k)}">Lock</button>`:""}
       </div>`).join("");
 }
+
+// ================= what's new =================
+const APP_VERSION="2.0";
+const WHATS_NEW=[
+  ["Analytics","A graph of who got what, and why. Group it by reason or by category, and pick the stretch of time you want."],
+  ["Classes","Give a class its own code and it stays hidden until the code is put in."],
+  ["Check-in reminders","A nudge before recess and lunch, naming who you need to see."],
+  ["Photos","Put a face on a student so the Fast tab is quicker to scan."],
+  ["Test student","A pretend student you can practise on, and remove in one tap."]
+];
+function seenVersion(){ try{ return localStorage.getItem("madeleine_seen")||""; }catch(e){ return APP_VERSION; } }
+function markSeen(){ try{ localStorage.setItem("madeleine_seen",APP_VERSION); }catch(e){} }
+function showWhatsNew(force){
+  if(!force && seenVersion()===APP_VERSION) return;
+  const el=$("#new-list"); if(!el) return;
+  el.innerHTML=WHATS_NEW.map(([t,d])=>`<li><b>${esc(t)}</b><span>${esc(d)}</span></li>`).join("");
+  $("#new-modal").classList.add("show");
+}
+function closeWhatsNew(){ markSeen(); $("#new-modal").classList.remove("show"); }
+
+// ================= check-in reminders =================
+const BREAKS=[["09:40","AM recess"],["11:30","Lunch"],["13:40","PM recess"]];
+function BRK(){ const b=state.settings.breaks; return Array.isArray(b)&&b.length?b:BREAKS.map(([t,l])=>({t,l})); }
+function hhmm(d){ const p=n=>String(n).padStart(2,"0"); return p(d.getHours())+":"+p(d.getMinutes()); }
+function minsOf(t){ const m=/^(\d{1,2}):(\d{2})$/.exec(String(t)||""); return m?(+m[1]*60 + +m[2]):-1; }
+// who has a check-in waiting, for the message
+function dueNames(){
+  const out=[];
+  scoped().forEach(x=>{ const t=dueTiers(x); if(t.length) out.push({name:x.name,what:tierShort(t[0].label)}); });
+  return out;
+}
+function checkinMessage(lead){
+  const d=dueNames();
+  if(!d.length) return null;
+  const who = d.length===1 ? d[0].name
+            : d.length===2 ? d[0].name+" and "+d[1].name
+            : d[0].name+", "+d[1].name+" and "+(d.length-2)+" more";
+  return {title:"Almost time for "+lead, body:"It’s nearly "+lead+" — check in with "+who+"."};
+}
+function notifyNow(title,body){
+  try{
+    if(!("Notification" in window) || Notification.permission!=="granted") return false;
+    new Notification(title,{body,icon:"icon-192.png",tag:"madeleine-checkin"});
+    return true;
+  }catch(e){ return false; }
+}
+let lastBreakFired=null;
+function checkBreakReminder(){
+  const s=state.settings; if(!s.checkinNudge) return;
+  const now=new Date(); const dow=now.getDay(); if(dow===0||dow===6) return;
+  const lead=Math.max(0,Math.min(30,+s.checkinLead||5));
+  const nowM=now.getHours()*60+now.getMinutes();
+  const key=now.toDateString();
+  BRK().forEach(b=>{
+    const m=minsOf(b.t); if(m<0) return;
+    const fireAt=m-lead;
+    const id=key+"|"+b.t;
+    if(nowM===fireAt && lastBreakFired!==id){
+      lastBreakFired=id;
+      const msg=checkinMessage(b.l);
+      if(msg){ notifyNow(msg.title,msg.body); toast(msg.body); }
+    }
+  });
+}
+function renderBreakEditor(){
+  const el=$("#break-editor"); if(!el) return;
+  el.innerHTML=BRK().map((b,i)=>`
+    <div class="tier-row">
+      <input class="input" value="${esc(b.l)}" placeholder="e.g. Lunch" data-blabel="${i}" aria-label="Break name" style="flex:1 1 auto;min-width:0">
+      <input class="input" type="time" value="${esc(b.t)}" data-btime="${i}" aria-label="Time" style="width:130px">
+      <button class="tier-del" data-bdel="${i}" title="Remove"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+    </div>`).join("") || `<div class="tier-warn">No break times yet — add one below.</div>`;
+  const sw=$("#checkin-switch"); if(sw) sw.classList.toggle("on", !!state.settings.checkinNudge);
+  const cfg=$("#checkin-config"); if(cfg) cfg.style.display = state.settings.checkinNudge ? "" : "none";
+  const ld=$("#checkin-lead"); if(ld && document.activeElement!==ld) ld.value=String(state.settings.checkinLead||5);
+}
+
+// ================= student photos =================
+const MAX_PHOTO=240;
+function photoOf(x){ return (x&&typeof x.pic==="string"&&x.pic.startsWith("data:image"))?x.pic:""; }
+function avatarHTML(x,cls){
+  const p=photoOf(x);
+  if(p) return `<div class="avatar ${cls||""} haspic"${isTest(x)?' data-test="1"':""} style="background-image:url('${p}')"></div>`;
+  return `<div class="avatar ${cls||""}${isTest(x)?" test":""}" style="background:${colorFor(x.id)}">${esc(initials(x.name))}</div>`;
+}
+function setPhoto(id,file){
+  const st=state.students.find(x=>x.id===id); if(!st||!file) return;
+  if(!/^image\//.test(file.type)){ toast("That isn’t a picture."); return; }
+  const rd=new FileReader();
+  rd.onload=()=>{
+    const img=new Image();
+    img.onload=()=>{
+      try{
+        const side=Math.min(img.width,img.height);
+        const c=document.createElement("canvas"); c.width=c.height=MAX_PHOTO;
+        const g=c.getContext("2d");
+        g.drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,MAX_PHOTO,MAX_PHOTO);
+        st.pic=c.toDataURL("image/jpeg",0.82);
+        save(); renderAll(); toast(st.name+" — photo added");
+      }catch(e){ toast("Couldn’t use that picture."); }
+    };
+    img.onerror=()=>toast("Couldn’t read that picture.");
+    img.src=rd.result;
+  };
+  rd.onerror=()=>toast("Couldn’t read that file.");
+  rd.readAsDataURL(file);
+}
+function clearPhoto(id){ const st=state.students.find(x=>x.id===id); if(!st) return; delete st.pic; save(); renderAll(); toast(st.name+" — photo removed"); }
+let photoTarget=null;
+function pickPhoto(id){ photoTarget=id; $("#photo-file").value=""; $("#photo-file").click(); }
 
 // toast
 let toastTimer;
@@ -2085,7 +2293,7 @@ function renderFastGrid(){
     const badge=n>0?`<div class="ftile-count ${atMax?'max':''}">${n}</div>`:"";
     return `<button class="ftile ${atMax?'maxed':''}" data-fstrike="${x.id}" title="${atMax?`${esc(x.name)} is at the max — hold to remove one`:`Tap for a ${w.n}, hold to remove one`}">
       ${badge}
-      <div class="avatar" style="background:${colorFor(x.id)}">${initials(x.name)}</div>
+      ${avatarHTML(x)}
       <div class="ftile-name">${esc(x.name)}</div>
       <div class="ftile-meta">${x.cls?esc(x.cls)+" · ":""}${plural(n,w.n)}${atMax?" · max":""}</div>
     </button>`;
@@ -2151,7 +2359,7 @@ $("#modeseg").addEventListener("click",e=>{
 function doAdd(){
   const n=$("#f-name").value, c=$("#f-class").value;
   if(!n.trim()){ $("#f-name").focus(); return; }
-  addStudent(n,c); renderAll();
+  addStudent(n, c.trim()||activeClass()); renderAll();
   $("#f-name").value=""; $("#f-class").value=""; $("#f-name").focus();
   toast("Added "+n.trim());
 }
@@ -2167,7 +2375,7 @@ $("#bulk-cancel").onclick=closeBulk;
 $("#bulk-modal").addEventListener("click",e=>{ if(e.target.id==="bulk-modal") closeBulk(); });
 $("#bulk-add").onclick=()=>{
   const lines=$("#bulk-text").value.split("\n").map(l=>l.trim()).filter(Boolean);
-  const existing=new Set(state.students.map(s=>s.name.toLowerCase()));
+  const existing=new Set(scoped().map(s=>s.name.toLowerCase()));
   let n=0, skipped=0;
   lines.forEach(line=>{
     const i=line.indexOf(",");
@@ -2184,6 +2392,8 @@ $("#bulk-add").onclick=()=>{
 $("#roster").addEventListener("click",e=>{
   const b=e.target.closest("button"); if(!b) return;
   if(b.dataset.menu){ const m=$("#menu-"+b.dataset.menu); const open=m.classList.contains("open"); closeMenus(); if(!open) m.classList.add("open"); e.stopPropagation(); return; }
+  if(b.dataset.photo){ pickPhoto(+b.dataset.photo); return; }
+  if(b.dataset.nopic){ clearPhoto(+b.dataset.nopic); closeMenus(); return; }
   if(b.dataset.done){ completeCheckin(+b.dataset.done, +b.dataset.key, b); return; }
   if(b.dataset.strike){ openModal(+b.dataset.strike); return; }
   if(b.dataset.undo){ undoStrikeOne(+b.dataset.undo); closeMenus(); return; }
@@ -2224,7 +2434,7 @@ $("#fast-search").addEventListener("keydown",e=>{
   const q=$("#fast-search").value.trim().toLowerCase();
   if(!q) return;   // an empty box must never pick "the only student"
   let list=scoped().filter(x=>x.name.toLowerCase().includes(q)||(x.cls||"").toLowerCase().includes(q));
-  const exact=state.students.find(x=>x.name.toLowerCase()===q);
+  const exact=list.find(x=>x.name.toLowerCase()===q);
   const target = exact || (list.length===1 ? list[0] : null);
   if(target){ fastStrike(target.id); $("#fast-search").value=""; renderFastGrid(); $("#fast-search").focus(); }
 });
@@ -2250,7 +2460,7 @@ $("#add-tier").onclick=()=>{ const ts=state.settings.tiers||(state.settings.tier
   if(ts.some(t=>t.at===nextAt)){ toast("No free strike number left — free one up first."); return; }
   ts.push({at:nextAt,label:""}); sortTiers(); save(); renderAll(); setTimeout(()=>{ const inputs=$$("#tier-editor [data-tier-label]"); const target=inputs.find(inp=>state.settings.tiers[+inp.dataset.tierLabel]?.at===nextAt); (target||inputs[inputs.length-1])?.focus(); },30); };
 $("#load-class").onclick=()=>{
-  const existing=new Set(state.students.map(s=>s.name.toLowerCase()));
+  const existing=new Set(scoped().map(s=>s.name.toLowerCase()));
   let n=0;
   CLASS_PRESET.forEach(name=>{ if(existing.has(name.toLowerCase())) return; addStudent(name,""); existing.add(name.toLowerCase()); n++; });
   renderAll();
@@ -2356,7 +2566,7 @@ function notifyStatusText(){
   if(Notification.permission==="denied") return "Weekends are off. Notifications are blocked in your browser — you’ll still get an in-app message.";
   return "Weekends are off. You’ll be asked to allow notifications; either way you’ll get an in-app message.";
 }
-function marksThisWeek(){ const cut=Date.now()-7*864e5; const k=W().log; return state.log.filter(l=>l.t===k && l.ts>=cut); }
+function marksThisWeek(){ const cut=Date.now()-7*864e5, k=W().log, vis=visIds(); return state.log.filter(l=>l.t===k && l.ts>=cut && vis.has(l.id)); }
 function strikesThisWeek(){ const cut=Date.now()-7*864e5; return state.log.filter(l=>l.t==="strike" && l.ts>=cut); }
 function notifyMessage(){
   const wk=strikesThisWeek(), n=wk.length;
@@ -2393,7 +2603,7 @@ document.addEventListener("keydown",e=>{
   if(!document.documentElement.hasAttribute("data-chosen") || !document.documentElement.hasAttribute("data-unlocked")) return;
   const tag=e.target.tagName||"";
   const typing = tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||e.target.isContentEditable;
-  if(e.key==="Escape"){ if($("#modal").classList.contains("show")) closeModal(); else if($("#bulk-modal").classList.contains("show")) closeBulk(); else closeMenus(); return; }
+  if(e.key==="Escape"){ if($("#modal").classList.contains("show")) closeModal(); else if($("#cls-modal").classList.contains("show")) closeClassModal(); else if($("#bulk-modal").classList.contains("show")) closeBulk(); else closeMenus(); return; }
   if(typing || e.metaKey || e.ctrlKey || e.altKey) return;
   const modalOpen=$("#modal").classList.contains("show")||$("#cls-modal").classList.contains("show");
   const bulkOpen=$("#bulk-modal").classList.contains("show");
@@ -2462,6 +2672,7 @@ function getPasscode(){ try{ const p=localStorage.getItem("madeleine_passcode");
       document.documentElement.setAttribute("data-unlocked",""); updateInert();
       try{ localStorage.setItem("madeleine_unlocked","1"); }catch(e){}
       try{ recordLogin(); renderLogins(); }catch(e){}
+      setTimeout(()=>{ try{ showWhatsNew(false); }catch(e){} },800);
       try{ checkDailyReminder(); }catch(e){}
       try{ animView("board"); }catch(e){}
       maybeBackup();
@@ -2543,6 +2754,10 @@ document.addEventListener("visibilitychange",()=>{ if(!document.hidden && dbOn()
 
 // ---- classes ----
 $("#classwrap").addEventListener("change",e=>{ const sel=e.target.closest("#classsel"); if(sel) chooseClass(sel.value); });
+document.addEventListener("click",e=>{
+  const u=e.target.closest("[data-unlockcls]"); if(u){ chooseClass(u.dataset.unlockcls); return; }
+  if(e.target.closest("[data-showall]")){ setActiveClass(""); renderAll(); }
+});
 $("#layout-switch").onclick=toggleLayout;
 $("#cls-go").onclick=tryClassCode;
 $("#cls-cancel").onclick=closeClassModal;
@@ -2552,8 +2767,9 @@ $("#cls-modal").addEventListener("click",e=>{ if(e.target.id==="cls-modal") clos
 $("#class-editor").addEventListener("input",e=>{
   const t=e.target.closest("input[data-clscode]"); if(!t) return;
   const k=t.dataset.clscode, v=t.value.trim();
-  if(v) CLASS_CODES()[k]=v; else { delete CLASS_CODES()[k]; lockClass(k); }
-  if(v && /^\d{3,8}$/.test(v)) unlockClass(k);   // don't lock yourself out of the class you're setting up
+  const digits=v.replace(/\D/g,"");
+  if(digits && /^\d{3,8}$/.test(digits)){ CLASS_CODES()[k]=digits; unlockClass(k); t.setCustomValidity(""); }
+  else { delete CLASS_CODES()[k]; lockClass(k); t.setCustomValidity(v?"Needs 3\u20138 digits":""); }
   bumpSettings(); save(); renderClassSwitch(); dbNudge();
 });
 $("#class-editor").addEventListener("click",e=>{
@@ -2563,6 +2779,37 @@ $("#class-editor").addEventListener("click",e=>{
   if(clsKey(activeClass())===k) setActiveClass("");
   renderAll(); toast("Locked — the code is needed again");
 });
+
+// ---- what's new ----
+$("#new-ok").onclick=closeWhatsNew;
+$("#new-modal").addEventListener("click",e=>{ if(e.target.id==="new-modal") closeWhatsNew(); });
+$("#show-new").onclick=()=>showWhatsNew(true);
+
+// ---- check-in nudges ----
+$("#checkin-switch").onclick=()=>{
+  state.settings.checkinNudge=!state.settings.checkinNudge;
+  if(state.settings.checkinNudge && "Notification" in window && Notification.permission==="default")
+    try{ Notification.requestPermission(); }catch(e){}
+  bumpSettings(); save(); renderBreakEditor();
+};
+$("#checkin-lead").addEventListener("input",e=>{ const v=Math.max(0,Math.min(30,+e.target.value||0)); state.settings.checkinLead=v; bumpSettings(); save(); });
+$("#break-editor").addEventListener("input",e=>{
+  const t=e.target.closest("[data-btime]"), l=e.target.closest("[data-blabel]");
+  if(t){ const i=+t.dataset.btime; if(state.settings.breaks[i]) state.settings.breaks[i].t=t.value; }
+  if(l){ const i=+l.dataset.blabel; if(state.settings.breaks[i]) state.settings.breaks[i].l=l.value; }
+  if(t||l){ bumpSettings(); save(); dbNudge(); }
+});
+$("#break-editor").addEventListener("click",e=>{
+  const b=e.target.closest("[data-bdel]"); if(!b) return;
+  state.settings.breaks.splice(+b.dataset.bdel,1); bumpSettings(); save(); renderBreakEditor();
+});
+$("#add-break").onclick=()=>{
+  if(state.settings.breaks.length>=8) return;
+  state.settings.breaks.push({t:"12:00",l:"Break"}); bumpSettings(); save(); renderBreakEditor();
+};
+
+// ---- student photos ----
+$("#photo-file").addEventListener("change",e=>{ const f=e.target.files&&e.target.files[0]; if(f&&photoTarget!=null) setPhoto(photoTarget,f); photoTarget=null; });
 
 // boot
 setOwner(isOwner());
@@ -2575,5 +2822,6 @@ renderAll();
 maybeBackup();
 checkDailyReminder();
 if(document.documentElement.hasAttribute("data-unlocked")) animView("board");
-setInterval(()=>{ const wiped=checkAutoReset(); maybeBackup(); checkDailyReminder(); if(dbOn()) dbSync(false); if(wiped) renderAll(); else if($("#view-board").style.display!=="none") renderLog(); }, 60000);
+if(document.documentElement.hasAttribute("data-unlocked")&&document.documentElement.hasAttribute("data-chosen")) setTimeout(()=>showWhatsNew(false),700);
+setInterval(()=>{ const wiped=checkAutoReset(); maybeBackup(); checkDailyReminder(); checkBreakReminder(); if(dbOn()) dbSync(false); if(wiped) renderAll(); else if($("#view-board").style.display!=="none") renderLog(); }, 60000);
 </script>

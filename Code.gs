@@ -110,8 +110,8 @@ function merge_(store, b) {
     s.name = r.name; s.cls = r.cls || "";
     s.strikes  = pick(Number(s.strikes) || 0,  Number(r.strikes) || 0);
     s.hits     = pick(Number(s.hits) || 0,     Number(r.hits) || 0);
-    s.total    = Math.max(Number(s.total) || 0,    Number(r.total) || 0);      // a year total never goes down
-    s.hitTotal = Math.max(Number(s.hitTotal) || 0, Number(r.hitTotal) || 0);
+    s.total    = pick(Number(s.total) || 0,    Number(r.total) || 0);      // a newer year-reset wins
+    s.hitTotal = pick(Number(s.hitTotal) || 0, Number(r.hitTotal) || 0);
     s.test = !!r.test;
     if (r.done) Object.keys(r.done).forEach(function (k) { if (r.done[k]) { s.done = s.done || {}; s.done[k] = true; } });
     if (r.lastStrike && r.lastStrike.when) s.lastStrike = r.lastStrike;
