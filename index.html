@@ -408,6 +408,14 @@
   .set-group:first-of-type{margin-top:6px}
   .set-group span{font-size:12.5px;font-weight:450;color:var(--muted);letter-spacing:0}
   .set-group+.panel{margin-top:0!important}
+  .iconpick{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--field-bg);color:var(--ink);display:grid;place-items:center;flex:0 0 auto;transition:.15s}
+  .iconpick:hover{border-color:var(--green)}
+  .iconbar{display:none;flex:1 1 100%;gap:5px;flex-wrap:wrap;padding:8px 0 2px}
+  .iconbar.open{display:flex}
+  .ibtn{width:34px;height:34px;border-radius:9px;border:1px solid var(--line);background:var(--panel);color:var(--muted);display:grid;place-items:center;transition:.12s}
+  .ibtn:hover{color:var(--ink);border-color:var(--green)}
+  .ibtn.on{background:var(--green-soft);border-color:var(--green-line);color:var(--green-dark)}
+  :root[data-mode="hits"] .cin{border-color:var(--green-line);background:var(--green-soft);color:var(--green-dark)}
   .new-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);background:var(--blue-soft);border-radius:20px;padding:4px 11px}
   .new-list{list-style:none;margin:14px 0 4px;padding:0;text-align:left}
   .new-list li{display:flex;flex-direction:column;gap:1px;padding:9px 0;border-top:1px solid var(--line-soft);font-size:13.5px}
@@ -824,6 +832,13 @@
   </div>
 
   <h2 class="set-group">How strikes work<span>The ladder, the reasons, and when it clears</span></h2>
+  <div class="panel panel-pad" id="panel-rewards" style="margin-top:18px">
+    <p class="section-title">What each hit earns</p>
+    <div class="tier-warn">The good-behaviour ladder. Pick the number of hits, what they earn, and an icon for it.</div>
+    <div id="reward-editor"></div>
+    <button class="btn btn-ghost btn-sm" id="add-reward" style="margin-top:12px">+ Add a reward</button>
+  </div>
+
   <div class="panel panel-pad" id="panel-consequences" style="margin-top:18px">
     <p class="section-title">What each strike means</p>
     <div class="tier-warn"><b>1 strike</b> — just a warning, nothing happens.</div>
@@ -1135,7 +1150,18 @@ const CICONS = {
   clock:'<circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>',
   warn:'<path d="M12 9v4M12 17h.01M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0z"/>',
   knife:'<path d="M12 2.5 15 9.5H9z"/><path d="M7.5 12h9"/><path d="M12 12v9"/>',
-  clip:'<rect x="8" y="3" width="8" height="4" rx="1"/><path d="M9 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3"/>'
+  clip:'<rect x="8" y="3" width="8" height="4" rx="1"/><path d="M9 5H6a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-3"/>',
+  star:'<path d="M12 2.5 15.1 9l7 .6-5.3 4.6 1.6 6.8L12 17.4 5.6 21l1.6-6.8L1.9 9.6l7-.6z"/>',
+  gift:'<rect x="3" y="8" width="18" height="4" rx="1"/><path d="M5 12v8a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-8"/><path d="M12 8v13"/><path d="M12 8S10.5 3 8 3a2.2 2.2 0 0 0 0 5M12 8s1.5-5 4-5a2.2 2.2 0 0 1 0 5"/>',
+  trophy:'<path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.5 5M17 6h2.5a2.5 2.5 0 0 1-2.5 5"/>',
+  medal:'<circle cx="12" cy="15" r="5"/><path d="M12 13.4l.8 1.7 1.8.2-1.4 1.3.4 1.8-1.6-1-1.6 1 .4-1.8-1.4-1.3 1.8-.2z"/><path d="M8.5 3h7l-2 7h-3z"/>',
+  smile:'<circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0"/><path d="M9 9.5h.01M15 9.5h.01"/>',
+  heart:'<path d="M12 20s-7-4.4-7-9.3A4 4 0 0 1 12 8a4 4 0 0 1 7 2.7C19 15.6 12 20 12 20z"/>',
+  ticket:'<path d="M3 8a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2v2a2 2 0 0 0 0 4v2a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-2a2 2 0 0 0 0-4z"/><path d="M14 6v12"/>',
+  book:'<path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v18H6.5A2.5 2.5 0 0 0 4 22z"/><path d="M4 17.5h16"/>',
+  music:'<path d="M9 18V5l11-2v13"/><circle cx="6.5" cy="18" r="2.5"/><circle cx="17.5" cy="16" r="2.5"/>',
+  ball:'<circle cx="12" cy="12" r="9"/><path d="M12 3a15 15 0 0 0 0 18M12 3a15 15 0 0 1 0 18M3.5 9h17M3.5 15h17"/>',
+  crown:'<path d="M3 8l4 4 5-7 5 7 4-4-2 11H5z"/><path d="M5 19h14"/>'
 };
 function icoSvg(key,w){ w=w||16; return `<svg class="cic" width="${w}" height="${w}" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${CICONS[key]||CICONS.clip}</svg>`; }
 function tierIconKey(label){
@@ -1212,9 +1238,15 @@ function normalize(s){
   }
   s.settings.tiers = s.settings.tiers.filter(x=>x && typeof x.label==="string" && Number.isFinite(+x.at)).map(x=>({at:+x.at,label:x.label}));
   s.settings.tiers.sort((a,b)=>a.at-b.at);
+  if(!Array.isArray(s.settings.rewards))
+    s.settings.rewards=[{at:3,label:"Free choice time",icon:"star"},{at:5,label:"Note home",icon:"heart"},{at:10,label:"Prize box",icon:"gift"}];
+  s.settings.rewards = s.settings.rewards.filter(x=>x&&typeof x.label==="string"&&Number.isFinite(+x.at))
+    .map(x=>({at:+x.at,label:x.label,icon:typeof x.icon==="string"?x.icon:"star"}));
+  s.settings.rewards.sort((a,b)=>a.at-b.at);
   s.students.forEach(x=>{
     x.strikes ||= 0; x.total ??= x.strikes; x.hits ||= 0; x.hitTotal ??= (x.hits||0);
     if(!x.done || typeof x.done!=="object" || ("recess" in x.done) || ("lunch" in x.done)) x.done={};
+    if(!x.rdone || typeof x.rdone!=="object") x.rdone={};
   });
   if(!Number.isFinite(s.doneTotal)) s.doneTotal=s.log.filter(l=>l&&l.t==="done").length;
   s.logins = Array.isArray(s.logins) ? s.logins.filter(l=>l&&Number.isFinite(+l.ts)).slice(0,25) : [];
@@ -1318,9 +1350,15 @@ document.addEventListener("pointerdown", primeSfx, {once:true});
 function beep(kind){ if(!state.settings.sound) return; playSound(sfxSrc(kind), 0.8); }
 // tiers
 function TIERS(){ return state.settings.tiers||[]; }
-function sortTiers(){ (state.settings.tiers||[]).sort((a,b)=>a.at-b.at); }
-function maxTierAt(){ const ts=TIERS().filter(t=>t.label.trim()); return ts.length ? ts[ts.length-1].at : Infinity; }
-function tierLabel(at){ const t=TIERS().find(t=>t.at===+at); return t?t.label:"Check-in"; }
+const REWARD_ICONS=["star","gift","trophy","medal","smile","heart","ticket","book","music","ball","crown","sun"];
+const REWARD_ICON_LABELS={star:"Star",gift:"Gift",trophy:"Trophy",medal:"Medal",smile:"Smiley",heart:"Heart",ticket:"Ticket",book:"Book",music:"Music",ball:"Ball",crown:"Crown",sun:"Sun"};
+function REWARDS(){ const r=state.settings.rewards; return Array.isArray(r)?r:(state.settings.rewards=[]); }
+function LADDER(){ return isHits() ? REWARDS() : TIERS(); }
+function doneOf(x){ if(isHits()){ if(!x.rdone||typeof x.rdone!=="object") x.rdone={}; return x.rdone; } if(!x.done||typeof x.done!=="object") x.done={}; return x.done; }
+function ladderIcon(t){ return isHits() ? (REWARD_ICONS.indexOf(t.icon)>-1?t.icon:"star") : tierIconKey(t.label); }
+function sortTiers(){ (state.settings.tiers||[]).sort((a,b)=>a.at-b.at); (state.settings.rewards||[]).sort((a,b)=>a.at-b.at); }
+function maxTierAt(){ const ts=LADDER().filter(t=>t.label.trim()); return ts.length ? ts[ts.length-1].at : Infinity; }
+function tierLabel(at){ const t=LADDER().find(t=>t.at===+at); return t?t.label:(isHits()?"Reward":"Check-in"); }
 function tierShort(label){
   let s=(label||"").replace(/check[\s-]?in/ig,"").replace(/\b(talk|with|to|the|a|an|go|please)\b/ig,"").replace(/\s+/g," ").trim();
   if(!s) s=(label||"Check-in").trim();
@@ -1328,12 +1366,14 @@ function tierShort(label){
   return s.length>13 ? s.slice(0,12).trim()+"…" : s;
 }
 function syncDone(st){
-  if(!st.done||typeof st.done!=="object") st.done={};
-  const live=new Set(TIERS().map(t=>String(t.at)));
-  Object.keys(st.done).forEach(k=>{ if(!live.has(k)) delete st.done[k]; });   // a renumbered rung must not start out "done"
-  TIERS().forEach(t=>{ if(st.strikes<t.at) st.done[t.at]=false; });
+  [["done",TIERS(),st.strikes||0],["rdone",REWARDS(),st.hits||0]].forEach(([key,list,n])=>{
+    if(!st[key]||typeof st[key]!=="object") st[key]={};
+    const live=new Set(list.map(t=>String(t.at)));
+    Object.keys(st[key]).forEach(k=>{ if(!live.has(k)) delete st[key][k]; });   // a renumbered rung must not start out "done"
+    list.forEach(t=>{ if(n<t.at) st[key][t.at]=false; });
+  });
 }
-function dueTiers(st){ return TIERS().filter(t=> t.label.trim() && st.strikes>=t.at && !st.done[t.at]); }
+function dueTiers(st){ const d=doneOf(st); return LADDER().filter(t=> t.label.trim() && cntOf(st)>=t.at && !d[t.at]); }
 
 function intervalWord(iv){ return iv==="day"?"daily":(iv==="week"?"weekly":"monthly"); }
 function checkAutoReset(){   // returns true if it actually wiped, so callers can re-render
@@ -1358,7 +1398,7 @@ function giveStrike(id,reason){          // gives one mark in the CURRENT mode
   if(isFinite(cap) && st.strikes>=cap){ toast(st.name+" is already at "+cap+" — the last step ("+tierLabel(cap)+"). Reset when it's handled."); return null; }
   setCnt(st, cntOf(st)+1); setYear(st, yearOf(st)+1);
   beep(hits?"remove":"add");             // a point sounds light, a strike sounds heavy
-  const triggered=hits?null:TIERS().find(t=> t.label.trim() && st.strikes===t.at);
+  const triggered=LADDER().find(t=> t.label.trim() && cntOf(st)===t.at);
   state.log.unshift({t:w.log,ts:Date.now(),id,name:st.name,cls:st.cls,reason:(reason||"").trim(),count:cntOf(st),eid:newEid()});
   if(state.log.length>LOG_CAP) state.log.length=LOG_CAP;
   save(); renderAll(); dbNudge();
@@ -1381,23 +1421,24 @@ function undoStrikeOne(id){
 }
 function toggleDone(id,key){
   const st=state.students.find(x=>x.id===id); if(!st) return;
-  const at=+key, now=!st.done[at]; st.done[at]=now; state.doneTotal=Math.max(0,(state.doneTotal||0)+(now?1:-1));
+  const d=doneOf(st), at=+key, now=!d[at]; d[at]=now; state.doneTotal=Math.max(0,(state.doneTotal||0)+(now?1:-1));
   const label=tierLabel(at);
   if(now) state.log.unshift({t:"done",ts:Date.now(),note:label+" done · "+st.name});
   save(); renderAll(); toast(st.name+" · "+label+(now?" ✓":" reopened"));
 }
 // used on the roster: mark done, let the chip linger green then fade out & reflow
 function completeCheckin(id, at, chip){
-  const st=state.students.find(x=>x.id===id); if(!st || st.done[at]) return;
-  if(st.strikes < at){ renderAll(); return; }   // view was stale (e.g. an auto-reset fired) - resync instead of writing
-  st.done[at]=true; state.doneTotal=(state.doneTotal||0)+1;
+  const st=state.students.find(x=>x.id===id); if(!st) return;
+  const d=doneOf(st); if(d[at]) return;
+  if(cntOf(st) < at){ renderAll(); return; }   // view was stale (e.g. an auto-reset fired) - resync instead of writing
+  d[at]=true; state.doneTotal=(state.doneTotal||0)+1;
   const label=tierLabel(at);
   state.log.unshift({t:"done",ts:Date.now(),note:label+" done · "+st.name});
   save();
   renderReminders(); renderStats(); renderLog(); renderBackupBanner();
   if($("#view-totals").style.display!=="none") renderTotals();
   toastUndo(st.name+" · "+tierShort(label)+" done ✓", ()=>{
-    st.done[at]=false; state.doneTotal=Math.max(0,(state.doneTotal||0)-1);
+    doneOf(st)[at]=false; state.doneTotal=Math.max(0,(state.doneTotal||0)-1);
     const i=state.log.findIndex(l=>l.t==="done"&&l.note===label+" done · "+st.name);
     if(i>-1) state.log.splice(i,1);
     save(); renderAll();
@@ -1535,11 +1576,10 @@ function sortedStudents(){
   return list;
 }
 function consHTML(x){
-  if(isHits()) return "";      // consequences belong to strikes only
   const maxAt=maxTierAt();
   return dueTiers(x).map(t=>{
     const top=t.at===maxAt;
-    return `<button class="cin ${top?'top':''}" data-done="${x.id}" data-key="${t.at}" title="${esc(t.label)} — tap when done" aria-label="${esc(t.label)}">${icoSvg(tierIconKey(t.label),15)}<span>${esc(tierShort(t.label))}</span></button>`;
+    return `<button class="cin ${top?'top':''} ${isHits()?'good':''}" data-done="${x.id}" data-key="${t.at}" title="${esc(t.label)} — tap when ${isHits()?"given":"done"}" aria-label="${esc(t.label)}">${icoSvg(ladderIcon(t),15)}<span>${esc(tierShort(t.label))}</span></button>`;
   }).join("");
 }
 function renderRoster(){
@@ -1631,6 +1671,18 @@ function renderTotals(){
          <td><div class="barwrap"><div class="bar" style="background:var(--${isHits()?"green":"red"});width:${Math.round(yearOf(s)/maxStud*100)}%"></div></div></td>
        </tr>`).join("")}</tbody>`;
 }
+function renderRewardEditor(){
+  const el=$("#reward-editor"); if(!el) return;
+  el.innerHTML=REWARDS().map((t,i)=>`
+    <div class="tier-row">
+      <div class="tier-at"><input class="input tier-num" type="number" min="1" max="99" value="${t.at}" data-rew-at="${i}" aria-label="hits"><span>hits \u2192</span></div>
+      <input class="input" value="${esc(t.label)}" placeholder="e.g. Free choice time" data-rew-label="${i}" aria-label="reward">
+      <button class="iconpick" data-rew-icon="${i}" title="Choose an icon" aria-label="Choose an icon">${icoSvg(ladderIcon(t),16)}</button>
+      <button class="tier-del" data-rew-del="${i}" title="Remove"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
+      <div class="iconbar" data-rew-bar="${i}">${REWARD_ICONS.map(k=>`<button class="ibtn ${k===ladderIcon(t)?"on":""}" data-seticon="${i}" data-icon="${k}" title="${REWARD_ICON_LABELS[k]}" aria-label="${REWARD_ICON_LABELS[k]}">${icoSvg(k,16)}</button>`).join("")}</div>
+    </div>`).join("") || `<div class="tier-warn">No rewards yet \u2014 add one below.</div>`;
+  const add=$("#add-reward"); if(add) add.style.display = REWARDS().length>=8 ? "none" : "";
+}
 function renderTierEditor(){
   const el=$("#tier-editor"); if(!el) return;
   const tiers=TIERS();
@@ -1683,11 +1735,13 @@ function renderSettings(){
   const busy=document.activeElement;
   const inside=sel=>{ const el=$(sel); return el && busy && el.contains(busy); };
   if(!inside("#tier-editor")) renderTierEditor();
+  if(!inside("#reward-editor")) renderRewardEditor();
   if(!inside("#reason-editor")) renderReasonEditor();
   if(!inside("#class-editor")) renderClassEditor();
   renderBreakEditor(); renderLogins(); renderTestPanel(); dbStatus(); applyLayout();
   { const c=$("#cc-code"), u=$("#cc-url"); if(c&&document.activeElement!==c) c.value=DB().code; if(u&&document.activeElement!==u) u.value=DB().url; }
   ["#panel-checkins","#panel-consequences"].forEach(sel=>{ const el=$(sel); if(el) el.style.display=isHits()?"none":""; });
+  { const el=$("#panel-rewards"); if(el) el.style.display=isHits()?"":"none"; }
   { const ph=$("#pass-hint"); if(ph) ph.textContent = (getPasscode()===DEFAULT_PASSCODE)
       ? "Currently the default (9096). 4\u20138 digits. Saved on this device only \u2014 if you use the app on a phone too, change it there as well."
       : "You\u2019ve set your own passcode. 4\u20138 digits. Saved on this device only \u2014 change it separately on any other device."; }
@@ -1973,7 +2027,7 @@ function dbPayload(){
           name:l.name,cls:l.cls||"",reason:l.reason||"",category:categoryOf(l.reason),count:l.count||0}; }),
     logins: (state.logins||[]).slice(0,25),
     settingsTs: state.settings.ts||0,
-    settings: {reasons:REASONS(),reasonCats:REASON_CATS(),catMap:CATMAP(),tiers:state.settings.tiers,classCodes:CLASS_CODES()}};
+    settings: {reasons:REASONS(),reasonCats:REASON_CATS(),catMap:CATMAP(),tiers:state.settings.tiers,rewards:REWARDS(),classCodes:CLASS_CODES()}};
 }
 function dbMerge(res){
   if(!res||!Array.isArray(res.students)) return 0;
@@ -2022,6 +2076,7 @@ function dbMerge(res){
     if(t.catMap&&typeof t.catMap==="object") state.settings.catMap=t.catMap;
     if(t.classCodes&&typeof t.classCodes==="object") state.settings.classCodes=t.classCodes;
     if(Array.isArray(t.tiers)&&t.tiers.length) state.settings.tiers=t.tiers;
+    if(Array.isArray(t.rewards)) state.settings.rewards=t.rewards;
     state.settings.ts=+res.settingsTs||0; changed++;
   }
   return changed;
@@ -2758,6 +2813,30 @@ document.addEventListener("click",e=>{
   const u=e.target.closest("[data-unlockcls]"); if(u){ chooseClass(u.dataset.unlockcls); return; }
   if(e.target.closest("[data-showall]")){ setActiveClass(""); renderAll(); }
 });
+// ---- rewards ----
+$("#reward-editor").addEventListener("input",e=>{
+  const l=e.target.closest("[data-rew-label]"), n=e.target.closest("[data-rew-at]");
+  if(l){ const i=+l.dataset.rewLabel; if(REWARDS()[i]) REWARDS()[i].label=l.value; bumpSettings(); save(); dbNudge(); return; }
+  if(n){
+    const i=+n.dataset.rewAt, v=Math.max(1,Math.min(99,parseInt(n.value,10)||1));
+    const clash=REWARDS().find((t,j)=>j!==i && t.at===v);
+    if(clash){ toast("\u201c"+(clash.label||"Another reward")+"\u201d is already at "+v+" \u2014 pick a different number."); renderRewardEditor(); return; }
+    REWARDS()[i].at=v; sortTiers(); state.students.forEach(syncDone); bumpSettings(); save(); renderAll(); dbNudge();
+  }
+});
+$("#reward-editor").addEventListener("click",e=>{
+  const pick=e.target.closest("[data-rew-icon]");
+  if(pick){ const bar=$('[data-rew-bar="'+pick.dataset.rewIcon+'"]'); if(bar){ const open=bar.classList.contains("open"); $$(".iconbar").forEach(b=>b.classList.remove("open")); if(!open) bar.classList.add("open"); } return; }
+  const set=e.target.closest("[data-seticon]");
+  if(set){ const i=+set.dataset.seticon; if(REWARDS()[i]) REWARDS()[i].icon=set.dataset.icon; bumpSettings(); save(); renderRewardEditor(); renderAll(); dbNudge(); return; }
+  const del=e.target.closest("[data-rew-del]");
+  if(del){ REWARDS().splice(+del.dataset.rewDel,1); state.students.forEach(syncDone); bumpSettings(); save(); renderAll(); }
+});
+$("#add-reward").onclick=()=>{
+  const r=REWARDS(); if(r.length>=8) return;
+  const used=new Set(r.map(t=>t.at)); let at=1; while(used.has(at)) at++;
+  r.push({at,label:"",icon:REWARD_ICONS[r.length%REWARD_ICONS.length]}); sortTiers(); bumpSettings(); save(); renderAll();
+};
 $("#layout-switch").onclick=toggleLayout;
 $("#cls-go").onclick=tryClassCode;
 $("#cls-cancel").onclick=closeClassModal;
