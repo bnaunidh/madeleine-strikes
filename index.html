@@ -21,6 +21,9 @@
     --toast-bg:#1f2733; --toast-fg:#ffffff; --toast-accent:#8fc6ff;
     --shadow:0 1px 2px rgba(20,28,45,.04), 0 8px 24px rgba(20,28,45,.06);
     --radius:16px;
+    --c1:#2f6bd8; --c2:#d8443c; --c3:#2f9e59; --c4:#d8813c; --c5:#7a4dd8;
+    --c6:#0e9bb0; --c7:#c94f9c; --c8:#9a8d2e; --c9:#5a6acc; --c10:#7b6152;
+    --c-other:#9aa3b2; --c-none:#c7ccd6;
   }
   :root[data-theme="dark"]{
     --bg:#0f1420; --panel:#161d2b; --ink:#e7ebf2; --muted:#98a2b3;
@@ -33,6 +36,9 @@
     --chip-btn:rgba(255,255,255,.12); --chip-btn-h:rgba(255,255,255,.2);
     --toast-bg:#242e40; --toast-fg:#eef2f8; --toast-accent:#9cc0ff;
     --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.42);
+    --c1:#5b8ff0; --c2:#ef6d64; --c3:#49c07a; --c4:#eb9e55; --c5:#a17ef0;
+    --c6:#37bcd1; --c7:#e57ab9; --c8:#c9b44a; --c9:#8490e8; --c10:#b08d78;
+    --c-other:#7b8496; --c-none:#4a5466;
   }
   @media (prefers-color-scheme: dark){
     :root:not([data-theme="light"]){
@@ -46,6 +52,9 @@
       --chip-btn:rgba(255,255,255,.12); --chip-btn-h:rgba(255,255,255,.2);
       --toast-bg:#242e40; --toast-fg:#eef2f8; --toast-accent:#9cc0ff;
       --shadow:0 1px 2px rgba(0,0,0,.3), 0 10px 28px rgba(0,0,0,.42);
+    --c1:#5b8ff0; --c2:#ef6d64; --c3:#49c07a; --c4:#eb9e55; --c5:#a17ef0;
+    --c6:#37bcd1; --c7:#e57ab9; --c8:#c9b44a; --c9:#8490e8; --c10:#b08d78;
+    --c-other:#7b8496; --c-none:#4a5466;
     }
   }
   *{box-sizing:border-box}
@@ -294,6 +303,16 @@
   .ch-opt.hits .ch-ico{background:var(--green)}
   .ch-t{font-weight:650;font-size:14.5px}
   .ch-d{font-size:12.5px;color:var(--muted)}
+  #chooser .gate-logo{cursor:default;-webkit-tap-highlight-color:transparent;user-select:none}
+  #ch-secret{margin-top:16px}
+  .ch-dots{display:flex;gap:6px;justify-content:center;height:6px;opacity:0;transition:opacity .2s}
+  .ch-dots.show{opacity:1}
+  .ch-dots i{width:6px;height:6px;border-radius:50%;background:var(--line);transition:.15s}
+  .ch-dots i.lit{background:var(--muted)}
+  .ch-dots.ok i{background:var(--green)}
+  .ch-code{display:none;gap:8px;justify-content:center;margin-top:12px}
+  .ch-code.show{display:flex}
+  .ch-code .input{width:120px;text-align:center;letter-spacing:4px}
   :root[data-unlocked] #gate{display:none}
   :root:not([data-chosen]) #gate{display:none}
   .gate-card{background:var(--panel);border:1px solid var(--line);border-radius:20px;box-shadow:var(--shadow);padding:34px 30px;width:100%;max-width:330px;text-align:center}
@@ -370,6 +389,72 @@
   #toast.show{transform:translateX(-50%) translateY(0);opacity:1;visibility:visible;pointer-events:auto}
   #toast.undo{cursor:pointer}
   #toast .u{color:var(--toast-accent);font-weight:650}
+  /* ================= Analytics ================= */
+  .tab .tab-sm{display:none}
+  @media(max-width:900px){ .topbar-inner{flex-wrap:wrap} .tabs{order:5;width:100%} .tab{flex:1;justify-content:center} }
+  @media(max-width:560px){ .tab{flex-direction:column;gap:3px;padding:7px 3px;font-size:11px;line-height:1.2} .tab .tab-lg{display:none} .tab .tab-sm{display:block} }
+  .a-head{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;margin-bottom:12px}
+  .aseg{display:flex;gap:3px;background:var(--bg);padding:3px;border-radius:10px;border:1px solid var(--line);flex:0 0 auto}
+  .aseg button{padding:5px 11px;border-radius:7px;font-size:12.5px;font-weight:650;color:var(--muted);transition:.15s;white-space:nowrap}
+  .aseg button:hover{color:var(--ink)}
+  .aseg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(20,28,45,.09)}
+  .a-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+  .abar{display:grid;grid-template-columns:104px 1fr 34px 30px;align-items:center;gap:10px;padding:3px 0}
+  .abar-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+  .abar-track{display:flex;width:100%;height:20px;border-radius:6px;background:var(--line-soft);overflow:hidden;padding:0;text-align:left;transform-origin:left center}
+  .abar-track:focus-visible{outline:2px solid var(--blue);outline-offset:2px}
+  .abar-seg{display:block;height:100%;min-width:4px;flex:0 0 auto;transition:filter .12s}
+  .abar-seg+.abar-seg{box-shadow:inset 1px 0 0 var(--panel)}
+  .abar-track:hover .abar-seg{filter:saturate(1.18)}
+  .abar-tot{font-size:13px;font-weight:700;font-variant-numeric:tabular-nums;text-align:right;color:var(--muted)}
+  .abar-x{width:26px;height:26px;border-radius:8px;color:var(--muted);display:grid;place-items:center;opacity:.5;transition:.15s}
+  .abar-x:hover{background:var(--ghost-hover);color:var(--ink);opacity:1}
+  .a-readout{min-height:40px;display:flex;align-items:center;gap:8px;margin-top:14px;padding:9px 12px;border-radius:10px;background:var(--bg);border:1px solid var(--line-soft);font-size:13px;color:var(--ink);line-height:1.35}
+  .a-readout .a-dim{color:var(--muted)}
+  .a-sw{width:11px;height:11px;border-radius:3px;flex:0 0 auto;display:inline-block}
+  .a-legend{display:flex;flex-wrap:wrap;gap:7px;margin-top:14px}
+  .aleg{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;padding:5px 10px;border-radius:20px;border:1px solid var(--line);background:var(--bg);color:var(--ink);transition:.12s}
+  .aleg:hover{border-color:var(--blue)}
+  .aleg-n{color:var(--muted);font-variant-numeric:tabular-nums;font-weight:650}
+  .aleg.off{opacity:.45;text-decoration:line-through}
+  .a-note{font-size:12.5px;color:var(--muted);margin-top:12px;line-height:1.5}
+  .a-note b{color:var(--ink);font-weight:650}
+  .a-foot{display:flex;align-items:center;gap:10px;margin-top:14px;flex-wrap:wrap}
+  @media(max-width:560px){ .abar{grid-template-columns:66px 1fr 28px 26px;gap:7px} .abar-name{font-size:12px} .abar-tot{font-size:12px} }
+
+  /* ---- who's on the chart ---- */
+  .hidebar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 0 0;margin-top:14px;border-top:1px solid var(--line-soft);font-size:13px;color:var(--muted)}
+  .hidebar .sp{flex:1;min-width:150px;line-height:1.5}
+  .hidepanel{display:none;margin-top:12px}
+  .hidepanel.open{display:block}
+  .hidegrid{display:flex;flex-wrap:wrap;gap:7px}
+  .hchip{display:inline-flex;align-items:center;gap:7px;max-width:100%;padding:5px 11px 5px 5px;border-radius:20px;border:1px solid var(--line);background:var(--panel);color:var(--ink);font-size:12.5px;font-weight:550;transition:.12s}
+  .hchip:hover{border-color:var(--blue)}
+  .hchip .hdot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;color:#fff;font-size:10px;font-weight:700;flex:0 0 auto}
+  .hchip .hn{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:150px}
+  .hchip.off{background:var(--bg);color:var(--muted);border-style:dashed}
+  .hchip.off .hdot{filter:grayscale(1);opacity:.5}
+  .hchip.off .hn{text-decoration:line-through;text-decoration-thickness:1px}
+  @media(max-width:560px){ .hchip{font-size:12px;padding:4px 9px 4px 4px} .hchip .hn{max-width:104px} }
+
+  /* ---- TEST student ---- */
+  .chip.test{background:var(--amber-soft);color:var(--amber-ink);border:1px solid var(--amber-line)}
+  .avatar.test{background:var(--amber-soft)!important;color:var(--amber-ink);border:1.5px dashed var(--amber-line)}
+  .ftile.test{border-style:dashed;border-color:var(--amber-line)}
+
+  /* ---- categories in the reason editor ---- */
+  .tier-row>.catsel{flex:0 0 auto;width:168px;padding:9px 10px;font-size:13px;cursor:pointer}
+  .catsel[data-empty="1"]{color:var(--muted)}
+  .cdot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;display:inline-block;background:var(--c-other)}
+  @media(max-width:560px){ .tier-row>.catsel{width:100%;order:5} }
+
+  /* ---- The Database ---- */
+  .log-dot.db{background:var(--blue)}
+  .sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:7px;vertical-align:1px;background:var(--muted)}
+  :root:not([data-owner]) #panel-codecenter{display:none}
+  #cc-steps{font-size:12.5px;color:var(--muted);line-height:1.6;margin:10px 0 0;padding-left:20px}
+  #cc-steps li{margin-bottom:3px}
+  #cc-steps code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:11.5px}
 </style>
 <script>
   try{ var _t=localStorage.getItem("madeleine_theme"); if(_t) document.documentElement.setAttribute("data-theme",_t); }catch(e){}
@@ -396,6 +481,13 @@
         <span class="ch-t">Hit Dashboard</span>
         <span class="ch-d">Points for something good</span>
       </button>
+    </div>
+    <div id="ch-secret">
+      <div class="ch-dots" id="ch-dots"><i></i><i></i><i></i><i></i><i></i></div>
+      <div class="ch-code" id="ch-code-row">
+        <input class="input" id="ch-code" type="password" inputmode="numeric" maxlength="8" placeholder="Code" autocomplete="off" aria-label="Code">
+        <button class="btn btn-primary btn-sm" id="ch-code-go">Go</button>
+      </div>
     </div>
   </div>
 </div>
@@ -429,18 +521,23 @@
     <div class="tabs">
       <button class="tab active" data-view="board">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M3 12h18M3 18h18"/></svg>
-        Roster
+        <span class="tab-lg">Roster</span><span class="tab-sm">Roster</span>
       </button>
       <button class="tab" data-view="fast">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2 3 14h7l-1 8 10-12h-7z"/></svg>
-        <span id="tab-fast-label">Fast Strike</span>
+        <span class="tab-lg" id="tab-fast-label">Fast Strike</span><span class="tab-sm">Fast</span>
       </button>
       <button class="tab" data-view="totals">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 15l3-4 3 2 4-6"/></svg>
-        This Year
+        <span class="tab-lg">This Year</span><span class="tab-sm">Year</span>
+      </button>
+      <button class="tab" data-view="analytics">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V11M10 20V4M16 20v-6M2 20h20"/></svg>
+        <span class="tab-lg">Analytics</span><span class="tab-sm">Charts</span>
       </button>
       <button class="tab" data-view="settings" title="Settings">
         <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+      <span class="tab-sm">Settings</span>
       </button>
     </div>
   </div>
@@ -524,6 +621,28 @@
   </div>
 </div>
 
+<!-- ANALYTICS -->
+<div class="wrap" id="view-analytics" style="display:none">
+  <div class="stats" id="a-stats"></div>
+  <div class="panel panel-pad">
+    <div class="a-head">
+      <p class="section-title" id="a-title" style="margin:0">Analytics</p>
+      <div class="aseg" id="a-group" role="group" aria-label="Group the graph by"></div>
+    </div>
+    <div class="a-chips" id="a-range" role="group" aria-label="Time range"></div>
+    <div id="a-chart"></div>
+    <div class="a-readout" id="a-readout" aria-live="polite"></div>
+    <div class="a-legend" id="a-legend"></div>
+    <div class="a-note" id="a-note" style="display:none"></div>
+    <div class="a-note" id="a-zero" style="display:none"></div>
+    <div id="a-hidden"></div>
+    <div class="a-foot">
+      <button class="btn btn-ghost btn-sm" id="a-table-btn" aria-expanded="false" aria-controls="a-table-wrap">Show numbers</button>
+    </div>
+    <div class="scroll-x" id="a-table-wrap" style="display:none;margin-top:12px"><table class="tbl" id="a-table"></table></div>
+  </div>
+</div>
+
 <!-- SETTINGS -->
 <div class="wrap" id="view-settings" style="display:none;max-width:660px">
   <div class="banner" id="autoreset-banner" style="display:none"></div>
@@ -553,6 +672,11 @@
         <button class="btn btn-primary btn-sm" id="save-pass">Save</button>
       </div>
     </div>
+  </div>
+
+  <div class="panel panel-pad" id="panel-logins" style="margin-top:18px">
+    <p class="section-title">Recent logins</p>
+    <div id="logins-list"></div>
   </div>
 
   <div class="panel panel-pad" id="panel-reminder" style="margin-top:18px">
@@ -594,6 +718,17 @@
         <div class="d">Adds these 23 students at once (skips anyone already there); everyone starts at zero. Note: ~6 students aren't in this list yet — add them with the ＋ row or “Add several”.</div>
       </div>
       <div class="ctl"><button class="btn btn-primary btn-sm" id="load-class">Load class</button></div>
+    </div>
+  </div>
+
+  <div class="panel panel-pad" id="panel-test" style="margin-top:18px">
+    <p class="section-title">Test student</p>
+    <div class="set-row">
+      <div>
+        <div class="t" id="test-t">Add a student to try things on</div>
+        <div class="d" id="test-d">A pretend student called TEST STUDENT, marked in amber everywhere so you can’t mix them up with a real child. Give them strikes, watch a check-in appear, see the graph move — then remove them in one tap.</div>
+      </div>
+      <div class="ctl"><button class="btn btn-primary btn-sm" id="test-btn">Add TEST student</button></div>
     </div>
   </div>
 
@@ -695,6 +830,13 @@
     </div>
     <div class="set-row">
       <div>
+        <div class="t">Download for Google Sheets</div>
+        <div class="d">A spreadsheet of everyone — their strikes, their hits and their most recent one. Open it in Google Sheets with <b>File → Import</b>. This one is for reading; the backup above is the one that brings everything back.</div>
+      </div>
+      <div class="ctl"><button class="btn btn-ghost btn-sm" id="sheets-btn">Download</button></div>
+    </div>
+    <div class="set-row">
+      <div>
         <div class="t">Automatic backups</div>
         <div class="d" id="backup-last">—</div>
       </div>
@@ -745,6 +887,58 @@
       <div class="ctl"><button class="btn btn-danger btn-sm" id="wipe">Delete all</button></div>
     </div>
   </div>
+
+  <div class="panel panel-pad" id="panel-codecenter" style="margin-top:18px">
+    <p class="section-title">Code Center</p>
+    <div class="set-row">
+      <div>
+        <div class="t">Class code</div>
+        <div class="d">Every device with this code shares one class.</div>
+      </div>
+      <div class="ctl"><input class="input" id="cc-code" inputmode="numeric" maxlength="12" placeholder="5643" autocomplete="off" aria-label="Class code" style="width:112px;text-align:center;letter-spacing:3px"></div>
+    </div>
+    <div class="set-row">
+      <div>
+        <div class="t">The Database</div>
+        <div class="d">The web-app link from the Google Sheet. It ends in <b>/exec</b>.</div>
+      </div>
+      <div class="ctl"><input class="input" id="cc-url" placeholder="https://script.google.com/…/exec" autocomplete="off" spellcheck="false" aria-label="Database link" style="width:232px"></div>
+    </div>
+    <div class="set-row">
+      <div>
+        <div class="t" id="cc-state">Not connected</div>
+        <div class="d" id="cc-detail">Put in the code and the link, then press Connect.</div>
+      </div>
+      <div class="ctl">
+        <button class="btn btn-primary btn-sm" id="cc-connect">Connect</button>
+        <button class="btn btn-ghost btn-sm" id="cc-now" style="display:none">Sync now</button>
+        <button class="btn btn-ghost btn-sm" id="cc-off" style="display:none">Disconnect</button>
+      </div>
+    </div>
+    <div class="set-row">
+      <div>
+        <div class="t">Set up the sheet</div>
+        <div class="d">
+          <ol id="cc-steps">
+            <li>Make a new Google Sheet.</li>
+            <li><b>Extensions → Apps Script</b>.</li>
+            <li>Delete what’s there, paste in <code>Code.gs</code>, save.</li>
+            <li><b>Deploy → New deployment → Web app</b>.</li>
+            <li>Execute as <b>Me</b>, access <b>Anyone</b>. Deploy, allow it.</li>
+            <li>Copy the <code>/exec</code> link into the box above.</li>
+          </ol>
+        </div>
+      </div>
+      <div class="ctl"><button class="btn btn-ghost btn-sm" id="cc-copy-gs">Copy Code.gs</button></div>
+    </div>
+    <div class="set-row">
+      <div>
+        <div class="t">Leave</div>
+        <div class="d">Hides the Code Center on this device. Nothing is disconnected — use Disconnect for that.</div>
+      </div>
+      <div class="ctl"><button class="btn btn-ghost btn-sm" id="cc-leave">Leave</button></div>
+    </div>
+  </div>
 </div>
 
 <!-- Hit reason modal -->
@@ -787,11 +981,12 @@ function motionOK(){ return !!window.Motion && !(window.matchMedia && window.mat
 function animView(v){
   if(!motionOK()) return;
   const {animate,stagger}=window.Motion;
-  const el = v==="board"?document.querySelector("#view-board"): v==="settings"?document.querySelector("#view-settings"): v==="totals"?document.querySelector("#view-totals"): v==="fast"?document.querySelector("#view-fast"):null;
+  const el = v==="board"?document.querySelector("#view-board"): v==="settings"?document.querySelector("#view-settings"): v==="totals"?document.querySelector("#view-totals"): v==="analytics"?document.querySelector("#view-analytics"): v==="fast"?document.querySelector("#view-fast"):null;
   let cards=[];
   if(v==="board") cards=[...document.querySelectorAll("#view-board .stat, #roster .student")];
   else if(v==="fast") cards=[...document.querySelectorAll("#fast-grid .ftile")];
   else if(v==="totals") cards=[...document.querySelectorAll("#totals-stats .stat, #student-table tbody tr")];
+  else if(v==="analytics") cards=[...document.querySelectorAll("#a-stats .stat")];
   try{ if(el) animate(el, {opacity:[0,1], y:[8,0]}, {duration:0.28, easing:[0.2,0.7,0.2,1]}); }catch(e){}
   try{ if(cards.length) animate(cards, {opacity:[0,1], y:[10,0]}, {delay:stagger(0.02,{start:0.04}), duration:0.3, easing:"ease-out"}); }catch(e){}
   // safety: guarantee everything ends visible even if the tab was hidden / animation interrupted
@@ -803,6 +998,7 @@ function popCount(el){
   setTimeout(()=>{ el.style.transform=""; }, 700);
 }
 const STORE = "madeleine_strikeboard_v1";
+const DEFAULT_CATS = {"Talking in class":"Disruption","Disruptive":"Disruption","Phone use":"Technology","Late":"Punctuality","No homework":"Work","Disrespect":"Respect"};
 const DEFAULT_REASONS = ["Talking in class","Late","No homework","Disruptive","Phone use","Disrespect"];
 function REASONS(){ const r=(typeof state!=="undefined") && state.settings && state.settings.reasons; return Array.isArray(r)?r:DEFAULT_REASONS; }
 function reasonKey(i){ return i<9 ? String(i+1) : "0"; }
@@ -868,7 +1064,7 @@ function applyMode(){
 }
 function updateInert(){
   const blocked = !document.documentElement.hasAttribute("data-chosen") || !document.documentElement.hasAttribute("data-unlocked");
-  [".topbar","#view-board","#view-fast","#view-totals","#view-settings"].forEach(s=>{ const el=document.querySelector(s); if(el) el.inert=blocked; });
+  [".topbar","#view-board","#view-fast","#view-totals","#view-analytics","#view-settings"].forEach(s=>{ const el=document.querySelector(s); if(el) el.inert=blocked; });
 }
 function setMode(m){ state.mode=(m==="hits")?"hits":"strikes"; save(); applyMode(); renderAll(); }
 function load(){
@@ -903,6 +1099,26 @@ function normalize(s){
     if(!x.done || typeof x.done!=="object" || ("recess" in x.done) || ("lunch" in x.done)) x.done={};
   });
   if(!Number.isFinite(s.doneTotal)) s.doneTotal=s.log.filter(l=>l&&l.t==="done").length;
+  s.logins = Array.isArray(s.logins) ? s.logins.filter(l=>l&&Number.isFinite(+l.ts)).slice(0,25) : [];
+  if(!Number.isFinite(s.epoch)) s.epoch=0;
+  if(!s.settings.catMap || typeof s.settings.catMap!=="object") s.settings.catMap={};
+  if(!Array.isArray(s.settings.reasonCats)){
+    s.settings.reasonCats = s.settings.reasons.map(r=>DEFAULT_CATS[String(r||"").trim()]||"");
+    s.settings.reasons.forEach((r,i)=>{ const k=String(r||"").trim().toLowerCase().replace(/\s+/g," ");
+      if(k && s.settings.reasonCats[i]) s.settings.catMap[k]=s.settings.reasonCats[i]; });
+  }
+  s.settings.reasonCats = s.settings.reasonCats.slice(0,10).map(c=>typeof c==="string"?c:"");
+  while(s.settings.reasonCats.length < s.settings.reasons.length) s.settings.reasonCats.push("");
+  if(!s.settings.analytics || typeof s.settings.analytics!=="object") s.settings.analytics={};
+  if(!Array.isArray(s.settings.analytics.hidden)) s.settings.analytics.hidden=[];
+  s.settings.analytics.group = s.settings.analytics.group==="cat" ? "cat" : "reason";
+  if(["week","month","year","all"].indexOf(s.settings.analytics.range)<0) s.settings.analytics.range="month";
+  if(!s.settings.db || typeof s.settings.db!=="object") s.settings.db={};
+  if(typeof s.settings.db.code!=="string") s.settings.db.code="";
+  if(typeof s.settings.db.url!=="string") s.settings.db.url="";
+  if(!Number.isFinite(s.settings.ts)) s.settings.ts=0;
+  { let seenTest=false; s.students.forEach(x=>{ x.test = x.test===true && !seenTest ? (seenTest=true) : false; }); }
+  { const live=new Set(s.students.map(x=>x.id)); s.settings.analytics.hidden=s.settings.analytics.hidden.filter(id=>live.has(id)); }
   s.mode = (s.mode==="hits") ? "hits" : "strikes";
   s.seq ||= (Math.max(0,...s.students.map(x=>x.id||0))+1);
   return s;
@@ -925,6 +1141,45 @@ function timeAgo(ts){ const d=(Date.now()-ts)/1000;
   if(d<60) return "just now"; if(d<3600) return Math.floor(d/60)+"m ago"; if(d<86400) return Math.floor(d/3600)+"h ago";
   const dt=new Date(ts); return dt.toLocaleDateString(undefined,{month:"short",day:"numeric"})+" · "+dt.toLocaleTimeString(undefined,{hour:"numeric",minute:"2-digit"}); }
 const INTERVAL_MS={day:864e5,week:6048e5,month:2592e6};
+
+// ---- this device ----
+function deviceId(){
+  let d=null; try{ d=localStorage.getItem("madeleine_device"); }catch(e){}
+  if(!d){ d="d"+Math.random().toString(36).slice(2,8)+Date.now().toString(36).slice(-4); try{ localStorage.setItem("madeleine_device",d); }catch(e){} }
+  return d;
+}
+function deviceName(){
+  const u=navigator.userAgent||"";
+  if(/iPad/.test(u)) return "iPad";
+  if(/iPhone|iPod/.test(u)) return "iPhone";
+  if(/Android/.test(u)) return /Mobile/.test(u)?"Android phone":"Android tablet";
+  if(/CrOS/.test(u)) return "Chromebook";
+  if(/Macintosh|Mac OS X/.test(u)) return "Mac";
+  if(/Windows/.test(u)) return "Windows PC";
+  return "This device";
+}
+function recordLogin(){
+  if(!Array.isArray(state.logins)) state.logins=[];
+  state.logins.unshift({id:deviceId()+"-"+Date.now().toString(36),ts:Date.now(),device:deviceName(),dev:deviceId()});
+  if(state.logins.length>25) state.logins.length=25;
+  save();
+}
+function renderLogins(){
+  const el=$("#logins-list"); if(!el) return;
+  const ls=(state.logins||[]).slice(0,12), me=deviceId();
+  el.innerHTML = !ls.length
+    ? `<div class="empty" style="padding:14px 0">Nothing yet — this list fills in each time the passcode is used.</div>`
+    : ls.map(l=>`<div class="log-item"><span class="log-dot" style="background:var(--blue)"></span><div class="log-body"><div>${esc(l.device||"This device")}${l.dev===me?` <span class="chip">this one</span>`:""}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`).join("");
+}
+
+// ---- owner mode (reached only from the chooser) ----
+const DEFAULT_OWNER_CODE="5643";
+function ownerCode(){ try{ const c=localStorage.getItem("madeleine_ownercode"); return (c&&/^\d{4,8}$/.test(c))?c:DEFAULT_OWNER_CODE; }catch(e){ return DEFAULT_OWNER_CODE; } }
+function isOwner(){ try{ return localStorage.getItem("madeleine_owner")==="1"; }catch(e){ return false; } }
+function setOwner(on){
+  try{ on ? localStorage.setItem("madeleine_owner","1") : localStorage.removeItem("madeleine_owner"); }catch(e){}
+  if(on) document.documentElement.setAttribute("data-owner",""); else document.documentElement.removeAttribute("data-owner");
+}
 
 // ---- sound effects (built-in defaults are royalty-free Mixkit; teacher can upload their own in Settings) ----
 const DEFAULT_SFX_ADD="data:audio/mpeg;base64,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lT+nkNfRKQ2hTbIXFbJZPbFRMgUmikJRpFMVEqSZxdEFiVhwjYQOUPWHk2MUkakdlO30Eu9beij/IX9mw8K5YhcpNdiEZCf6kacmpGg4YdGT4cPDiFk+aEphhn4nKU8v9Slsf/UvKeXlepSleWruf/xqWbU2SJcloiehpXFkU5LNTZtzVJgFAlJqS5KRKExETJgi7SFFqgEEm1AC4v+iywaM7wtY5Y8VHbuVf/+qJ7sYqkdjLojsZf2MpHL6o+ZPVHb1T+qOxkdv///ojsZUdkmW+VEfRxIEFBhDs5TBQwIP/0tSxVETEg1XEUxVFOSSw0UtTEFNRTQuMFVVVVVVVf/7csQ0g8t1pMJsAEuIAAA0gAAABFVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVVV";
@@ -960,7 +1215,7 @@ function checkAutoReset(){   // returns true if it actually wiped, so callers ca
   if(Date.now() >= s.lastReset + INTERVAL_MS[s.interval]){
     const had=state.students.some(x=>x.strikes>0||x.hits>0);
     state.students.forEach(x=>{ x.strikes=0; x.hits=0; x.done={}; });
-    s.lastReset=Date.now();
+    s.lastReset=Date.now(); state.epoch=(state.epoch||0)+1;
     if(had) state.log.unshift({t:"reset",ts:Date.now(),note:"Auto reset ("+intervalWord(s.interval)+")"});
     save();
     return true;
@@ -978,9 +1233,9 @@ function giveStrike(id,reason){          // gives one mark in the CURRENT mode
   setCnt(st, cntOf(st)+1); setYear(st, yearOf(st)+1);
   beep(hits?"remove":"add");             // a point sounds light, a strike sounds heavy
   const triggered=hits?null:TIERS().find(t=> t.label.trim() && st.strikes===t.at);
-  state.log.unshift({t:w.log,ts:Date.now(),id,name:st.name,cls:st.cls,reason:(reason||"").trim(),count:cntOf(st)});
-  if(state.log.length>300) state.log.length=300;
-  save(); renderAll();
+  state.log.unshift({t:w.log,ts:Date.now(),id,name:st.name,cls:st.cls,reason:(reason||"").trim(),count:cntOf(st),eid:newEid()});
+  if(state.log.length>LOG_CAP) state.log.length=LOG_CAP;
+  save(); renderAll(); dbNudge();
   popCount(document.querySelector("#roster [data-strike='"+id+"']")?.closest(".student")?.querySelector(".count"));
   const r=reason&&reason.trim()?' — "'+reason.trim()+'"':"";
   const cons=triggered?" · "+triggered.label+" now due":"";
@@ -1034,9 +1289,9 @@ function resetStudent(id){
   if(prev>0) state.log.unshift({t:"reset",ts:Date.now(),note:"Reset "+st.name+" ("+W().p+")"});
   save(); renderAll(); toast(st.name+" — "+W().p+" reset to 0");
 }
-function removeStudent(id){ state.students=state.students.filter(x=>x.id!==id); save(); renderAll(); }
-function resetAll(){ state.students.forEach(x=>{ x.strikes=0; x.hits=0; x.done={}; }); state.settings.lastReset=Date.now(); state.log.unshift({t:"reset",ts:Date.now(),note:"All strikes and hits reset"}); save(); renderAll(); toast("Strikes and hits reset to 0"); }
-function newSchoolYear(){ state.students.forEach(x=>{ x.strikes=0; x.total=0; x.hits=0; x.hitTotal=0; x.done={}; }); state.settings.lastReset=Date.now(); state.log.unshift({t:"reset",ts:Date.now(),note:"New school year — all totals reset"}); save(); renderAll(); toast("New school year — totals reset"); }
+function removeStudent(id){ state.students=state.students.filter(x=>x.id!==id); pruneHidden(); save(); renderAll(); dbNudge(); }
+function resetAll(){ state.students.forEach(x=>{ x.strikes=0; x.hits=0; x.done={}; }); state.settings.lastReset=Date.now(); state.epoch=(state.epoch||0)+1; state.log.unshift({t:"reset",ts:Date.now(),note:"All strikes and hits reset"}); save(); renderAll(); toast("Strikes and hits reset to 0"); }
+function newSchoolYear(){ state.students.forEach(x=>{ x.strikes=0; x.total=0; x.hits=0; x.hitTotal=0; x.done={}; }); state.settings.lastReset=Date.now(); state.epoch=(state.epoch||0)+1; state.log.unshift({t:"reset",ts:Date.now(),note:"New school year — all totals reset"}); save(); renderAll(); toast("New school year — totals reset"); }
 
 // ---- backup: export / import ----
 function stamp(){ const d=new Date(); const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
@@ -1209,6 +1464,8 @@ function renderLog(){
   const el=$("#log");
   if(!state.log.length){ el.innerHTML=`<div class="empty" style="padding:24px">No activity yet.</div>`; return; }
   el.innerHTML=state.log.slice(0,40).map(l=>{
+    if(l.t==="db") return `<div class="log-item"><span class="log-dot db"></span><div class="log-body"><div>${esc(l.note||"")}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
+    if(l.t!=="strike"&&l.t!=="hit"&&l.t!=="reset"&&l.t!=="done") return "";
     if(l.t==="reset"||l.t==="done") return `<div class="log-item"><span class="log-dot good"></span><div class="log-body"><div>${esc(l.note||"")}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
     const isHit=l.t==="hit";
     return `<div class="log-item"><span class="log-dot" style="background:var(--${isHit?"green":"red"})"></span><div class="log-body"><div><strong>${esc(l.name)}</strong>${l.cls?` <span style="color:var(--muted)">· ${esc(l.cls)}</span>`:""} — ${isHit?"hit":"strike"} ${l.count}${l.reason?` <span class="log-reason">"${esc(l.reason)}"</span>`:""}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
@@ -1251,10 +1508,16 @@ function renderTierEditor(){
 function renderReasonEditor(){
   const el=$("#reason-editor"); if(!el) return;
   const list=REASONS();
+  const cats=allCats();
   el.innerHTML=list.map((r,i)=>`
     <div class="tier-row">
       <div class="tier-at"><span class="rkey">${reasonKey(i)}</span></div>
       <input class="input" value="${esc(r)}" placeholder="e.g. Talking in class" data-reason="${i}" aria-label="Quick reason ${reasonKey(i)}">
+      <select class="input catsel" data-cat="${i}" data-empty="${(REASON_CATS()[i]||"").trim()?"0":"1"}" aria-label="Category for ${esc(r)||"this reason"}">
+        <option value=""${(REASON_CATS()[i]||"").trim()?"":" selected"}>No category</option>
+        ${cats.map(c=>`<option value="${esc(c)}"${catKey(c)===catKey(REASON_CATS()[i]||"")?" selected":""}>${esc(c)}</option>`).join("")}
+        <option value="__new">+ New category\u2026</option>
+      </select>
       <button class="tier-del" data-reason-del="${i}" title="Remove"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg></button>
     </div>`).join("") || `<div class="tier-warn">No quick reasons yet — add one below.</div>`;
   const add=$("#add-reason"); if(add) add.style.display = list.length>=10 ? "none" : "";
@@ -1281,7 +1544,8 @@ function renderSettings(){
   $("#auto-interval").value=state.settings.interval;
   $("#auto-interval-row").style.opacity=state.settings.auto?"1":".45";
   $("#auto-interval").disabled=!state.settings.auto;
-  renderTierEditor(); renderReasonEditor();
+  renderTierEditor(); renderReasonEditor(); renderLogins(); renderTestPanel(); dbStatus();
+  { const c=$("#cc-code"), u=$("#cc-url"); if(c&&document.activeElement!==c) c.value=DB().code; if(u&&document.activeElement!==u) u.value=DB().url; }
   ["#panel-checkins","#panel-consequences"].forEach(sel=>{ const el=$(sel); if(el) el.style.display=isHits()?"none":""; });
   { const ph=$("#pass-hint"); if(ph) ph.textContent = (getPasscode()===DEFAULT_PASSCODE)
       ? "Currently the default (9096). 4\u20138 digits. Saved on this device only \u2014 if you use the app on a phone too, change it there as well."
@@ -1297,7 +1561,365 @@ function renderAll(){
   renderBackupBanner(); renderReminders(); renderStats(); renderRoster(); renderLog(); renderSettings();
   if($("#view-fast").classList.contains("show")) renderFastGrid();
   if($("#view-totals").style.display!=="none") renderTotals();
+  if($("#view-analytics") && $("#view-analytics").style.display!=="none") renderAnalytics();
 }
+
+// ================= categories =================
+function catKey(r){ return String(r||"").trim().toLowerCase().replace(/\s+/g," "); }
+function REASON_CATS(){ const a=state.settings.reasonCats; return Array.isArray(a)?a:(state.settings.reasonCats=[]); }
+function CATMAP(){ const m=state.settings.catMap; return (m&&typeof m==="object")?m:(state.settings.catMap={}); }
+// the one public read API — everything (chart, CSV, the sheet) goes through this
+function categoryOf(reason){
+  const k=catKey(reason); if(!k) return "";
+  const i=REASONS().findIndex(r=>catKey(r)===k);
+  if(i>-1){ const c=(REASON_CATS()[i]||"").trim(); if(c) return c; }
+  const m=(CATMAP()[k]||"").trim();                 // remembered through a rename
+  return m;
+}
+function setReasonCat(i,cat){
+  cat=(cat||"").trim();
+  REASON_CATS()[i]=cat;
+  const k=catKey(REASONS()[i]); if(k){ if(cat) CATMAP()[k]=cat; else delete CATMAP()[k]; }
+  save();
+}
+function allCats(){
+  const out=[];
+  REASON_CATS().forEach(c=>{ c=(c||"").trim(); if(c&&out.indexOf(c)<0) out.push(c); });
+  Object.values(CATMAP()).forEach(c=>{ c=(c||"").trim(); if(c&&out.indexOf(c)<0) out.push(c); });
+  return out;
+}
+
+// ================= TEST student =================
+const TEST_NAME="TEST STUDENT";
+function isTest(x){ return !!(x&&x.test===true); }
+function testStudent(){ return state.students.find(isTest)||null; }
+function addTestStudent(){
+  if(testStudent()) return;
+  state.students.push({id:state.seq++,name:TEST_NAME,cls:"",strikes:0,total:0,hits:0,hitTotal:0,done:{},test:true});
+  save(); renderAll(); toast("TEST STUDENT added — try tapping "+W().N+" on them");
+}
+function removeTestStudent(){
+  const t=testStudent(); if(!t) return;
+  state.students=state.students.filter(x=>!isTest(x));
+  state.log=state.log.filter(l=>!(l&&l.id===t.id));
+  pruneHidden(); save(); renderAll(); toast("TEST STUDENT removed");
+}
+function renderTestPanel(){
+  const b=$("#test-btn"), t=$("#test-t"); if(!b||!t) return;
+  const has=!!testStudent();
+  b.textContent = has ? "Remove TEST student" : "Add TEST student";
+  b.className = "btn btn-sm "+(has?"btn-ghost":"btn-primary");
+  t.textContent = has ? "TEST STUDENT is on your roster" : "Add a student to try things on";
+}
+
+// ================= Analytics =================
+const K_NONE=" none", K_OTHER=" other";
+const A_RANGES=[["week","This week"],["month","This month"],["year","This year"],["all","All time"]];
+const A_RW={week:"this week",month:"this month",year:"this year",all:"all time"};
+const A_DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+const LOG_CAP=1200;
+let aMuted=new Set(), aTableOpen=false, aLast=null;
+function A(){ const s=state.settings.analytics||(state.settings.analytics={}); if(!Array.isArray(s.hidden)) s.hidden=[]; s.group||="reason"; s.range||="month"; return s; }
+function pruneHidden(){ const live=new Set(state.students.map(x=>x.id)); const h=A().hidden; for(let i=h.length-1;i>=0;i--) if(!live.has(h[i])) h.splice(i,1); }
+function shortName(n){ const p=String(n).trim().split(/\s+/); return p.length>1 ? p[0]+" "+p[p.length-1][0]+"." : p[0]; }
+function aRangeStart(k){
+  const d=new Date();
+  if(k==="week"){ const n=new Date(d); n.setHours(0,0,0,0); n.setDate(n.getDate()-((n.getDay()+6)%7)); return n.getTime(); }
+  if(k==="month") return new Date(d.getFullYear(),d.getMonth(),1).getTime();
+  if(k==="year"){ const y=d.getMonth()>=7?d.getFullYear():d.getFullYear()-1; return new Date(y,7,1).getTime(); }
+  return 0;
+}
+function reasonList(){ return REASONS().map(r=>(r||"").trim()).filter(Boolean); }
+function catOrder(){ return allCats(); }
+function seriesOf(l,rs){
+  const r=(l.reason||"").trim(); if(!r) return K_NONE;
+  if(A().group==="cat"){ const c=categoryOf(r); return c||K_OTHER; }
+  return rs.has(r) ? r : K_OTHER;
+}
+function seriesLabel(k){ return k===K_NONE ? "No reason given" : k===K_OTHER ? (A().group==="cat"?"Uncategorised":"Other (typed in)") : k; }
+function seriesColor(k){
+  if(k===K_NONE) return "var(--c-none)";
+  if(k===K_OTHER) return "var(--c-other)";
+  const list=A().group==="cat"?catOrder():reasonList(), i=list.indexOf(k);
+  if(i>=0) return "var(--c"+(i%10+1)+")";
+  let h=0; for(let j=0;j<k.length;j++) h=(h*31+k.charCodeAt(j))%10;
+  return "var(--c"+(h+1)+")";
+}
+function aData(){
+  const a=A(), key=W().log, cut=aRangeStart(a.range), rs=new Set(reasonList()), hid=new Set(a.hidden);
+  const people=state.students.filter(x=>!hid.has(x.id));
+  const live=new Map(people.map(x=>[x.id,x]));
+  const rowMap=new Map(), ser=new Map(), days=[0,0,0,0,0,0,0];
+  let n=0, ghost=0, logged=0, oldest=Infinity;
+  state.log.forEach(l=>{
+    if(!l) return; if(l.ts<oldest) oldest=l.ts;
+    if(l.t!==key) return;
+    if(live.has(l.id)) logged++;
+    if(l.ts<cut) return;
+    if(!live.has(l.id)){ ghost++; return; }
+    const k=seriesOf(l,rs); n++; days[new Date(l.ts).getDay()]++;
+    ser.set(k,(ser.get(k)||0)+1);
+    let r=rowMap.get(l.id); if(!r){ r={x:live.get(l.id),tot:0,by:new Map()}; rowMap.set(l.id,r); }
+    r.tot++; r.by.set(k,(r.by.get(k)||0)+1);
+  });
+  const canon=a.group==="cat"?catOrder():reasonList();
+  const order=canon.filter(k=>ser.has(k));
+  [...ser.keys()].forEach(k=>{ if(k!==K_OTHER&&k!==K_NONE&&order.indexOf(k)<0) order.push(k); });
+  if(ser.has(K_OTHER)) order.push(K_OTHER);
+  if(ser.has(K_NONE)) order.push(K_NONE);
+  const rows=[...rowMap.values()].sort((p,q)=>q.tot-p.tot||p.x.name.localeCompare(q.x.name));
+  const top=[...ser.entries()].sort((p,q)=>q[1]-p[1])[0]||null;
+  let bd=-1; for(let i=0;i<7;i++) if(days[i]>(bd<0?0:days[bd])) bd=i;
+  const yearSum=people.reduce((v,x)=>v+yearOf(x),0);
+  return {rows,ser,order,n,people:people.length,top,busy:(bd>=0&&n)?A_DAYS[bd]:"",
+    zero:people.filter(x=>!rowMap.has(x.id)),
+    cut,ghost,oldest:isFinite(oldest)?oldest:0,trimmed:state.log.length>=LOG_CAP,
+    missing:Math.max(0,yearSum-logged)};
+}
+function aHint(){ return '<span class="a-dim">Tap a bar for the detail.</span>'; }
+function aSetReadout(html){ const el=$("#a-readout"); if(el) el.innerHTML=html||aHint(); }
+function aDetail(seg){
+  if(!aLast) return "";
+  const id=+seg.dataset.aid, k=seg.dataset.ak, r=aLast.rows.find(r=>r.x.id===id); if(!r) return "";
+  const n=r.by.get(k)||0;
+  return `<span class="a-sw" style="background:${seriesColor(k)}"></span><span><b>${esc(r.x.name)}</b> · ${esc(seriesLabel(k))} · <b>${plural(n,W().n)}</b> <span class="a-dim">of their ${r.tot} ${A_RW[A().range]}</span></span>`;
+}
+function aHide(id){
+  const st=state.students.find(x=>x.id===id), h=A().hidden;
+  if(h.indexOf(id)>-1) return; h.push(id); save(); renderAnalytics(true);
+  toastUndo((st?st.name:"Student")+" hidden from the graph", ()=>{ const i=A().hidden.indexOf(id); if(i>-1) A().hidden.splice(i,1); save(); renderAnalytics(true); });
+}
+function aShow(id){ const i=A().hidden.indexOf(id); if(i>-1) A().hidden.splice(i,1); save(); renderAnalytics(true); }
+function aAnimate(){
+  const bars=$$("#a-chart .abar-track");
+  if(!bars.length) return;
+  const clear=()=>bars.forEach(b=>{ b.style.transform=""; b.style.opacity=""; });
+  if(!motionOK()){ clear(); return; }
+  try{ const {animate,stagger}=window.Motion; animate(bars,{scaleX:[0,1]},{delay:stagger(0.018,{start:0.02}),duration:0.42,easing:[0.2,0.7,0.2,1]}); }catch(e){}
+  setTimeout(clear,1200);
+}
+function renderAnalytics(anim){
+  if(!$("#a-chart")) return;
+  const a=A(), w=W(); pruneHidden();
+  const d=aData(); aLast=d;
+  const active=d.order.filter(k=>!aMuted.has(k)), solo=active.length===1;
+  const maxTot=Math.max(1,...d.rows.map(r=>r.tot));
+  $("#a-group").innerHTML=[["reason","Reason"],["cat","Category"]].map(([k,t])=>`<button data-agroup="${k}" class="${a.group===k?"on":""}" aria-pressed="${a.group===k}">${t}</button>`).join("");
+  $("#a-range").innerHTML=A_RANGES.map(([k,t])=>`<button class="rtag ${a.range===k?"on":""}" data-arange="${k}" aria-pressed="${a.range===k}">${t}</button>`).join("");
+  $("#a-title").textContent=`${w.P} by ${a.group==="cat"?"category":"reason"}`;
+  $("#a-stats").innerHTML=`
+    <div class="stat"><div class="n">${d.n}</div><div class="l">${w.P} ${A_RW[a.range]}</div></div>
+    <div class="stat"><div class="n">${d.rows.length}</div><div class="l">Students involved</div></div>
+    <div class="stat"><div class="n" style="font-size:17px">${d.top?esc(seriesLabel(d.top[0])):"—"}</div><div class="l">Top reason${d.top?" · "+d.top[1]:""}</div></div>
+    <div class="stat"><div class="n" style="font-size:17px">${d.busy||"—"}</div><div class="l">Busiest day</div></div>`;
+  const chart=$("#a-chart");
+  if(!state.students.length) chart.innerHTML=`<div class="empty">Add students on the Roster tab first.<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" data-aaddtest="1">Add a TEST student to try it</button></div></div>`;
+  else if(!d.people) chart.innerHTML=`<div class="empty">Every student is hidden.<div style="margin-top:8px"><button class="btn btn-ghost btn-sm" data-ashowall="1">Show them all</button></div></div>`;
+  else if(!d.rows.length) chart.innerHTML=`<div class="empty">No ${esc(w.p)} ${A_RW[a.range]}.${a.range!=="all"?" Try <b>All time</b>.":""}</div>`;
+  else chart.innerHTML=d.rows.map(r=>{
+    const segs=d.order.filter(k=>r.by.has(k)&&!aMuted.has(k));
+    const ftot=segs.reduce((v,k)=>v+r.by.get(k),0);
+    const brk=segs.map(k=>seriesLabel(k)+" "+r.by.get(k)).join(", ");
+    return `<div class="abar">
+      <div class="abar-name" title="${esc(r.x.name)}">${isTest(r.x)?'<span class="chip test">TEST</span> ':""}${esc(shortName(r.x.name))}</div>
+      <button class="abar-track" data-arow="${r.x.id}" aria-label="${esc(r.x.name+" — "+plural(ftot,w.n)+(brk?": "+brk:""))}">${
+        segs.map(k=>`<span class="abar-seg" style="width:${(r.by.get(k)/maxTot*100).toFixed(2)}%;background:${seriesColor(k)}" data-aid="${r.x.id}" data-ak="${esc(k)}" title="${esc(seriesLabel(k))}: ${r.by.get(k)}"></span>`).join("")
+      }</button>
+      <div class="abar-tot">${ftot}</div>
+      <button class="abar-x" data-ahide="${r.x.id}" title="Hide ${esc(r.x.name)} from the graph" aria-label="Hide ${esc(r.x.name)} from the graph"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3l18 18"/><path d="M10.6 5.1A9.7 9.7 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-2.6 3.4M6.6 6.6A17 17 0 0 0 2 12s4 7 10 7a9.6 9.6 0 0 0 4.6-1.1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg></button>
+    </div>`;
+  }).join("");
+  const zl=$("#a-zero");
+  if(d.rows.length && d.zero.length){ zl.style.display=""; zl.innerHTML=`<b>No ${esc(w.p)} ${A_RW[a.range]}:</b> ${d.zero.map(x=>esc(x.name)).join(", ")}`; }
+  else zl.style.display="none";
+  $("#a-legend").innerHTML=d.order.map(k=>`<button class="aleg ${aMuted.has(k)?"off":""}" data-aser="${esc(k)}" aria-pressed="${!aMuted.has(k)}" title="${aMuted.has(k)?"Show":"Hide"} ${esc(seriesLabel(k))} in the graph"><span class="a-sw" style="background:${seriesColor(k)}"></span>${esc(seriesLabel(k))}<span class="aleg-n">${d.ser.get(k)}</span></button>`).join("");
+  const hid=A().hidden.map(id=>state.students.find(x=>x.id===id)).filter(Boolean);
+  $("#a-hidden").innerHTML=hid.length?`<div class="hidebar">
+    <span class="sp">Hidden from this graph only — nothing is deleted, and their strikes still count everywhere else.</span>
+    <div class="hidegrid">${hid.map(x=>`<button class="hchip off" data-ashow="${x.id}" title="Show ${esc(x.name)} again"><span class="hdot" style="background:${colorFor(x.id)}">${esc(initials(x.name))}</span><span class="hn">${esc(x.name)}</span></button>`).join("")}
+    ${hid.length>1?`<button class="btn btn-ghost btn-sm" data-ashowall="1">Show all</button>`:""}</div>
+  </div>`:"";
+  const note=$("#a-note"), bits=[];
+  if(d.trimmed && d.cut<d.oldest){
+    bits.push(`This graph goes back to <b>${new Date(d.oldest).toLocaleDateString(undefined,{month:"short",day:"numeric",year:"numeric"})}</b>.`
+      +((a.range==="all"||a.range==="year")&&d.missing?` About <b>${d.missing}</b> earlier ${esc(w.p)} aren’t counted here.`:"")
+      +` The <b>This Year</b> tab always has the true totals.`);
+  }
+  if(d.ghost) bits.push(`${plural(d.ghost,w.n)} from students who have since been removed aren’t shown.`);
+  if(bits.length){ note.style.display=""; note.innerHTML=bits.join(" "); } else note.style.display="none";
+  const keys=d.order;
+  $("#a-table").innerHTML=!d.rows.length
+    ? `<tbody><tr><td style="color:var(--muted)">Nothing to show for ${A_RW[a.range]}.</td></tr></tbody>`
+    : `<thead><tr><th>Student</th>${keys.map(k=>`<th class="num">${esc(seriesLabel(k))}</th>`).join("")}<th class="num">Total</th></tr></thead>
+       <tbody>${d.rows.map(r=>`<tr><td>${esc(r.x.name)}</td>${keys.map(k=>`<td class="num">${r.by.get(k)||""}</td>`).join("")}<td class="num">${r.tot}</td></tr>`).join("")}</tbody>`;
+  $("#a-table-wrap").style.display=aTableOpen?"":"none";
+  $("#a-table-btn").textContent=aTableOpen?"Hide numbers":"Show numbers";
+  $("#a-table-btn").setAttribute("aria-expanded",String(aTableOpen));
+  aSetReadout("");
+  if(anim) aAnimate(); else $$("#a-chart .abar-track").forEach(b=>{ b.style.transform=""; b.style.opacity=""; });
+}
+
+// ================= spreadsheet export (no setup needed) =================
+const CSV_NUM=/^-?\d+(\.\d+)?$/;
+function csvCell(v){
+  let s=(v==null?"":String(v)).replace(/[\r\n]+/g," ").trim();
+  if(/^[=+@\t-]/.test(s) && !CSV_NUM.test(s)) s="'"+s;      // a reason typed as "=1+1" must not become a formula
+  return /[",]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
+}
+function csvWhen(ts){ const d=new Date(ts), p=n=>String(n).padStart(2,"0");
+  return { d:d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()), t:p(d.getHours())+":"+p(d.getMinutes()),
+    w:["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"][d.getDay()] }; }
+function lastMark(x,kind){
+  const l=state.log.find(l=>l&&l.t===kind&&l.id===x.id);
+  if(!l) return {when:"",reason:""};
+  const k=csvWhen(l.ts);
+  return {when:k.d+" "+k.t, reason:(l.reason||"").trim()};
+}
+function csvRoster(){
+  const rows=[["Student","Class","Strikes now","Strikes this year","Hits now","Hits this year","Last strike","Last strike — reason","Last hit","Last hit — reason","Test student"]];
+  state.students.slice().sort((a,b)=>a.name.localeCompare(b.name)).forEach(x=>{
+    const ls=lastMark(x,"strike"), lh=lastMark(x,"hit");
+    rows.push([x.name,x.cls||"",x.strikes||0,x.total||0,x.hits||0,x.hitTotal||0,ls.when,ls.reason,lh.when,lh.reason,isTest(x)?"yes":""]);
+  });
+  return rows;
+}
+function csvEvents(){
+  const rows=[["When","Date","Time","Weekday","Student","Class","Type","Reason","Category","Count after"]];
+  state.log.filter(l=>l&&(l.t==="strike"||l.t==="hit")).slice().reverse().forEach(l=>{
+    const k=csvWhen(l.ts), r=(l.reason||"").trim();
+    rows.push([k.d+" "+k.t,k.d,k.t,k.w,l.name||"",l.cls||"",l.t==="hit"?"Hit":"Strike",r,categoryOf(r),Number.isFinite(l.count)?l.count:""]);
+  });
+  return rows;
+}
+function csvText(rows){ return rows.map(r=>r.map(csvCell).join(",")).join("\r\n")+"\r\n"; }
+function csvDownload(name,text){
+  try{
+    const blob=new Blob(["﻿"+text],{type:"text/csv;charset=utf-8"});
+    const url=URL.createObjectURL(blob), a=document.createElement("a");
+    a.href=url; a.download=name; document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(url),1500); return true;
+  }catch(e){ return false; }
+}
+function dbLog(note){ state.log.unshift({t:"db",ts:Date.now(),note}); if(state.log.length>LOG_CAP) state.log.length=LOG_CAP; }
+function exportSheets(){
+  if(!state.students.length){ toast("No students yet."); return; }
+  const ok1=csvDownload("The Database - everyone - "+stamp()+".csv", csvText(csvRoster()));
+  const ev=csvEvents();
+  if(ev.length>1) setTimeout(()=>csvDownload("The Database - activity - "+stamp()+".csv", csvText(ev)),700);
+  if(!ok1){ alert("Couldn't create the spreadsheet file."); return; }
+  dbLog("The Database — spreadsheet saved to this device");
+  save(); renderAll(); toast("Saved for Google Sheets");
+}
+
+// ================= The Database (sync) =================
+function DB(){ const d=state.settings.db||(state.settings.db={}); if(typeof d.code!=="string") d.code=""; if(typeof d.url!=="string") d.url=""; return d; }
+function dbOn(){ const d=DB(); return !!(d.url&&d.code); }
+function studentKey(x){ return String(x.name||"").trim().toLowerCase().replace(/\s+/g," ")+"|"+String(x.cls||"").trim().toLowerCase(); }
+function newEid(){ return deviceId()+"-"+Date.now().toString(36)+"-"+Math.random().toString(36).slice(2,6); }
+let dbBusy=false, dbTimer=null, dbPhase="idle";
+
+function dbPayload(){
+  return {v:1, code:DB().code, device:deviceId(), deviceName:deviceName(), epoch:state.epoch||0,
+    students: state.students.map(x=>({key:studentKey(x),name:x.name,cls:x.cls||"",strikes:x.strikes||0,total:x.total||0,
+      hits:x.hits||0,hitTotal:x.hitTotal||0,done:x.done||{},test:!!x.test,
+      lastStrike:lastMark(x,"strike"),lastHit:lastMark(x,"hit")})),
+    events: state.log.filter(l=>l&&(l.t==="strike"||l.t==="hit")&&l.eid).slice(0,400)
+      .map(l=>{ const x=state.students.find(s=>s.id===l.id);
+        return {eid:l.eid,t:l.t,ts:l.ts,key:x?studentKey(x):String(l.name||"").trim().toLowerCase()+"|"+String(l.cls||"").trim().toLowerCase(),
+          name:l.name,cls:l.cls||"",reason:l.reason||"",category:categoryOf(l.reason),count:l.count||0}; }),
+    logins: (state.logins||[]).slice(0,25),
+    settingsTs: state.settings.ts||0,
+    settings: {reasons:REASONS(),reasonCats:REASON_CATS(),catMap:CATMAP(),tiers:state.settings.tiers}};
+}
+function dbMerge(res){
+  if(!res||!Array.isArray(res.students)) return 0;
+  let changed=0;
+  const rE=+res.epoch||0, lE=state.epoch||0;
+  const pick=(a,b)=> rE>lE ? b : (rE<lE ? a : Math.max(a,b));   // most marks wins; a newer reset wins outright
+  const byKey=new Map(state.students.map(x=>[studentKey(x),x]));
+  res.students.forEach(r=>{
+    if(!r||!r.name||!r.key) return;
+    let x=byKey.get(r.key);
+    if(!x){ x={id:state.seq++,name:r.name,cls:r.cls||"",strikes:0,total:0,hits:0,hitTotal:0,done:{},test:!!r.test};
+            state.students.push(x); byKey.set(r.key,x); changed++; }
+    const ns=pick(x.strikes||0,+r.strikes||0), nh=pick(x.hits||0,+r.hits||0);
+    const nt=Math.max(x.total||0,+r.total||0), nht=Math.max(x.hitTotal||0,+r.hitTotal||0);
+    if(ns!==(x.strikes||0)||nh!==(x.hits||0)||nt!==(x.total||0)||nht!==(x.hitTotal||0)) changed++;
+    x.strikes=ns; x.hits=nh; x.total=nt; x.hitTotal=nht;
+    if(r.done&&typeof r.done==="object") Object.keys(r.done).forEach(k=>{ if(r.done[k]) x.done[k]=true; });
+    syncDone(x);
+  });
+  if(rE>lE) state.epoch=rE;
+  if(Array.isArray(res.events)){
+    const have=new Set(state.log.map(l=>l&&l.eid).filter(Boolean));
+    const add=[];
+    res.events.forEach(e=>{
+      if(!e||!e.eid||have.has(e.eid)) return;
+      const x=byKey.get(e.key); if(!x) return;                   // never land a mark on a guessed student
+      add.push({t:e.t==="hit"?"hit":"strike",ts:+e.ts||Date.now(),id:x.id,name:x.name,cls:x.cls||"",
+                reason:e.reason||"",count:+e.count||0,eid:e.eid});
+      have.add(e.eid);
+    });
+    if(add.length){                                             // merge, then sort, then trim ONCE
+      state.log=state.log.concat(add).sort((a,b)=>(b.ts||0)-(a.ts||0));
+      if(state.log.length>LOG_CAP) state.log.length=LOG_CAP;
+      changed+=add.length;
+    }
+  }
+  if(Array.isArray(res.logins)){
+    const have=new Set((state.logins||[]).map(l=>l&&l.id));
+    const add=res.logins.filter(l=>l&&l.id&&l.ts&&!have.has(l.id));
+    if(add.length) state.logins=(state.logins||[]).concat(add).sort((a,b)=>b.ts-a.ts).slice(0,25);
+  }
+  if(res.settings && (+res.settingsTs||0) > (state.settings.ts||0)){
+    const t=res.settings;
+    if(Array.isArray(t.reasons)) state.settings.reasons=t.reasons.slice(0,10);
+    if(Array.isArray(t.reasonCats)) state.settings.reasonCats=t.reasonCats.slice(0,10);
+    if(t.catMap&&typeof t.catMap==="object") state.settings.catMap=t.catMap;
+    if(Array.isArray(t.tiers)&&t.tiers.length) state.settings.tiers=t.tiers;
+    state.settings.ts=+res.settingsTs||0; changed++;
+  }
+  return changed;
+}
+function dbStatus(){
+  const st=$("#cc-state"), de=$("#cc-detail"); if(!st||!de) return;
+  const d=DB();
+  $("#cc-connect").style.display = dbOn()?"none":"";
+  $("#cc-now").style.display = dbOn()?"":"none";
+  $("#cc-off").style.display = dbOn()?"":"none";
+  if(!dbOn()){ st.innerHTML='<span class="sync-dot"></span>Not connected'; de.textContent="Put in the code and the link, then press Connect."; return; }
+  if(dbPhase==="sync"){ st.innerHTML='<span class="sync-dot" style="background:var(--blue)"></span>Syncing…'; de.textContent="Talking to The Database."; return; }
+  if(dbPhase==="err"){ st.innerHTML='<span class="sync-dot" style="background:var(--amber)"></span>Couldn’t reach The Database'; de.textContent="Everything still works on this device. It will try again on its own."; return; }
+  st.innerHTML='<span class="sync-dot" style="background:var(--green)"></span>Connected';
+  de.textContent = d.last ? ("Synced "+timeAgo(d.last)+" · code "+d.code) : ("Code "+d.code);
+}
+function dbSetPhase(p){ dbPhase=p; dbStatus(); }
+function dbSync(manual){
+  if(!dbOn()||dbBusy) return Promise.resolve(false);
+  dbBusy=true; dbSetPhase("sync");
+  return fetch(DB().url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
+      body:JSON.stringify(dbPayload()),redirect:"follow"})
+    .then(r=>r.text())
+    .then(txt=>{
+      let res=null; try{ res=JSON.parse(txt); }catch(e){}
+      if(!res||!res.ok) throw new Error(res&&res.error||"The Database didn't answer properly");
+      const n=dbMerge(res);
+      DB().last=Date.now(); DB().fails=0;
+      if(n) dbLog(n+" change"+(n===1?"":"s")+" arrived from The Database");
+      save(); renderAll(); dbSetPhase("ok");
+      if(manual) toast(n?("Synced — "+n+" change"+(n===1?"":"s")):"Synced — everything already matched");
+      return true;
+    })
+    .catch(e=>{
+      DB().fails=(DB().fails||0)+1;
+      if(DB().fails===1) dbLog("Couldn’t reach The Database — kept on this device for now");
+      save(); dbSetPhase("err");
+      if(manual) toast("Couldn't reach The Database");
+      return false;
+    })
+    .then(v=>{ dbBusy=false; return v; });
+}
+function dbNudge(){ if(!dbOn()) return; clearTimeout(dbTimer); dbTimer=setTimeout(()=>dbSync(false),4000); }
 
 // toast
 let toastTimer;
@@ -1369,11 +1991,13 @@ function switchView(v){
   $("#view-board").style.display=v==="board"?"block":"none";
   $("#view-settings").style.display=v==="settings"?"block":"none";
   $("#view-totals").style.display=v==="totals"?"block":"none";
+  $("#view-analytics").style.display=v==="analytics"?"block":"none";
   $("#view-fast").classList.toggle("show", v==="fast");
   closeMenus();
   if(v==="fast"){ $("#fast-search").value=""; $("#fast-reason").value=""; updateReasonClear(); fastReasonChips(); renderFastGrid(); setTimeout(()=>$("#fast-search").focus(),50); }
   if(v==="settings") renderSettings();
   if(v==="totals") renderTotals();
+  if(v==="analytics") renderAnalytics(true);
   animView(v);
 }
 function closeMenus(){ $$(".menu.open").forEach(m=>m.classList.remove("open")); }
@@ -1483,9 +2107,9 @@ $("#tier-editor").addEventListener("change",e=>{ const t=e.target; if(t.dataset.
   state.settings.tiers[i].at=v; sortTiers(); state.students.forEach(syncDone); save(); renderAll();
 });
 $("#tier-editor").addEventListener("click",e=>{ const b=e.target.closest("[data-tier-del]"); if(!b) return; state.settings.tiers.splice(+b.dataset.tierDel,1); state.students.forEach(syncDone); save(); renderAll(); });
-$("#reason-editor").addEventListener("input",e=>{ const t=e.target.closest("input[data-reason]"); if(!t) return; const i=+t.dataset.reason; if(state.settings.reasons[i]!==undefined){ state.settings.reasons[i]=t.value; save(); } });
-$("#reason-editor").addEventListener("click",e=>{ const b=e.target.closest("[data-reason-del]"); if(!b) return; state.settings.reasons.splice(+b.dataset.reasonDel,1); save(); renderSettings(); });
-$("#add-reason").onclick=()=>{ const l=state.settings.reasons; if(l.length>=10) return; l.push(""); save(); renderSettings(); setTimeout(()=>{ const ins=$$("#reason-editor input[data-reason]"); if(ins.length) ins[ins.length-1].focus(); },30); };
+$("#reason-editor").addEventListener("input",e=>{ const t=e.target.closest("input[data-reason]"); if(!t) return; const i=+t.dataset.reason; if(state.settings.reasons[i]!==undefined){ state.settings.reasons[i]=t.value; bumpSettings(); save(); dbNudge(); } });
+$("#reason-editor").addEventListener("click",e=>{ const b=e.target.closest("[data-reason-del]"); if(!b) return; const i=+b.dataset.reasonDel; state.settings.reasons.splice(i,1); REASON_CATS().splice(i,1); bumpSettings(); save(); renderSettings(); });
+$("#add-reason").onclick=()=>{ const l=state.settings.reasons; if(l.length>=10) return; l.push(""); REASON_CATS().push(""); bumpSettings(); save(); renderSettings(); setTimeout(()=>{ const ins=$$("#reason-editor input[data-reason]"); if(ins.length) ins[ins.length-1].focus(); },30); };
 $("#add-tier").onclick=()=>{ const ts=state.settings.tiers||(state.settings.tiers=[]); let nextAt=ts.length?Math.min(99,Math.max(...ts.map(t=>t.at))+1):2;
   while(ts.some(t=>t.at===nextAt) && nextAt<99) nextAt++;
   if(ts.some(t=>t.at===nextAt)){ toast("No free strike number left — free one up first."); return; }
@@ -1643,6 +2267,35 @@ document.addEventListener("keydown",e=>{
 // ---------- entry: choose a dashboard, then the passcode ----------
 (function initChooser(){
   const ci=document.querySelector("#crest img"); if(ci) $("#ch-logo-img").src=ci.src;
+
+  // five taps on the crest -> code field. Nothing about it is written down anywhere else.
+  const logo=$("#chooser .gate-logo"), dots=$("#ch-dots"), row=$("#ch-code-row"), inp=$("#ch-code");
+  let taps=0, tapTimer=null;
+  function paint(){
+    dots.classList.toggle("show", taps>=3);
+    $$("#ch-dots i").forEach((d,i)=>d.classList.toggle("lit", i<taps));
+  }
+  logo.addEventListener("click",()=>{
+    if(row.classList.contains("show")) return;
+    taps++; clearTimeout(tapTimer);
+    tapTimer=setTimeout(()=>{ taps=0; paint(); },3000);
+    if(taps>=5){ taps=0; paint(); row.classList.add("show"); dots.classList.remove("show"); setTimeout(()=>inp.focus(),40); }
+    else paint();
+  });
+  function trySecret(){
+    if(inp.value.trim()===ownerCode()){
+      setOwner(true); inp.value=""; row.classList.remove("show");
+      dots.classList.add("show","ok"); $$("#ch-dots i").forEach(d=>d.classList.add("lit"));
+      setTimeout(()=>{ dots.classList.remove("show","ok"); $$("#ch-dots i").forEach(d=>d.classList.remove("lit")); },1400);
+      try{ renderSettings(); }catch(e){}
+    } else {
+      inp.value="";
+      const c=$(".ch-card"); c.classList.remove("gate-shake"); void c.offsetWidth; c.classList.add("gate-shake"); inp.focus();
+    }
+  }
+  $("#ch-code-go").onclick=trySecret;
+  inp.addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); trySecret(); } });
+
   $("#chooser").addEventListener("click",e=>{
     const b=e.target.closest(".ch-opt"); if(!b) return;
     setMode(b.dataset.mode);
@@ -1662,6 +2315,7 @@ function getPasscode(){ try{ const p=localStorage.getItem("madeleine_passcode");
     if(gi.value.trim()===getPasscode()){
       document.documentElement.setAttribute("data-unlocked",""); updateInert();
       try{ localStorage.setItem("madeleine_unlocked","1"); }catch(e){}
+      try{ recordLogin(); renderLogins(); }catch(e){}
       try{ checkDailyReminder(); }catch(e){}
       try{ animView("board"); }catch(e){}
       maybeBackup();
@@ -1676,7 +2330,73 @@ function getPasscode(){ try{ const p=localStorage.getItem("madeleine_passcode");
   if(!document.documentElement.hasAttribute("data-unlocked") && document.documentElement.hasAttribute("data-chosen")) setTimeout(()=>gi.focus(),60);
 })();
 
+// ---- settings stamp (newest settings win when two devices differ) ----
+function bumpSettings(){ state.settings.ts=Date.now(); }
+
+// ---- categories ----
+$("#reason-editor").addEventListener("change",e=>{
+  const sel=e.target.closest("select[data-cat]"); if(!sel) return;
+  const i=+sel.dataset.cat;
+  if(sel.value==="__new"){
+    const name=(prompt("Name the new category\n\n(e.g. Disruption, Respect, Work)")||"").trim();
+    if(!name){ renderReasonEditor(); return; }
+    setReasonCat(i,name);
+  } else setReasonCat(i,sel.value);
+  bumpSettings(); save(); renderReasonEditor(); dbNudge();
+  if($("#view-analytics").style.display!=="none") renderAnalytics(false);
+});
+
+// ---- analytics ----
+$("#a-group").addEventListener("click",e=>{ const b=e.target.closest("[data-agroup]"); if(!b) return; A().group=b.dataset.agroup; aMuted.clear(); save(); renderAnalytics(true); });
+$("#a-range").addEventListener("click",e=>{ const b=e.target.closest("[data-arange]"); if(!b) return; A().range=b.dataset.arange; save(); renderAnalytics(true); });
+$("#a-legend").addEventListener("click",e=>{ const b=e.target.closest("[data-aser]"); if(!b) return; const k=b.dataset.aser; if(aMuted.has(k)) aMuted.delete(k); else aMuted.add(k); renderAnalytics(true); });
+$("#a-hidden").addEventListener("click",e=>{
+  const sh=e.target.closest("[data-ashow]"); if(sh){ aShow(+sh.dataset.ashow); return; }
+  if(e.target.closest("[data-ashowall]")){ A().hidden.length=0; save(); renderAnalytics(true); }
+});
+$("#a-table-btn").onclick=()=>{ aTableOpen=!aTableOpen; renderAnalytics(false); };
+$("#a-chart").addEventListener("click",e=>{
+  const h=e.target.closest("[data-ahide]"); if(h){ aHide(+h.dataset.ahide); return; }
+  if(e.target.closest("[data-ashowall]")){ A().hidden.length=0; save(); renderAnalytics(true); return; }
+  if(e.target.closest("[data-aaddtest]")){ addTestStudent(); switchView("analytics"); return; }
+  const sg=e.target.closest(".abar-seg"); if(sg){ aSetReadout(aDetail(sg)); return; }
+  const t=e.target.closest(".abar-track"); if(t) aSetReadout(esc(t.getAttribute("aria-label")));
+});
+$("#a-chart").addEventListener("pointermove",e=>{ if(e.pointerType!=="mouse") return; const sg=e.target.closest(".abar-seg"); if(sg) aSetReadout(aDetail(sg)); });
+$("#a-chart").addEventListener("pointerleave",e=>{ if(e.pointerType==="mouse") aSetReadout(""); });
+$("#a-chart").addEventListener("focusin",e=>{ const t=e.target.closest(".abar-track"); if(t) aSetReadout(esc(t.getAttribute("aria-label"))); });
+
+// ---- TEST student ----
+$("#test-btn").onclick=()=>{ testStudent() ? removeTestStudent() : addTestStudent(); };
+
+// ---- spreadsheet ----
+$("#sheets-btn").onclick=exportSheets;
+
+// ---- Code Center ----
+$("#cc-connect").onclick=()=>{
+  const code=($("#cc-code").value||"").trim(), url=($("#cc-url").value||"").trim();
+  if(!/^\d{3,12}$/.test(code)){ toast("Put in a class code — digits only."); $("#cc-code").focus(); return; }
+  if(!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)){ toast("That link should start with https://script.google.com and end in /exec"); $("#cc-url").focus(); return; }
+  DB().code=code; DB().url=url; DB().fails=0; save();
+  dbLog("Joined The Database"); save(); renderAll();
+  dbSync(true);
+};
+$("#cc-now").onclick=()=>dbSync(true);
+$("#cc-off").onclick=()=>{
+  if(!confirm("Disconnect from The Database?\n\nEverything stays on this device. It just stops syncing.")) return;
+  DB().url=""; DB().code=""; dbLog("Left The Database"); save(); renderAll(); toast("Disconnected");
+};
+$("#cc-leave").onclick=()=>{ setOwner(false); renderSettings(); switchView("board"); };
+$("#cc-copy-gs").onclick=()=>{
+  fetch("./Code.gs").then(r=>{ if(!r.ok) throw 0; return r.text(); })
+    .then(t=>navigator.clipboard.writeText(t))
+    .then(()=>toast("Code.gs copied \u2014 paste it into Apps Script"))
+    .catch(()=>{ window.open("./Code.gs","_blank"); });
+};
+document.addEventListener("visibilitychange",()=>{ if(!document.hidden && dbOn()) dbSync(false); });
+
 // boot
+setOwner(isOwner());
 updateThemeIcon();
 applyMode();
 updateInert();
@@ -1685,5 +2405,5 @@ renderAll();
 maybeBackup();
 checkDailyReminder();
 if(document.documentElement.hasAttribute("data-unlocked")) animView("board");
-setInterval(()=>{ const wiped=checkAutoReset(); maybeBackup(); checkDailyReminder(); if(wiped) renderAll(); else if($("#view-board").style.display!=="none") renderLog(); }, 60000);
+setInterval(()=>{ const wiped=checkAutoReset(); maybeBackup(); checkDailyReminder(); if(dbOn()) dbSync(false); if(wiped) renderAll(); else if($("#view-board").style.display!=="none") renderLog(); }, 60000);
 </script>
