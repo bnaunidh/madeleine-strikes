@@ -408,17 +408,17 @@
   .set-group:first-of-type{margin-top:6px}
   .set-group span{font-size:12.5px;font-weight:450;color:var(--muted);letter-spacing:0}
   .set-group+.panel{margin-top:0!important}
-  .set-group.foldable{flex-direction:row;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:13px 16px;margin:10px 0 0;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);transition:.15s}
-  .set-group.foldable:hover{border-color:var(--blue)}
-  .set-group.foldable span{flex:1 1 auto;margin-top:2px}
-  .set-group.foldable .fold-ar{flex:0 0 auto;color:var(--muted);transition:transform .2s}
-  .set-group.foldable.open{border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0}
-  .set-group.foldable.open .fold-ar{transform:rotate(180deg)}
+  .set-nav{display:flex;gap:4px;background:var(--bg);border:1px solid var(--line);padding:4px;border-radius:12px;margin-bottom:18px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+  .set-nav::-webkit-scrollbar{display:none}
+  .set-nav button{flex:1 0 auto;white-space:nowrap;padding:8px 14px;border-radius:9px;font-size:13px;font-weight:600;color:var(--muted);transition:.15s}
+  .set-nav button:hover{color:var(--ink)}
+  .set-nav button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(20,28,45,.09)}
   .set-sec{display:none}
-  .set-sec.open{display:block}
-  .set-sec.open>.panel:first-child{border-top-left-radius:0;border-top-right-radius:0;margin-top:0!important;border-top:0}
+  .set-sec.on{display:block}
+  .set-sec.on>.panel:first-child{margin-top:0!important}
   :root[data-layout="classic"] .set-sec{display:block}
-  :root[data-layout="classic"] .set-group.foldable{display:none}
+  :root[data-layout="classic"] .set-nav{display:none}
+  @media(max-width:560px){ .set-nav button{padding:7px 11px;font-size:12.5px} }
   .iconpick{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--field-bg);color:var(--ink);display:grid;place-items:center;flex:0 0 auto;transition:.15s}
   .iconpick:hover{border-color:var(--green)}
   .iconbar{display:none;flex:1 1 100%;gap:5px;flex-wrap:wrap;padding:8px 0 2px}
@@ -1809,35 +1809,38 @@ function renderReasonEditor(){
     </div>`).join("") || `<div class="tier-warn">No quick reasons yet — add one below.</div>`;
   const add=$("#add-reason"); if(add) add.style.display = list.length>=10 ? "none" : "";
 }
-// Settings had grown to 16 panels. Each heading now folds its own group away.
+// Settings has 16 panels. One section shows at a time, picked from a strip at the top —
+// same shape as the main tabs, so it reads like the rest of the app.
 function buildSettingsSections(){
-  const view=$("#view-settings"); if(!view || view.dataset.folded) return;
-  view.dataset.folded="1";
+  const view=$("#view-settings"); if(!view || view.dataset.sectioned) return;
   const heads=[...view.querySelectorAll(".set-group")];
+  if(!heads.length) return;
+  view.dataset.sectioned="1";
+  const names=[];
   heads.forEach((h,i)=>{
+    names.push((h.childNodes[0] && h.childNodes[0].textContent || ("Section "+(i+1))).trim());
     const wrap=document.createElement("div");
     wrap.className="set-sec"; wrap.id="sec-"+i;
     h.after(wrap);
     let n=wrap.nextSibling;
     while(n && !(n.classList && n.classList.contains("set-group"))){ const next=n.nextSibling; wrap.appendChild(n); n=next; }
-    h.classList.add("foldable"); h.setAttribute("role","button"); h.tabIndex=0;
-    h.setAttribute("aria-controls",wrap.id);
-    h.insertAdjacentHTML("beforeend",'<svg class="fold-ar" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>');
-    const open = openSections().indexOf(i)>-1;
-    wrap.classList.toggle("open", open); h.classList.toggle("open", open);
-    h.setAttribute("aria-expanded", String(open));
-    const toggle=()=>{
-      const now=!wrap.classList.contains("open");
-      wrap.classList.toggle("open", now); h.classList.toggle("open", now);
-      h.setAttribute("aria-expanded", String(now));
-      const list=openSections().filter(x=>x!==i); if(now) list.push(i);
-      try{ localStorage.setItem("madeleine_sections", JSON.stringify(list)); }catch(e){}
-    };
-    h.addEventListener("click",toggle);
-    h.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(); } });
+    h.remove();                                   // the strip replaces the headings
   });
+  const bar=document.createElement("div");
+  bar.className="set-nav"; bar.id="set-nav"; bar.setAttribute("role","group"); bar.setAttribute("aria-label","Settings sections");
+  bar.innerHTML=names.map((n,i)=>`<button data-sec="${i}">${esc(n)}</button>`).join("");
+  view.insertBefore(bar, view.firstElementChild);
+  bar.addEventListener("click",e=>{ const b=e.target.closest("[data-sec]"); if(b) showSection(+b.dataset.sec); });
+  showSection(currentSection());
 }
-function openSections(){ try{ const v=JSON.parse(localStorage.getItem("madeleine_sections")); return Array.isArray(v)?v:[]; }catch(e){ return []; } }
+function currentSection(){ let v=0; try{ v=parseInt(localStorage.getItem("madeleine_section"),10); }catch(e){} return Number.isFinite(v)?v:0; }
+function showSection(i){
+  const secs=$$("#view-settings .set-sec"); if(!secs.length) return;
+  if(i<0||i>=secs.length) i=0;
+  secs.forEach((s,k)=>s.classList.toggle("on", k===i));
+  $$("#set-nav button").forEach((b,k)=>{ b.classList.toggle("on", k===i); b.setAttribute("aria-pressed", String(k===i)); });
+  try{ localStorage.setItem("madeleine_section", String(i)); }catch(e){}
+}
 function renderSettings(){
   $("#remind-switch").classList.toggle("on", state.settings.reminders);
   $("#sound-switch").classList.toggle("on", state.settings.sound);
@@ -3081,6 +3084,7 @@ function getPasscode(){ try{ const p=localStorage.getItem("madeleine_passcode");
       document.documentElement.setAttribute("data-unlocked",""); updateInert();
       try{ localStorage.setItem("madeleine_unlocked","1"); }catch(e){}
       try{ recordLogin(); renderLogins(); }catch(e){}
+      try{ if(dbOn()) dbSync(false); }catch(e){}   // catch up the moment she opens it
       setTimeout(()=>{ try{ showWhatsNew(false); }catch(e){} },800);
       try{ checkDailyReminder(); }catch(e){}
       try{ animView("board"); }catch(e){}
