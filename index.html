@@ -408,6 +408,17 @@
   .set-group:first-of-type{margin-top:6px}
   .set-group span{font-size:12.5px;font-weight:450;color:var(--muted);letter-spacing:0}
   .set-group+.panel{margin-top:0!important}
+  .set-group.foldable{flex-direction:row;align-items:center;gap:10px;cursor:pointer;user-select:none;padding:13px 16px;margin:10px 0 0;background:var(--panel);border:1px solid var(--line);border-radius:14px;box-shadow:var(--shadow);transition:.15s}
+  .set-group.foldable:hover{border-color:var(--blue)}
+  .set-group.foldable span{flex:1 1 auto;margin-top:2px}
+  .set-group.foldable .fold-ar{flex:0 0 auto;color:var(--muted);transition:transform .2s}
+  .set-group.foldable.open{border-bottom-left-radius:0;border-bottom-right-radius:0;margin-bottom:0}
+  .set-group.foldable.open .fold-ar{transform:rotate(180deg)}
+  .set-sec{display:none}
+  .set-sec.open{display:block}
+  .set-sec.open>.panel:first-child{border-top-left-radius:0;border-top-right-radius:0;margin-top:0!important;border-top:0}
+  :root[data-layout="classic"] .set-sec{display:block}
+  :root[data-layout="classic"] .set-group.foldable{display:none}
   .iconpick{width:38px;height:38px;border-radius:10px;border:1px solid var(--line);background:var(--field-bg);color:var(--ink);display:grid;place-items:center;flex:0 0 auto;transition:.15s}
   .iconpick:hover{border-color:var(--green)}
   .iconbar{display:none;flex:1 1 100%;gap:5px;flex-wrap:wrap;padding:8px 0 2px}
@@ -431,6 +442,11 @@
   .new-list b{font-weight:650}
   .new-list span{color:var(--muted);font-size:12.5px;line-height:1.45}
   .avatar.haspic{background-size:cover;background-position:center;color:transparent}
+  .crop-stage{width:262px;height:262px;margin:12px auto 0;border-radius:50%;overflow:hidden;position:relative;background:var(--bg);border:1px solid var(--line);cursor:grab;touch-action:none}
+  .crop-stage:active{cursor:grabbing}
+  .crop-stage img{position:absolute;top:0;left:0;transform-origin:0 0;max-width:none;user-select:none;-webkit-user-drag:none;pointer-events:none}
+  .crop-zoom{display:flex;align-items:center;gap:10px;margin:14px 4px 0;color:var(--muted)}
+  .crop-zoom input[type=range]{flex:1;accent-color:var(--blue)}
   .avatar.haspic[data-test="1"]{box-shadow:0 0 0 2px var(--amber-line)}
   .photo-btn{position:absolute;right:-3px;bottom:-3px;width:19px;height:19px;border-radius:50%;background:var(--panel);border:1px solid var(--line);color:var(--muted);display:grid;place-items:center;opacity:0;transition:.15s}
   .s-avatar-wrap{position:relative;flex:0 0 auto}
@@ -1061,6 +1077,13 @@
     </div>
     <div class="set-row">
       <div>
+        <div class="t">Set up another device</div>
+        <div class="d">Copies a link that joins the other device on its own — no code to type, and the Code Center stays hidden over there. Anyone who opens it joins this class, so send it only to the person who should have it.</div>
+      </div>
+      <div class="ctl"><button class="btn btn-primary btn-sm" id="cc-share">Copy setup link</button></div>
+    </div>
+    <div class="set-row">
+      <div>
         <div class="t">Leave</div>
         <div class="d">Hides the Code Center on this device. Nothing is disconnected — use Disconnect for that.</div>
       </div>
@@ -1108,6 +1131,36 @@
   </div>
 </div>
 <input type="file" id="photo-file" accept="image/*" style="display:none">
+
+<div class="overlay" id="crop-modal">
+  <div class="modal">
+    <h3>Position the photo</h3>
+    <p class="who"><b id="crop-who"></b> — drag to move, scroll or use the slider to zoom.</p>
+    <div class="crop-stage" id="crop-stage"><img id="crop-img" alt=""></div>
+    <div class="crop-zoom">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="range" id="crop-zoom" min="1" max="4" step="0.01" value="1" aria-label="Zoom">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="crop-cancel" style="flex:1">Cancel</button>
+      <button class="btn btn-primary" id="crop-save" style="flex:1">Use this photo</button>
+    </div>
+    <button class="btn btn-ghost btn-sm" id="crop-pick" style="width:100%;margin-top:8px">Choose a different picture</button>
+    <button class="btn btn-ghost btn-sm" id="crop-remove" style="width:100%;margin-top:6px;display:none">Remove photo, go back to initials</button>
+  </div>
+</div>
+
+<div class="overlay" id="ow-modal">
+  <div class="modal">
+    <h3>Code</h3>
+    <input class="input" id="ow-input" type="password" inputmode="numeric" maxlength="8" placeholder="Code" autocomplete="off" style="margin-top:6px;text-align:center;letter-spacing:5px">
+    <div class="gate-err" id="ow-err" style="min-height:18px"></div>
+    <div class="modal-actions">
+      <button class="btn btn-ghost" id="ow-cancel" style="flex:1">Cancel</button>
+      <button class="btn btn-primary" id="ow-go" style="flex:1">Go</button>
+    </div>
+  </div>
+</div>
 
 <div class="overlay" id="cls-modal">
   <div class="modal">
@@ -1358,9 +1411,11 @@ function renderLogins(){
 // ---- owner mode (reached only from the chooser) ----
 const DEFAULT_OWNER_CODE="5643";
 function ownerCode(){ try{ const c=localStorage.getItem("madeleine_ownercode"); return (c&&/^\d{4,8}$/.test(c))?c:DEFAULT_OWNER_CODE; }catch(e){ return DEFAULT_OWNER_CODE; } }
-function isOwner(){ try{ return localStorage.getItem("madeleine_owner")==="1"; }catch(e){ return false; } }
+let ownerSession=false;                       // in memory only: closing the tab locks it again
+function isOwner(){ return ownerSession; }
 function setOwner(on){
-  try{ on ? localStorage.setItem("madeleine_owner","1") : localStorage.removeItem("madeleine_owner"); }catch(e){}
+  ownerSession=!!on;
+  try{ localStorage.removeItem("madeleine_owner"); }catch(e){}   // clear anything an older build left behind
   if(on) document.documentElement.setAttribute("data-owner",""); else document.documentElement.removeAttribute("data-owner");
 }
 
@@ -1678,8 +1733,9 @@ function renderRoster(){
 }
 function renderLog(){
   const el=$("#log");
-  if(!state.log.filter(logInScope).length){ el.innerHTML=`<div class="empty" style="padding:24px">No activity yet.</div>`; return; }
+  if(!state.log.filter(l=>logInScope(l) && (l.t!=="db"||isOwner())).length){ el.innerHTML=`<div class="empty" style="padding:24px">No activity yet.</div>`; return; }
   el.innerHTML=state.log.filter(logInScope).slice(0,40).map(l=>{
+    if(l.t==="db" && !isOwner()) return "";
     if(l.t==="db") return `<div class="log-item"><span class="log-dot db"></span><div class="log-body"><div>${esc(l.note||"")}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
     if(l.t!=="strike"&&l.t!=="hit"&&l.t!=="reset"&&l.t!=="done") return "";
     if(l.t==="reset"||l.t==="done") return `<div class="log-item"><span class="log-dot good"></span><div class="log-body"><div>${esc(l.note||"")}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
@@ -1753,6 +1809,35 @@ function renderReasonEditor(){
     </div>`).join("") || `<div class="tier-warn">No quick reasons yet — add one below.</div>`;
   const add=$("#add-reason"); if(add) add.style.display = list.length>=10 ? "none" : "";
 }
+// Settings had grown to 16 panels. Each heading now folds its own group away.
+function buildSettingsSections(){
+  const view=$("#view-settings"); if(!view || view.dataset.folded) return;
+  view.dataset.folded="1";
+  const heads=[...view.querySelectorAll(".set-group")];
+  heads.forEach((h,i)=>{
+    const wrap=document.createElement("div");
+    wrap.className="set-sec"; wrap.id="sec-"+i;
+    h.after(wrap);
+    let n=wrap.nextSibling;
+    while(n && !(n.classList && n.classList.contains("set-group"))){ const next=n.nextSibling; wrap.appendChild(n); n=next; }
+    h.classList.add("foldable"); h.setAttribute("role","button"); h.tabIndex=0;
+    h.setAttribute("aria-controls",wrap.id);
+    h.insertAdjacentHTML("beforeend",'<svg class="fold-ar" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M6 9l6 6 6-6"/></svg>');
+    const open = openSections().indexOf(i)>-1;
+    wrap.classList.toggle("open", open); h.classList.toggle("open", open);
+    h.setAttribute("aria-expanded", String(open));
+    const toggle=()=>{
+      const now=!wrap.classList.contains("open");
+      wrap.classList.toggle("open", now); h.classList.toggle("open", now);
+      h.setAttribute("aria-expanded", String(now));
+      const list=openSections().filter(x=>x!==i); if(now) list.push(i);
+      try{ localStorage.setItem("madeleine_sections", JSON.stringify(list)); }catch(e){}
+    };
+    h.addEventListener("click",toggle);
+    h.addEventListener("keydown",e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); toggle(); } });
+  });
+}
+function openSections(){ try{ const v=JSON.parse(localStorage.getItem("madeleine_sections")); return Array.isArray(v)?v:[]; }catch(e){ return []; } }
 function renderSettings(){
   $("#remind-switch").classList.toggle("on", state.settings.reminders);
   $("#sound-switch").classList.toggle("on", state.settings.sound);
@@ -1781,6 +1866,7 @@ function renderSettings(){
   if(!inside("#reward-editor")) renderRewardEditor();
   if(!inside("#reason-editor")) renderReasonEditor();
   if(!inside("#class-editor")) renderClassEditor();
+  buildSettingsSections();
   renderBreakEditor(); if(!inside("#beta-tools")) renderBeta(); renderLogins(); renderTestPanel(); dbStatus(); applyLayout();
   { const c=$("#cc-code"), u=$("#cc-url"); if(c&&document.activeElement!==c) c.value=DB().code; if(u&&document.activeElement!==u) u.value=DB().url; }
   ["#panel-checkins","#panel-consequences"].forEach(sel=>{ const el=$(sel); if(el) el.style.display=isHits()?"none":""; });
@@ -2045,9 +2131,9 @@ function csvDownload(name,text){
 function dbLog(note){ state.log.unshift({t:"db",ts:Date.now(),note}); if(state.log.length>LOG_CAP) state.log.length=LOG_CAP; }
 function exportSheets(){
   if(!scoped().length){ toast("No students yet."); return; }
-  const ok1=csvDownload("The Database - everyone - "+stamp()+".csv", csvText(csvRoster()));
+  const ok1=csvDownload("Madeleine - everyone - "+stamp()+".csv", csvText(csvRoster()));
   const ev=csvEvents();
-  if(ev.length>1) setTimeout(()=>csvDownload("The Database - activity - "+stamp()+".csv", csvText(ev)),700);
+  if(ev.length>1) setTimeout(()=>csvDownload("Madeleine - activity - "+stamp()+".csv", csvText(ev)),700);
   if(!ok1){ alert("Couldn't create the spreadsheet file."); return; }
   dbLog("The Database — spreadsheet saved to this device");
   save(); renderAll(); toast("Saved for Google Sheets");
@@ -2185,17 +2271,37 @@ function dbSync(manual){
       DB().last=Date.now(); DB().fails=0;
       if(n) dbLog(n+" change"+(n===1?"":"s")+" arrived from The Database");
       save(); renderAll(); dbSetPhase("ok");
-      if(manual) toast(n?("Synced — "+n+" change"+(n===1?"":"s")):"Synced — everything already matched");
+      if(manual && isOwner()) toast(n?("Synced — "+n+" change"+(n===1?"":"s")):"Synced — everything already matched");
       return true;
     })
     .catch(e=>{
       DB().fails=(DB().fails||0)+1;
-      if(DB().fails===1) dbLog("Couldn’t reach The Database — kept on this device for now");
+      if(DB().fails===1 && isOwner()) dbLog("Couldn’t reach The Database — kept on this device for now");
       save(); dbSetPhase("err");
-      if(manual) toast("Couldn't reach The Database");
+      if(manual && isOwner()) toast("Couldn't reach The Database");
       return false;
     })
     .then(v=>{ dbBusy=false; return v; });
+}
+function setupLink(){
+  const d=DB();
+  if(!d.url||!d.code) return "";
+  const base=location.origin+location.pathname;
+  return base+"?db="+encodeURIComponent(d.url)+"&c="+encodeURIComponent(d.code);
+}
+// Applied on the other device when she opens the link. It joins the class and nothing else —
+// it never turns on owner mode, so the Code Center stays hidden over there.
+function applySetupLink(){
+  let q; try{ q=new URLSearchParams(location.search); }catch(e){ return false; }
+  const url=(q.get("db")||"").trim(), code=(q.get("c")||"").trim();
+  if(!url||!code) return false;
+  let ok=false;
+  if(/^https:\/\/script\.google\.com\/.+\/exec$/.test(url) && /^\d{3,12}$/.test(code)){
+    DB().url=url; DB().code=code; DB().fails=0;
+    dbLog("Joined The Database"); save(); ok=true;
+  }
+  try{ history.replaceState(null,"",location.origin+location.pathname); }catch(e){}   // don't leave it in the address bar
+  return ok;
 }
 function dbNudge(){ if(!dbOn()) return; clearTimeout(dbTimer); dbTimer=setTimeout(()=>dbSync(false),4000); }
 
@@ -2408,24 +2514,10 @@ function avatarHTML(x,cls){
 }
 function setPhoto(id,file){
   const st=state.students.find(x=>x.id===id); if(!st||!file) return;
-  if(!/^image\//.test(file.type)){ toast("That isn’t a picture."); return; }
+  if(!/^image\//.test(file.type)){ toast("That isn\u2019t a picture."); return; }
   const rd=new FileReader();
-  rd.onload=()=>{
-    const img=new Image();
-    img.onload=()=>{
-      try{
-        const side=Math.min(img.width,img.height);
-        const c=document.createElement("canvas"); c.width=c.height=MAX_PHOTO;
-        const g=c.getContext("2d");
-        g.drawImage(img,(img.width-side)/2,(img.height-side)/2,side,side,0,0,MAX_PHOTO,MAX_PHOTO);
-        st.pic=c.toDataURL("image/jpeg",0.82);
-        save(); renderAll(); toast(st.name+" — photo added");
-      }catch(e){ toast("Couldn’t use that picture."); }
-    };
-    img.onerror=()=>toast("Couldn’t read that picture.");
-    img.src=rd.result;
-  };
-  rd.onerror=()=>toast("Couldn’t read that file.");
+  rd.onload=()=>openCrop(id, rd.result);          // let her place it rather than guessing the middle
+  rd.onerror=()=>toast("Couldn\u2019t read that file.");
   rd.readAsDataURL(file);
 }
 function clearPhoto(id){ const st=state.students.find(x=>x.id===id); if(!st) return; delete st.pic; save(); renderAll(); toast(st.name+" — photo removed"); }
@@ -2483,6 +2575,83 @@ function renderBeta(){
         </select>
         <span style="color:var(--muted);font-size:12.5px">${state.students.filter(x=>clsKey(x.cls)===k).length}</span>
       </div>`).join("");
+}
+
+// ================= crop a photo =================
+const CROP_STAGE=262;
+let cropState=null;
+function openCrop(id,src){
+  const st=state.students.find(x=>x.id===id); if(!st) return;
+  const img=$("#crop-img");
+  img.onload=()=>{
+    const w=img.naturalWidth, h=img.naturalHeight;
+    const base=CROP_STAGE/Math.min(w,h);                 // smallest scale that still covers the square
+    cropState={id,w,h,base,zoom:1,ox:0,oy:0};
+    centreCrop(); paintCrop();
+    $("#crop-zoom").value="1";
+    $("#crop-who").textContent=st.name;
+    $("#crop-remove").style.display = photoOf(st) ? "" : "none";
+    $("#crop-modal").classList.add("show");
+  };
+  img.onerror=()=>toast("Couldn’t read that picture.");
+  img.src=src;
+}
+function centreCrop(){
+  const c=cropState; if(!c) return;
+  const s=c.base*c.zoom;
+  c.ox=(CROP_STAGE-c.w*s)/2; c.oy=(CROP_STAGE-c.h*s)/2;
+}
+function clampCrop(){
+  const c=cropState; if(!c) return;
+  const s=c.base*c.zoom, dw=c.w*s, dh=c.h*s;
+  c.ox=Math.min(0,Math.max(CROP_STAGE-dw,c.ox));        // never let a gap show at an edge
+  c.oy=Math.min(0,Math.max(CROP_STAGE-dh,c.oy));
+}
+function paintCrop(){
+  const c=cropState; if(!c) return;
+  clampCrop();
+  const s=c.base*c.zoom;
+  $("#crop-img").style.transform="translate("+c.ox+"px,"+c.oy+"px) scale("+s+")";
+}
+function closeCrop(){ $("#crop-modal").classList.remove("show"); cropState=null; }
+function saveCrop(){
+  const c=cropState; if(!c) return;
+  const st=state.students.find(x=>x.id===c.id); if(!st){ closeCrop(); return; }
+  try{
+    const s=c.base*c.zoom;
+    const sx=-c.ox/s, sy=-c.oy/s, side=CROP_STAGE/s;    // the square, back in the original's pixels
+    const cv=document.createElement("canvas"); cv.width=cv.height=MAX_PHOTO;
+    const g=cv.getContext("2d");
+    g.drawImage($("#crop-img"), sx, sy, side, side, 0, 0, MAX_PHOTO, MAX_PHOTO);
+    st.pic=cv.toDataURL("image/jpeg",0.82);
+    save(); renderAll(); toast(st.name+" — photo saved");
+  }catch(e){ toast("Couldn’t save that picture."); }
+  closeCrop();
+}
+// drag to move
+(function cropDrag(){
+  const stage=$("#crop-stage"); if(!stage) return;
+  let dragging=false, lx=0, ly=0;
+  stage.addEventListener("pointerdown",e=>{ if(!cropState) return; dragging=true; lx=e.clientX; ly=e.clientY; stage.setPointerCapture(e.pointerId); });
+  stage.addEventListener("pointermove",e=>{
+    if(!dragging||!cropState) return;
+    cropState.ox+=e.clientX-lx; cropState.oy+=e.clientY-ly; lx=e.clientX; ly=e.clientY; paintCrop();
+  });
+  const stop=e=>{ dragging=false; try{ stage.releasePointerCapture(e.pointerId); }catch(_){} };
+  stage.addEventListener("pointerup",stop); stage.addEventListener("pointercancel",stop);
+  stage.addEventListener("wheel",e=>{
+    if(!cropState) return; e.preventDefault();
+    const z=Math.min(4,Math.max(1,cropState.zoom*(e.deltaY<0?1.08:0.926)));
+    zoomCropTo(z); $("#crop-zoom").value=String(z);
+  },{passive:false});
+})();
+function zoomCropTo(z){
+  const c=cropState; if(!c) return;
+  const mid=CROP_STAGE/2;
+  const before=c.base*c.zoom, after=c.base*z;           // keep the middle of the square where it was
+  c.ox=mid-(mid-c.ox)*(after/before);
+  c.oy=mid-(mid-c.oy)*(after/before);
+  c.zoom=z; paintCrop();
 }
 
 // toast
@@ -2613,7 +2782,11 @@ $("#bulk-add").onclick=()=>{
 $("#roster").addEventListener("click",e=>{
   const b=e.target.closest("button"); if(!b) return;
   if(b.dataset.menu){ const m=$("#menu-"+b.dataset.menu); const open=m.classList.contains("open"); closeMenus(); if(!open) m.classList.add("open"); e.stopPropagation(); return; }
-  if(b.dataset.photo){ pickPhoto(+b.dataset.photo); return; }
+  if(b.dataset.photo){
+    const st=state.students.find(x=>x.id===+b.dataset.photo);
+    if(st && photoOf(st)) openCrop(st.id, photoOf(st)); else pickPhoto(+b.dataset.photo);
+    return;
+  }
   if(b.dataset.nopic){ clearPhoto(+b.dataset.nopic); closeMenus(); return; }
   if(b.dataset.done){ completeCheckin(+b.dataset.done, +b.dataset.key, b); return; }
   if(b.dataset.strike){ openModal(+b.dataset.strike); return; }
@@ -2841,7 +3014,7 @@ document.addEventListener("keydown",e=>{
   const typing = tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||e.target.isContentEditable;
   if(e.key==="Escape"){ if($("#modal").classList.contains("show")) closeModal(); else if($("#cls-modal").classList.contains("show")) closeClassModal(); else if($("#bulk-modal").classList.contains("show")) closeBulk(); else closeMenus(); return; }
   if(typing || e.metaKey || e.ctrlKey || e.altKey) return;
-  const modalOpen=$("#modal").classList.contains("show")||$("#cls-modal").classList.contains("show");
+  const modalOpen=$("#modal").classList.contains("show")||$("#cls-modal").classList.contains("show")||$("#ow-modal").classList.contains("show");
   const bulkOpen=$("#bulk-modal").classList.contains("show");
   if(bulkOpen) return;
   if(modalOpen && e.key==="Enter"){ e.preventDefault(); $("#modal-confirm").click(); return; }
@@ -2980,6 +3153,12 @@ $("#cc-off").onclick=()=>{
   DB().url=""; DB().code=""; dbLog("Left The Database"); save(); renderAll(); toast("Disconnected");
 };
 $("#cc-leave").onclick=()=>{ setOwner(false); renderSettings(); switchView("board"); };
+$("#cc-share").onclick=()=>{
+  const l=setupLink();
+  if(!l){ toast("Connect this device first."); return; }
+  try{ navigator.clipboard.writeText(l).then(()=>toast("Setup link copied \u2014 send it to the other device"),()=>prompt("Copy this link:",l)); }
+  catch(e){ prompt("Copy this link:",l); }
+};
 $("#cc-copy-gs").onclick=()=>{
   fetch("./Code.gs").then(r=>{ if(!r.ok) throw 0; return r.text(); })
     .then(t=>navigator.clipboard.writeText(t))
@@ -3033,6 +3212,40 @@ $("#beta-tools").addEventListener("blur",e=>{
   if(!was || clsKey(r.value)===k || !r.value.trim()){ renderBeta(); return; }
   renameClass(was[1], r.value);
 },true);
+// Settings: the sequence .,.,. asks for the code. Nothing hints at it.
+(function ownerKnock(){
+  const WANT=".,.,.";
+  let buf="";
+  document.addEventListener("keydown",e=>{
+    if(isOwner()) return;
+    if($("#view-settings").style.display==="none") { buf=""; return; }
+    const t=e.target, tag=t&&t.tagName;
+    if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||(t&&t.isContentEditable)) { buf=""; return; }
+    if(e.key!=="."&&e.key!==","){ buf=""; return; }
+    buf=(buf+e.key).slice(-WANT.length);
+    if(buf===WANT){ buf=""; askOwnerCode(); }
+  });
+})();
+function askOwnerCode(){
+  $("#ow-input").value=""; $("#ow-err").textContent="";
+  $("#ow-modal").classList.add("show");
+  setTimeout(()=>$("#ow-input").focus(),50);
+}
+function closeOwnerModal(){ $("#ow-modal").classList.remove("show"); }
+function tryOwnerCode(){
+  if($("#ow-input").value.trim()===ownerCode()){
+    setOwner(true); closeOwnerModal(); renderSettings();
+    const el=$("#panel-codecenter"); if(el) el.scrollIntoView({behavior:"smooth",block:"center"});
+  } else {
+    $("#ow-err").textContent="Wrong code"; $("#ow-input").value="";
+    const c=$("#ow-modal .modal"); c.classList.remove("gate-shake"); void c.offsetWidth; c.classList.add("gate-shake"); $("#ow-input").focus();
+  }
+}
+$("#ow-go").onclick=tryOwnerCode;
+$("#ow-cancel").onclick=closeOwnerModal;
+$("#ow-input").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); tryOwnerCode(); } });
+$("#ow-input").addEventListener("input",()=>{ $("#ow-err").textContent=""; });
+$("#ow-modal").addEventListener("click",e=>{ if(e.target.id==="ow-modal") closeOwnerModal(); });
 $("#layout-switch").onclick=toggleLayout;
 $("#cls-go").onclick=tryClassCode;
 $("#cls-cancel").onclick=closeClassModal;
@@ -3088,11 +3301,18 @@ $("#add-break").onclick=()=>{
 };
 
 // ---- student photos ----
+$("#crop-cancel").onclick=closeCrop;
+$("#crop-remove").onclick=()=>{ if(cropState) clearPhoto(cropState.id); closeCrop(); };
+$("#crop-pick").onclick=()=>{ const id=cropState&&cropState.id; closeCrop(); if(id!=null) pickPhoto(id); };
+$("#crop-save").onclick=saveCrop;
+$("#crop-zoom").addEventListener("input",e=>zoomCropTo(parseFloat(e.target.value)||1));
+$("#crop-modal").addEventListener("click",e=>{ if(e.target.id==="crop-modal") closeCrop(); });
 $("#photo-file").addEventListener("change",e=>{ const f=e.target.files&&e.target.files[0]; if(f&&photoTarget!=null) setPhoto(photoTarget,f); photoTarget=null; });
 
 // boot
-setOwner(isOwner());
+setOwner(false);
 upgradeCodes();
+const joinedByLink = applySetupLink();
 applyLayout();
 updateThemeIcon();
 applyMode();
@@ -3102,6 +3322,7 @@ renderAll();
 maybeBackup();
 checkDailyReminder();
 if(document.documentElement.hasAttribute("data-unlocked")) animView("board");
+if(joinedByLink) setTimeout(()=>{ dbSync(false); },600);   // silent on purpose
 if(document.documentElement.hasAttribute("data-unlocked")&&document.documentElement.hasAttribute("data-chosen")) setTimeout(()=>showWhatsNew(false),700);
 setInterval(()=>{ const wiped=checkAutoReset(); maybeBackup(); checkDailyReminder(); checkBreakReminder(); if(dbOn()) dbSync(false); if(wiped) renderAll(); else if($("#view-board").style.display!=="none") renderLog(); }, 60000);
 </script>
