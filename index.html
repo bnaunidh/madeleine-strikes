@@ -399,6 +399,10 @@
   .aseg button:hover{color:var(--ink)}
   .aseg button.on{background:var(--panel);color:var(--ink);box-shadow:0 1px 3px rgba(20,28,45,.09)}
   .a-chips{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:16px}
+  .a-controls{display:flex;gap:14px;flex-wrap:wrap;align-items:center}
+  .a-ctl{display:flex;align-items:center;gap:8px}
+  .a-ctl-l{font-size:11.5px;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+  @media(max-width:560px){ .a-head{align-items:flex-start} .a-controls{gap:9px;width:100%} .a-ctl{width:100%} .a-ctl .aseg{flex:1} .a-ctl .aseg button{flex:1;text-align:center;padding:6px 4px;font-size:11.5px} }
   .abar{display:grid;grid-template-columns:104px 1fr 34px 30px;align-items:center;gap:10px;padding:3px 0}
   .abar-name{font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
   .abar-track{display:flex;width:100%;height:20px;border-radius:6px;background:var(--line-soft);overflow:hidden;padding:0;text-align:left;transform-origin:left center}
@@ -627,9 +631,11 @@
   <div class="panel panel-pad">
     <div class="a-head">
       <p class="section-title" id="a-title" style="margin:0">Analytics</p>
-      <div class="aseg" id="a-group" role="group" aria-label="Group the graph by"></div>
+      <div class="a-controls">
+        <div class="a-ctl"><span class="a-ctl-l">Show</span><div class="aseg" id="a-range" role="group" aria-label="Time range"></div></div>
+        <div class="a-ctl"><span class="a-ctl-l">By</span><div class="aseg" id="a-group" role="group" aria-label="Group the graph by"></div></div>
+      </div>
     </div>
-    <div class="a-chips" id="a-range" role="group" aria-label="Time range"></div>
     <div id="a-chart"></div>
     <div class="a-readout" id="a-readout" aria-live="polite"></div>
     <div class="a-legend" id="a-legend"></div>
@@ -1112,7 +1118,7 @@ function normalize(s){
   if(!s.settings.analytics || typeof s.settings.analytics!=="object") s.settings.analytics={};
   if(!Array.isArray(s.settings.analytics.hidden)) s.settings.analytics.hidden=[];
   s.settings.analytics.group = s.settings.analytics.group==="cat" ? "cat" : "reason";
-  if(["week","month","year","all"].indexOf(s.settings.analytics.range)<0) s.settings.analytics.range="month";
+  if(["week","month","q","year","all"].indexOf(s.settings.analytics.range)<0) s.settings.analytics.range="month";
   if(!s.settings.db || typeof s.settings.db!=="object") s.settings.db={};
   if(typeof s.settings.db.code!=="string") s.settings.db.code="";
   if(typeof s.settings.db.url!=="string") s.settings.db.url="";
@@ -1614,8 +1620,8 @@ function renderTestPanel(){
 
 // ================= Analytics =================
 const K_NONE=" none", K_OTHER=" other";
-const A_RANGES=[["week","This week"],["month","This month"],["year","This year"],["all","All time"]];
-const A_RW={week:"this week",month:"this month",year:"this year",all:"all time"};
+const A_RANGES=[["week","Week"],["month","Month"],["q","3 months"],["year","Year"],["all","All"]];
+const A_RW={week:"this week",month:"this month",q:"in the last 3 months",year:"this school year",all:"all time"};
 const A_DAYS=["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
 const LOG_CAP=1200;
 let aMuted=new Set(), aTableOpen=false, aLast=null;
@@ -1626,6 +1632,7 @@ function aRangeStart(k){
   const d=new Date();
   if(k==="week"){ const n=new Date(d); n.setHours(0,0,0,0); n.setDate(n.getDate()-((n.getDay()+6)%7)); return n.getTime(); }
   if(k==="month") return new Date(d.getFullYear(),d.getMonth(),1).getTime();
+  if(k==="q"){ const n=new Date(d.getFullYear(),d.getMonth()-2,1); n.setHours(0,0,0,0); return n.getTime(); }
   if(k==="year"){ const y=d.getMonth()>=7?d.getFullYear():d.getFullYear()-1; return new Date(y,7,1).getTime(); }
   return 0;
 }
@@ -1705,7 +1712,7 @@ function renderAnalytics(anim){
   const active=d.order.filter(k=>!aMuted.has(k)), solo=active.length===1;
   const maxTot=Math.max(1,...d.rows.map(r=>r.tot));
   $("#a-group").innerHTML=[["reason","Reason"],["cat","Category"]].map(([k,t])=>`<button data-agroup="${k}" class="${a.group===k?"on":""}" aria-pressed="${a.group===k}">${t}</button>`).join("");
-  $("#a-range").innerHTML=A_RANGES.map(([k,t])=>`<button class="rtag ${a.range===k?"on":""}" data-arange="${k}" aria-pressed="${a.range===k}">${t}</button>`).join("");
+  $("#a-range").innerHTML=A_RANGES.map(([k,t])=>`<button data-arange="${k}" class="${a.range===k?"on":""}" aria-pressed="${a.range===k}">${t}</button>`).join("");
   $("#a-title").textContent=`${w.P} by ${a.group==="cat"?"category":"reason"}`;
   $("#a-stats").innerHTML=`
     <div class="stat"><div class="n">${d.n}</div><div class="l">${w.P} ${A_RW[a.range]}</div></div>
