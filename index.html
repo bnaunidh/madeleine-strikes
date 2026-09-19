@@ -1494,7 +1494,18 @@ function newSchoolYear(){ const list=scoped(); list.forEach(x=>{ x.strikes=0; x.
 function stamp(){ const d=new Date(); const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
 function exportData(silent){
   try{
-    const blob=new Blob([JSON.stringify(state,null,2)],{type:"application/json"});
+    const payload=Object.assign({}, state, {
+      _backup:{
+        app:"The Madeleine Dashboard", version:APP_VERSION, saved:new Date().toISOString(),
+        students:state.students.length,
+        strikesNow:state.students.reduce((a,x)=>a+(x.strikes||0),0),
+        strikesThisYear:state.students.reduce((a,x)=>a+(x.total||0),0),
+        hitsNow:state.students.reduce((a,x)=>a+(x.hits||0),0),
+        hitsThisYear:state.students.reduce((a,x)=>a+(x.hitTotal||0),0),
+        entries:state.log.length
+      }
+    });
+    const blob=new Blob([JSON.stringify(payload,null,2)],{type:"application/json"});
     const url=URL.createObjectURL(blob);
     const a=document.createElement("a");
     a.href=url; a.download="madeleine-dashboard-backup-"+stamp()+".json";
@@ -2196,7 +2207,28 @@ function classList(){
   state.students.forEach(x=>{ const k=clsKey(x.cls); if(k && !seen.has(k)) seen.set(k,String(x.cls).trim()); });
   return [...seen.entries()].sort((a,b)=>a[1].localeCompare(b[1],undefined,{numeric:true}));
 }
-function classCode(c){ const v=CLASS_CODES()[clsKey(c)]; return (typeof v==="string" && /^\d{3,8}$/.test(v)) ? v : ""; }
+const CODE_SALT="madeleine.v1.";
+async function hashCode(code){
+  const raw=CODE_SALT+String(code||"");
+  if(!(window.crypto&&crypto.subtle)) return "p:"+raw;          // no Web Crypto (file://) - fall back, still not plaintext-obvious
+  const buf=await crypto.subtle.digest("SHA-256", new TextEncoder().encode(raw));
+  return "h:"+[...new Uint8Array(buf)].map(b=>b.toString(16).padStart(2,"0")).join("");
+}
+// a class has a code if anything is stored for it - the value is a hash, not the code
+function classCode(c){ const v=CLASS_CODES()[clsKey(c)]; return (typeof v==="string" && v) ? v : ""; }
+// any code stored in the clear (an older save, or one carried through a rename) is hashed at startup,
+// so it cannot sit in the Google Sheet waiting to be read
+async function upgradeCodes(){
+  const m=CLASS_CODES(); const plain=Object.keys(m).filter(k=>/^\d{3,8}$/.test(m[k]));
+  if(!plain.length) return;
+  for(const k of plain){ try{ m[k]=await hashCode(m[k]); }catch(e){} }
+  bumpSettings(); save(); dbNudge();
+}
+async function codeMatches(c,typed){
+  const stored=classCode(c); if(!stored) return false;
+  if(/^\d{3,8}$/.test(stored)) return stored===String(typed).trim();   // legacy plaintext, upgraded on success
+  return stored===await hashCode(String(typed).trim());
+}
 function classUnlocked(c){
   const k=clsKey(c); if(!k || !classCode(k)) return true;
   try{ return localStorage.getItem("madeleine_cls_"+k)==="1"; }catch(e){ return false; }
@@ -2259,11 +2291,15 @@ function chooseClass(label){
   setTimeout(()=>$("#cls-input").focus(),60);
 }
 function closeClassModal(){ $("#cls-modal").classList.remove("show"); pendingClass=null; renderClassSwitch(); }
-function tryClassCode(){
+async function tryClassCode(){
   if(!pendingClass) return;
-  if($("#cls-input").value.trim()===classCode(pendingClass)){
-    unlockClass(pendingClass); setActiveClass(pendingClass);
-    const l=pendingClass; closeClassModal(); renderAll(); toast("Showing "+l);
+  const typed=$("#cls-input").value.trim(), target=pendingClass;
+  if(await codeMatches(target,typed)){
+    if(/^\d{3,8}$/.test(classCode(target))){                    // quietly upgrade an old plaintext code
+      CLASS_CODES()[clsKey(target)]=await hashCode(typed); bumpSettings(); save(); dbNudge();
+    }
+    unlockClass(target); setActiveClass(target);
+    closeClassModal(); renderAll(); toast("Showing "+target);
   } else {
     $("#cls-err").textContent="Wrong code";
     $("#cls-input").value="";
@@ -2279,7 +2315,7 @@ function renderClassEditor(){
     : list.map(([k,label])=>`
       <div class="tier-row">
         <div class="tier-at" style="min-width:0;flex:1 1 auto"><b style="font-size:13.5px">${esc(label)}</b><span style="color:var(--muted);font-size:12.5px">&nbsp;· ${state.students.filter(s=>clsKey(s.cls)===k).length} students</span></div>
-        <input class="input" type="password" inputmode="numeric" maxlength="8" placeholder="${classCode(k)&&!classUnlocked(k)?"Code set":"No code"}" value="${classCode(k)&&!classUnlocked(k)?"":esc(CLASS_CODES()[k]||"")}" data-clscode="${esc(k)}" aria-label="Code for ${esc(label)}" style="width:110px;text-align:center;letter-spacing:3px">
+        <input class="input" type="password" inputmode="numeric" maxlength="8" placeholder="${classCode(k)?"Code set \u2014 type to change":"No code"}" value="" data-clscode="${esc(k)}" aria-label="Code for ${esc(label)}" style="width:110px;text-align:center;letter-spacing:3px">
         ${classCode(k)&&classUnlocked(k)?`<button class="btn btn-ghost btn-sm" data-clslock="${esc(k)}">Lock</button>`:""}
       </div>`).join("");
 }
@@ -2295,8 +2331,10 @@ const WHATS_NEW=[
 ];
 function seenVersion(){ try{ return localStorage.getItem("madeleine_seen")||""; }catch(e){ return APP_VERSION; } }
 function markSeen(){ try{ localStorage.setItem("madeleine_seen",APP_VERSION); }catch(e){} }
+const UPDATE_AT = new Date(2026,8,21,9,40,0).getTime();   // Mon 21 Sep 2026, 9:40am local
 function showWhatsNew(force){
   if(!force && seenVersion()===APP_VERSION) return;
+  if(!force && Date.now() < UPDATE_AT) return;              // announce it when she is actually at her desk
   const el=$("#new-list"); if(!el) return;
   el.innerHTML=WHATS_NEW.map(([t,d])=>`<li><b>${esc(t)}</b><span>${esc(d)}</span></li>`).join("");
   $("#new-modal").classList.add("show");
@@ -3005,9 +3043,13 @@ $("#class-editor").addEventListener("input",e=>{
   const t=e.target.closest("input[data-clscode]"); if(!t) return;
   const k=t.dataset.clscode, v=t.value.trim();
   const digits=v.replace(/\D/g,"");
-  if(digits && /^\d{3,8}$/.test(digits)){ CLASS_CODES()[k]=digits; unlockClass(k); t.setCustomValidity(""); }
-  else { delete CLASS_CODES()[k]; lockClass(k); t.setCustomValidity(v?"Needs 3\u20138 digits":""); }
-  bumpSettings(); save(); renderClassSwitch(); dbNudge();
+  if(digits && /^\d{3,8}$/.test(digits)){
+    t.setCustomValidity("");
+    hashCode(digits).then(h=>{ CLASS_CODES()[k]=h; unlockClass(k); bumpSettings(); save(); renderClassSwitch(); dbNudge(); });
+  } else {
+    delete CLASS_CODES()[k]; lockClass(k); t.setCustomValidity(v?"Needs 3\u20138 digits":"");
+    bumpSettings(); save(); renderClassSwitch(); dbNudge();
+  }
 });
 $("#class-editor").addEventListener("click",e=>{
   const b=e.target.closest("[data-clslock]"); if(!b) return;
@@ -3050,6 +3092,7 @@ $("#photo-file").addEventListener("change",e=>{ const f=e.target.files&&e.target
 
 // boot
 setOwner(isOwner());
+upgradeCodes();
 applyLayout();
 updateThemeIcon();
 applyMode();
