@@ -2178,6 +2178,20 @@ function exportSheets(){
 }
 
 // ================= The Database (sync) =================
+const BAKED_DB={
+  url:"https://script.google.com/macros/s/AKfycbyNDTnO0_rJs6XcHlu5Ih6DdJsHCeZNDtrYRy_OPShTFzcP554zgogL9v7gNsM1XmnhNQ/exec",
+  code:"5643"
+};
+// A device picks the connection up from the app itself on first run. The sheet decides whether to
+// answer it (see the approval list in Code.gs) - joining is not the same as being let in.
+function applyBakedDb(){
+  if(!BAKED_DB.url) return false;
+  const d=DB();
+  if(d.url||d.code) return false;                 // never override a connection someone set by hand
+  d.url=BAKED_DB.url; d.code=BAKED_DB.code; d.on=true; d.fails=0;
+  dbLog("Joined The Database (built in)"); save();
+  return true;
+}
 function DB(){ const d=state.settings.db||(state.settings.db={}); if(typeof d.code!=="string") d.code=""; if(typeof d.url!=="string") d.url=""; return d; }
 function dbOn(){ const d=DB(); return !!(d.url&&d.code&&d.on!==false); }
 function dbHasDetails(){ const d=DB(); return !!(d.url&&d.code); }
@@ -2292,6 +2306,7 @@ function dbStatus(){
   $("#cc-off").style.display = dbOn()?"":"none";
   if(!dbOn()){ st.innerHTML='<span class="sync-dot"></span>Not connected'; de.textContent="Put in the code and the link, then press Connect."; return; }
   if(dbPhase==="sync"){ st.innerHTML='<span class="sync-dot" style="background:var(--blue)"></span>Syncing…'; de.textContent="Talking to The Database."; return; }
+  if(dbPhase==="pending"){ st.innerHTML='<span class="sync-dot" style="background:var(--amber)"></span>Waiting for approval'; de.textContent="This device has asked to join. Approve it in the sheet\u2019s Devices tab, then it syncs on its own."; return; }
   if(dbPhase==="err"){ st.innerHTML='<span class="sync-dot" style="background:var(--amber)"></span>Couldn’t reach The Database'; de.textContent="Everything still works on this device. It will try again on its own."; return; }
   st.innerHTML='<span class="sync-dot" style="background:var(--green)"></span>Connected';
   de.textContent = d.last ? ("Synced "+timeAgo(d.last)+" · code "+d.code) : ("Code "+d.code);
@@ -2307,6 +2322,12 @@ function dbSync(manual){
     .then(txt=>{
       let res=null; try{ res=JSON.parse(txt); }catch(e){}
       if(!dbOn() || (DB().url+"|"+DB().code)!==who) return false;   // paused or disconnected mid-flight
+      if(res && res.pending){                    // the sheet has seen us but has not been let in yet
+        DB().pending=true; DB().last=Date.now(); save(); dbSetPhase("pending");
+        if(manual && isOwner()) toast("Waiting to be approved in the sheet");
+        return false;
+      }
+      DB().pending=false;
       if(!res||!res.ok) throw new Error(res&&res.error||"The Database didn't answer properly");
       const n=dbMerge(res);
       DB().last=Date.now(); DB().fails=0;
@@ -3384,7 +3405,7 @@ $("#photo-file").addEventListener("change",e=>{ const f=e.target.files&&e.target
 // boot
 setOwner(false);
 upgradeCodes();
-const joinedByLink = applySetupLink();
+const joinedByLink = applySetupLink() || applyBakedDb();
 applyLayout();
 updateThemeIcon();
 applyMode();

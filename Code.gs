@@ -19,6 +19,8 @@ var W_ROSTER = [180,70,95,125,80,110,150,175,150,160,95,150];
 var H_EVENTS = ["When","Date","Time","Weekday","Student","Class","Type","Reason","Category","Count after","Device","Event ID"];
 var W_EVENTS = [150,95,75,95,180,70,70,190,130,105,110,180];
 var H_LOGINS = ["When","Device","Login ID"];
+var H_DEVICES = ["Approved?","Device","First seen","Last seen","Device ID"];
+var W_DEVICES = [95,150,150,150,200];
 var W_LOGINS = [160,140,200];
 
 /* =========================== web app entry points =========================== */
@@ -71,9 +73,22 @@ function handle_(b) {
 
   try {
     var store = readStore_(code);
+
+    // Anyone can reach this URL, so being able to ask is not the same as being answered.
+    // The FIRST device to ever ask is approved automatically (that is the owner setting it up);
+    // every later one waits until "yes" is put in its row on the Devices tab.
+    var gate = deviceGate_(store, b);
+    if (!gate.allowed) {
+      writeStore_(code, store);
+      devicesTab_(code, store);
+      return { ok: true, pending: true, message: "This device is waiting to be approved." };
+    }
+
     var merged = merge_(store, b);
+    merged.devices = store.devices;
     writeStore_(code, merged);
     compile_(code, merged);                    // <- the spreadsheet she actually reads
+    devicesTab_(code, merged);
     return {
       ok: true,
       epoch: merged.epoch,
@@ -159,6 +174,49 @@ function merge_(store, b) {
 
   return { epoch: epoch, gone: goneList, students: students, events: events, logins: logins,
            settings: settings, settingsTs: settingsTs, newEvents: fresh };
+}
+
+/** Records the device and says whether it may have the data. */
+function deviceGate_(store, b) {
+  var id = String(b.device || "").trim();
+  if (!id) return { allowed: false };
+  store.devices = store.devices || {};
+  var now = new Date().toISOString();
+  var d = store.devices[id];
+  if (!d) {
+    var first = Object.keys(store.devices).length === 0;      // the very first device is the one setting it up
+    d = store.devices[id] = { name: b.deviceName || "", ok: first, first: now, last: now };
+  }
+  d.name = b.deviceName || d.name;
+  d.last = now;
+  return { allowed: !!d.ok };
+}
+
+/** The Devices tab is the approval list. Type yes in column A to let a device in. */
+function devicesTab_(code, store) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sfx = (code === DEFAULT_CODE) ? "" : " " + code;
+  var sh = tab_(ss, "Devices" + sfx, H_DEVICES, W_DEVICES);
+
+  // read back any approvals the owner typed since last time
+  var last = sh.getLastRow();
+  if (last > 1) {
+    var rows = sh.getRange(2, 1, last - 1, H_DEVICES.length).getValues();
+    for (var i = 0; i < rows.length; i++) {
+      var id = String(rows[i][4] || "").trim();
+      if (id && store.devices[id]) {
+        var v = String(rows[i][0] || "").trim().toLowerCase();
+        store.devices[id].ok = (v === "yes" || v === "y" || v === "true" || v === "\u2713");
+      }
+    }
+    sh.getRange(2, 1, last - 1, H_DEVICES.length).clearContent();
+  }
+  var out = Object.keys(store.devices).map(function (id) {
+    var d = store.devices[id];
+    return [d.ok ? "yes" : "no", d.name || "", d.first || "", d.last || "", id];
+  });
+  if (out.length) sh.getRange(2, 1, out.length, H_DEVICES.length).setValues(out);
+  sh.getRange("G1").setValue("Type yes in the Approved? column to let a device in, then it syncs on its own.");
 }
 
 /* ============================== the spreadsheet ============================== */
@@ -268,13 +326,13 @@ function readStore_(code) {
     for (var i = 0; i < n; i++) parts.push(props.getProperty("store:" + code + ":" + i) || "");
     raw = parts.join("");
   }
-  if (!raw) return { epoch: 0, gone: [], students: [], events: [], logins: [], settings: {}, settingsTs: 0 };
+  if (!raw) return { epoch: 0, gone: [], devices: {}, students: [], events: [], logins: [], settings: {}, settingsTs: 0 };
   try { return JSON.parse(raw); }
-  catch (e) { return { epoch: 0, gone: [], students: [], events: [], logins: [], settings: {}, settingsTs: 0 }; }
+  catch (e) { return { epoch: 0, gone: [], devices: {}, students: [], events: [], logins: [], settings: {}, settingsTs: 0 }; }
 }
 
 function writeStore_(code, m) {
-  var keep = { epoch: m.epoch, gone: m.gone, students: m.students, events: m.events.slice(-2000),
+  var keep = { epoch: m.epoch, gone: m.gone, devices: m.devices || {}, students: m.students, events: m.events.slice(-2000),
                logins: m.logins, settings: stripHeavy_(m.settings), settingsTs: m.settingsTs };
   var raw = JSON.stringify(keep);
   var props = PropertiesService.getDocumentProperties();
