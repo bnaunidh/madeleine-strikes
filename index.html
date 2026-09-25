@@ -522,7 +522,8 @@
   /* ---- The Database ---- */
   .log-dot.db{background:var(--blue)}
   .sync-dot{width:8px;height:8px;border-radius:50%;display:inline-block;margin-right:7px;vertical-align:1px;background:var(--muted)}
-  :root:not([data-owner]) #panel-codecenter{display:none}
+  :root:not([data-owner]) #panel-codecenter,
+  :root:not([data-owner]) #panel-beta{display:none}
   #cc-steps{font-size:12.5px;color:var(--muted);line-height:1.6;margin:10px 0 0;padding-left:20px}
   #cc-steps li{margin-bottom:3px}
   #cc-steps code{background:var(--bg);border:1px solid var(--line);border-radius:5px;padding:1px 5px;font-size:11.5px}
@@ -1033,7 +1034,14 @@
   </div>
 
   <div class="panel panel-pad" id="panel-codecenter" style="margin-top:18px">
-    <p class="section-title">Code Center</p>
+    <p class="section-title">Debug <span class="beta-tag">hidden</span></p>
+    <div class="set-row">
+      <div>
+        <div class="t">Connect this device</div>
+        <div class="d" id="dbg-conn-d">Off. Turn it on to join this device to the class — it needs the code and the link below.</div>
+      </div>
+      <div class="ctl"><div class="switch" id="dbg-switch"></div></div>
+    </div>
     <div class="set-row">
       <div>
         <div class="t">Class code</div>
@@ -1081,6 +1089,13 @@
         <div class="d">Copies a link that joins the other device on its own — no code to type, and the Code Center stays hidden over there. Anyone who opens it joins this class, so send it only to the person who should have it.</div>
       </div>
       <div class="ctl"><button class="btn btn-primary btn-sm" id="cc-share">Copy setup link</button></div>
+    </div>
+    <div class="set-row">
+      <div>
+        <div class="t">This device</div>
+        <div class="d" id="dbg-info">—</div>
+      </div>
+      <div class="ctl"><button class="btn btn-ghost btn-sm" id="dbg-new">Show what’s new</button></div>
     </div>
     <div class="set-row">
       <div>
@@ -1286,11 +1301,11 @@ function updateInert(){
 function setMode(m){ state.mode=(m==="hits")?"hits":"strikes"; save(); applyMode(); renderAll(); }
 function load(){
   try{ const s=JSON.parse(localStorage.getItem(STORE)); if(s && s.students) return normalize(s); }catch(e){}
-  return {students:[], log:[], mode:"strikes", settings:{auto:false,interval:"week",lastReset:Date.now(),reminders:true,sound:true,
+  return normalize({students:[], log:[], mode:"strikes", settings:{auto:false,interval:"week",lastReset:Date.now(),reminders:true,sound:true,
     backup:{freq:"month",mode:"manual",last:Date.now()},
     reasons:["Talking in class","Late","No homework","Disruptive","Phone use","Disrespect"],
     notify:{enabled:false,times:{"1":"15:00","2":"15:00","3":"15:00","4":"15:00","5":"15:00"},lastFired:null},
-    tiers:[{at:2,label:"Recess check-in"},{at:3,label:"Lunch check-in"},{at:4,label:"Talk with the principal"},{at:5,label:"Call home"}]}, seq:1};
+    tiers:[{at:2,label:"Recess check-in"},{at:3,label:"Lunch check-in"},{at:4,label:"Talk with the principal"},{at:5,label:"Call home"}]}, seq:1});
 }
 function normalize(s){
   s.students = Array.isArray(s.students) ? s.students.filter(x=>x && typeof x.name==="string" && x.name.trim()) : [];
@@ -1352,6 +1367,7 @@ function normalize(s){
   if(!s.settings.db || typeof s.settings.db!=="object") s.settings.db={};
   if(typeof s.settings.db.code!=="string") s.settings.db.code="";
   if(typeof s.settings.db.url!=="string") s.settings.db.url="";
+  if(typeof s.settings.db.on!=="boolean") s.settings.db.on=!!(s.settings.db.url&&s.settings.db.code);
   if(!Number.isFinite(s.settings.ts)) s.settings.ts=0;
   { let seenTest=false; s.students.forEach(x=>{ x.test = x.test===true && !seenTest ? (seenTest=true) : false; }); }
   { const live=new Set(s.students.map(x=>x.id)); s.settings.analytics.hidden=s.settings.analytics.hidden.filter(id=>live.has(id)); }
@@ -1870,8 +1886,8 @@ function renderSettings(){
   if(!inside("#reason-editor")) renderReasonEditor();
   if(!inside("#class-editor")) renderClassEditor();
   buildSettingsSections();
-  renderBreakEditor(); if(!inside("#beta-tools")) renderBeta(); renderLogins(); renderTestPanel(); dbStatus(); applyLayout();
-  { const c=$("#cc-code"), u=$("#cc-url"); if(c&&document.activeElement!==c) c.value=DB().code; if(u&&document.activeElement!==u) u.value=DB().url; }
+  renderBreakEditor(); renderDebug(); if(!inside("#beta-tools")) renderBeta(); renderLogins(); renderTestPanel(); dbStatus(); applyLayout();
+  { const c=$("#cc-code"), u=$("#cc-url"); if(c&&document.activeElement!==c) c.value=DB().code||""; if(u&&document.activeElement!==u) u.value=DB().url||""; }
   ["#panel-checkins","#panel-consequences"].forEach(sel=>{ const el=$(sel); if(el) el.style.display=isHits()?"none":""; });
   { const el=$("#panel-rewards"); if(el) el.style.display=isHits()?"":"none"; }
   { const ph=$("#pass-hint"); if(ph) ph.textContent = (getPasscode()===DEFAULT_PASSCODE)
@@ -2144,7 +2160,8 @@ function exportSheets(){
 
 // ================= The Database (sync) =================
 function DB(){ const d=state.settings.db||(state.settings.db={}); if(typeof d.code!=="string") d.code=""; if(typeof d.url!=="string") d.url=""; return d; }
-function dbOn(){ const d=DB(); return !!(d.url&&d.code); }
+function dbOn(){ const d=DB(); return !!(d.url&&d.code&&d.on!==false); }
+function dbHasDetails(){ const d=DB(); return !!(d.url&&d.code); }
 function EPOCHS(){ const e=state.epochs; return (e&&typeof e==="object")?e:(state.epochs={}); }
 function epochFor(x){ return Math.max(state.epoch||0, EPOCHS()[clsKey(x&&x.cls)]||0); }
 function bumpEpochFor(list){                     // a scoped reset must not outrank classes it never touched
@@ -2260,7 +2277,7 @@ function dbStatus(){
   st.innerHTML='<span class="sync-dot" style="background:var(--green)"></span>Connected';
   de.textContent = d.last ? ("Synced "+timeAgo(d.last)+" · code "+d.code) : ("Code "+d.code);
 }
-function dbSetPhase(p){ dbPhase=p; dbStatus(); }
+function dbSetPhase(p){ dbPhase=p; dbStatus(); try{ renderDebug(); }catch(e){} }
 function dbSync(manual){
   if(!dbOn()||dbBusy) return Promise.resolve(false);
   dbBusy=true; dbSetPhase("sync");
@@ -3143,18 +3160,42 @@ $("#test-btn").onclick=()=>{ testStudent() ? removeTestStudent() : addTestStuden
 $("#sheets-btn").onclick=exportSheets;
 
 // ---- Code Center ----
+function dbgToggle(){
+  if(dbOn()){ DB().on=false; save(); renderAll(); toast("Paused \u2014 the link and code are kept"); return; }
+  if(dbHasDetails()){ DB().on=true; DB().fails=0; save(); renderAll(); dbSync(true); return; }
+  $("#cc-connect").click();                     // nothing filled in yet - run the same checks as Connect
+}
+function renderDebug(){
+  const sw=$("#dbg-switch"); if(!sw) return;
+  sw.classList.toggle("on", dbOn());
+  const d=$("#dbg-conn-d");
+  if(d) d.textContent = dbOn()
+    ? ("On \u2014 joined with code "+DB().code+(DB().last?(", synced "+timeAgo(DB().last)):""))
+    : (dbHasDetails() ? "Paused. The link and code are still here \u2014 flick it back on to rejoin."
+                      : "Off. Turn it on to join this device to the class \u2014 it needs the code and the link below.");
+  const info=$("#dbg-info");
+  if(info){
+    let kb=0; try{ kb=Math.round((localStorage.getItem(STORE)||"").length/1024); }catch(e){}
+    const pics=state.students.filter(x=>photoOf(x)).length;
+    info.textContent = deviceName()+" \u00b7 "+deviceId()+" \u00b7 v"+APP_VERSION
+      +" \u00b7 "+state.students.length+" students, "+state.log.length+" log entries, "+pics+" photos"
+      +" \u00b7 "+kb+" KB used"+(state.gone&&state.gone.length?(" \u00b7 "+state.gone.length+" deleted"):"");
+  }
+}
+$("#dbg-switch").onclick=dbgToggle;
+$("#dbg-new").onclick=()=>showWhatsNew(true);
 $("#cc-connect").onclick=()=>{
   const code=($("#cc-code").value||"").trim(), url=($("#cc-url").value||"").trim();
   if(!/^\d{3,12}$/.test(code)){ toast("Put in a class code — digits only."); $("#cc-code").focus(); return; }
   if(!/^https:\/\/script\.google\.com\/.+\/exec$/.test(url)){ toast("That link should start with https://script.google.com and end in /exec"); $("#cc-url").focus(); return; }
-  DB().code=code; DB().url=url; DB().fails=0; save();
+  DB().code=code; DB().url=url; DB().fails=0; DB().on=true; save();
   dbLog("Joined The Database"); save(); renderAll();
   dbSync(true);
 };
 $("#cc-now").onclick=()=>dbSync(true);
 $("#cc-off").onclick=()=>{
-  if(!confirm("Disconnect from The Database?\n\nEverything stays on this device. It just stops syncing.")) return;
-  DB().url=""; DB().code=""; dbLog("Left The Database"); save(); renderAll(); toast("Disconnected");
+  if(!confirm("Disconnect from The Database?\n\nEverything stays on this device. It just stops syncing, and the link is forgotten.")) return;
+  DB().url=""; DB().code=""; DB().on=false; dbLog("Left The Database"); save(); renderAll(); toast("Disconnected");
 };
 $("#cc-leave").onclick=()=>{ setOwner(false); renderSettings(); switchView("board"); };
 $("#cc-share").onclick=()=>{
