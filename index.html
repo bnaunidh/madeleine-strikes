@@ -3284,7 +3284,7 @@ $("#beta-tools").addEventListener("blur",e=>{
   let buf="";
   document.addEventListener("keydown",e=>{
     if(isOwner()) return;
-    if($("#view-settings").style.display==="none") { buf=""; return; }
+    if(!document.documentElement.hasAttribute("data-unlocked")) { buf=""; return; }   // any tab, once you are in
     const t=e.target, tag=t&&t.tagName;
     if(tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||(t&&t.isContentEditable)) { buf=""; return; }
     if(e.key!=="."&&e.key!==","){ buf=""; return; }
@@ -3293,6 +3293,7 @@ $("#beta-tools").addEventListener("blur",e=>{
   });
 })();
 function askOwnerCode(){
+  try{ if($("#view-settings").style.display==="none") switchView("settings"); }catch(e){}
   $("#ow-input").value=""; $("#ow-err").textContent="";
   $("#ow-modal").classList.add("show");
   setTimeout(()=>$("#ow-input").focus(),50);
