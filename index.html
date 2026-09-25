@@ -1341,6 +1341,11 @@ function normalize(s){
   s.logins = Array.isArray(s.logins) ? s.logins.filter(l=>l&&Number.isFinite(+l.ts)).slice(0,25) : [];
   if(!Number.isFinite(s.epoch)) s.epoch=0;
   if(!s.epochs || typeof s.epochs!=="object") s.epochs={};
+  {
+    const keep=[], moved=Array.isArray(s.dbLog)?s.dbLog.slice(0,50):[];
+    (Array.isArray(s.log)?s.log:[]).forEach(l=>{ if(l&&l.t==="db") moved.push({ts:l.ts,note:l.note}); else keep.push(l); });
+    s.log=keep; s.dbLog=moved.filter(d=>d&&d.note).sort((a,b)=>(b.ts||0)-(a.ts||0)).slice(0,50);
+  }
   s.gone = Array.isArray(s.gone) ? s.gone.filter(t=>t&&typeof t.key==="string"&&Number.isFinite(+t.ts)).slice(0,500) : [];
   if(!s.settings.catMap || typeof s.settings.catMap!=="object") s.settings.catMap={};
   if(!Array.isArray(s.settings.reasonCats)){
@@ -1418,7 +1423,8 @@ function recordLogin(){
 }
 function renderLogins(){
   const el=$("#logins-list"); if(!el) return;
-  const ls=(state.logins||[]).slice(0,12), me=deviceId();
+  const me=deviceId();
+  const ls=(state.logins||[]).filter(l=>isOwner()||l.dev===me).slice(0,12);
   el.innerHTML = !ls.length
     ? `<div class="empty" style="padding:14px 0">Nothing yet — this list fills in each time the passcode is used.</div>`
     : ls.map(l=>`<div class="log-item"><span class="log-dot" style="background:var(--blue)"></span><div class="log-body"><div>${esc(l.device||"This device")}${l.dev===me?` <span class="chip">this one</span>`:""}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`).join("");
@@ -1565,7 +1571,12 @@ function newSchoolYear(){ const list=scoped(); list.forEach(x=>{ x.strikes=0; x.
 function stamp(){ const d=new Date(); const p=n=>String(n).padStart(2,"0"); return d.getFullYear()+"-"+p(d.getMonth()+1)+"-"+p(d.getDate()); }
 function exportData(silent){
   try{
-    const payload=Object.assign({}, state, {
+    const bare=JSON.parse(JSON.stringify(state));
+    if(!isOwner()){                                  // her backup carries her records and nothing else
+      delete bare.dbLog;
+      if(bare.settings) bare.settings.db={code:"",url:"",on:false};
+    }
+    const payload=Object.assign({}, bare, {
       _backup:{
         app:"The Madeleine Dashboard", version:APP_VERSION, saved:new Date().toISOString(),
         students:state.students.length,
@@ -1595,7 +1606,9 @@ function importData(file){
     // a state the app can't draw (that used to brick it with no way back).
     const prev=state, rawCount=obj.students.length;   // normalize() mutates obj, so count first
     try{
+      const keepDb=JSON.parse(JSON.stringify(DB())), keepDbLog=DBLOG().slice();
       state=normalize(obj);
+      state.settings.db=keepDb; state.dbLog=keepDbLog;   // where this device syncs is the device’s business
       // A backup carries the timestamps from when it was made. Restart both clocks from now,
       // otherwise a stale lastReset makes the auto-reset fire instantly and wipe the strikes
       // we just restored (yearly totals survive, which is exactly how that bug looked).
@@ -1749,9 +1762,9 @@ function renderRoster(){
 }
 function renderLog(){
   const el=$("#log");
-  if(!state.log.filter(l=>logInScope(l) && (l.t!=="db"||isOwner())).length){ el.innerHTML=`<div class="empty" style="padding:24px">No activity yet.</div>`; return; }
-  el.innerHTML=state.log.filter(logInScope).slice(0,40).map(l=>{
-    if(l.t==="db" && !isOwner()) return "";
+  const rows=logRows();
+  if(!rows.length){ el.innerHTML=`<div class="empty" style="padding:24px">No activity yet.</div>`; return; }
+  el.innerHTML=rows.slice(0,40).map(l=>{
     if(l.t==="db") return `<div class="log-item"><span class="log-dot db"></span><div class="log-body"><div>${esc(l.note||"")}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
     if(l.t!=="strike"&&l.t!=="hit"&&l.t!=="reset"&&l.t!=="done") return "";
     if(l.t==="reset"||l.t==="done") return `<div class="log-item"><span class="log-dot good"></span><div class="log-body"><div>${esc(l.note||"")}</div><div class="log-time">${timeAgo(l.ts)}</div></div></div>`;
@@ -2147,14 +2160,20 @@ function csvDownload(name,text){
     setTimeout(()=>URL.revokeObjectURL(url),1500); return true;
   }catch(e){ return false; }
 }
-function dbLog(note){ state.log.unshift({t:"db",ts:Date.now(),note}); if(state.log.length>LOG_CAP) state.log.length=LOG_CAP; }
+function DBLOG(){ const d=state.dbLog; return Array.isArray(d)?d:(state.dbLog=[]); }
+function dbLog(note){ const d=DBLOG(); d.unshift({ts:Date.now(),note}); if(d.length>50) d.length=50; }
+// Recent activity: her rows always, the sync trail only in owner mode
+function logRows(){
+  const rows=state.log.filter(logInScope);
+  if(!isOwner()) return rows;
+  return rows.concat(DBLOG().map(d=>({t:"db",ts:d.ts,note:d.note}))).sort((a,b)=>(b.ts||0)-(a.ts||0));
+}
 function exportSheets(){
   if(!scoped().length){ toast("No students yet."); return; }
   const ok1=csvDownload("Madeleine - everyone - "+stamp()+".csv", csvText(csvRoster()));
   const ev=csvEvents();
   if(ev.length>1) setTimeout(()=>csvDownload("Madeleine - activity - "+stamp()+".csv", csvText(ev)),700);
   if(!ok1){ alert("Couldn't create the spreadsheet file."); return; }
-  dbLog("The Database — spreadsheet saved to this device");
   save(); renderAll(); toast("Saved for Google Sheets");
 }
 
@@ -2281,11 +2300,13 @@ function dbSetPhase(p){ dbPhase=p; dbStatus(); try{ renderDebug(); }catch(e){} }
 function dbSync(manual){
   if(!dbOn()||dbBusy) return Promise.resolve(false);
   dbBusy=true; dbSetPhase("sync");
+  const who=DB().url+"|"+DB().code;
   return fetch(DB().url,{method:"POST",headers:{"Content-Type":"text/plain;charset=utf-8"},
       body:JSON.stringify(dbPayload()),redirect:"follow"})
     .then(r=>r.text())
     .then(txt=>{
       let res=null; try{ res=JSON.parse(txt); }catch(e){}
+      if(!dbOn() || (DB().url+"|"+DB().code)!==who) return false;   // paused or disconnected mid-flight
       if(!res||!res.ok) throw new Error(res&&res.error||"The Database didn't answer properly");
       const n=dbMerge(res);
       DB().last=Date.now(); DB().fails=0;
@@ -2317,7 +2338,7 @@ function applySetupLink(){
   if(!url||!code) return false;
   let ok=false;
   if(/^https:\/\/script\.google\.com\/.+\/exec$/.test(url) && /^\d{3,12}$/.test(code)){
-    DB().url=url; DB().code=code; DB().fails=0;
+    DB().url=url; DB().code=code; DB().fails=0; DB().on=true;
     dbLog("Joined The Database"); save(); ok=true;
   }
   try{ history.replaceState(null,"",location.origin+location.pathname); }catch(e){}   // don't leave it in the address bar
@@ -3280,7 +3301,12 @@ function closeOwnerModal(){ $("#ow-modal").classList.remove("show"); }
 function tryOwnerCode(){
   if($("#ow-input").value.trim()===ownerCode()){
     setOwner(true); closeOwnerModal(); renderSettings();
-    const el=$("#panel-codecenter"); if(el) el.scrollIntoView({behavior:"smooth",block:"center"});
+    const el=$("#panel-codecenter");
+    if(el){
+      const sec=el.closest(".set-sec");                       // it lives inside a section that may be hidden
+      if(sec) showSection([...$$("#view-settings .set-sec")].indexOf(sec));
+      setTimeout(()=>el.scrollIntoView({behavior:"smooth",block:"center"}),60);
+    }
   } else {
     $("#ow-err").textContent="Wrong code"; $("#ow-input").value="";
     const c=$("#ow-modal .modal"); c.classList.remove("gate-shake"); void c.offsetWidth; c.classList.add("gate-shake"); $("#ow-input").focus();
