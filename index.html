@@ -450,7 +450,6 @@
   :root[data-hidden-nums] #student-table td.num,
   :root[data-hidden-nums] #student-table .barwrap,
   :root[data-hidden-nums] #log .log-body,
-  :root[data-hidden-nums] #reminders,
   :root[data-hidden-nums] #a-chart,
   :root[data-hidden-nums] #a-stats .stat .n,
   :root[data-hidden-nums] #a-table{
@@ -458,11 +457,23 @@
     -webkit-user-select:none;user-select:none;pointer-events:none;
     transition:filter .15s;
   }
-  /* still tappable, just unreadable - she has to be able to work while it is on */
-  :root[data-hidden-nums] .s-cons{filter:blur(6px);transition:filter .15s}
-  :root[data-hidden-nums] .s-cons:hover,
-  :root[data-hidden-nums] .s-cons:focus-within{filter:none}
-  :root[data-hidden-nums] .count{opacity:.9}
+  :root[data-hidden-nums] .s-cons,
+  :root[data-hidden-nums] #reminders{display:none}
+  :root[data-hidden-nums] .count,
+  :root[data-hidden-nums] .count.has,
+  :root[data-hidden-nums] .count.max,
+  :root[data-mode="hits"]:root[data-hidden-nums] .count.has,
+  :root[data-mode="hits"]:root[data-hidden-nums] .count.max,
+  :root[data-hidden-nums] .ftile-count,
+  :root[data-hidden-nums] .ftile-count.max,
+  :root[data-mode="hits"]:root[data-hidden-nums] .ftile-count,
+  :root[data-mode="hits"]:root[data-hidden-nums] .ftile-count.max{
+    background:var(--line-soft)!important;color:var(--muted)!important;box-shadow:none!important;
+  }
+  /* a maxed-out tile is outlined in red, which says the same thing */
+  :root[data-hidden-nums] .ftile,
+  :root[data-hidden-nums] .ftile.maxed{border-color:var(--line)!important;background:var(--panel)!important}
+  :root[data-hidden-nums] .student.test{background:transparent}
   @media(prefers-reduced-motion:reduce){ :root[data-hidden-nums] .count{transition:none} }
   .new-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);background:var(--blue-soft);border-radius:20px;padding:4px 11px}
   .new-list{list-style:none;margin:14px 0 4px;padding:0;text-align:left}
