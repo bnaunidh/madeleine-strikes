@@ -435,6 +435,35 @@
   .chip[data-tint="c4"]{background:var(--c4)} .chip[data-tint="c5"]{background:var(--c5)} .chip[data-tint="c6"]{background:var(--c6)}
   .chip[data-tint="c7"]{background:var(--c7)} .chip[data-tint="c8"]{background:var(--c8)}
   :root[data-mode="hits"] .cin{border-color:var(--green-line);background:var(--green-soft);color:var(--green-dark)}
+
+  /* ---- Hide numbers: for when someone is looking at the screen ---- */
+  .pv-off{display:none}
+  :root[data-hidden-nums] .pv-on{display:none}
+  :root[data-hidden-nums] .pv-off{display:inline}
+  :root[data-hidden-nums] #privacy-btn{background:var(--amber-soft);color:var(--amber-ink)}
+  :root[data-hidden-nums] .count,
+  :root[data-hidden-nums] .s-sub,
+  :root[data-hidden-nums] .ftile-meta,
+  :root[data-hidden-nums] .ftile .badge,
+  :root[data-hidden-nums] #stats .stat .n,
+  :root[data-hidden-nums] #totals-stats .stat .n,
+  :root[data-hidden-nums] #student-table td.num,
+  :root[data-hidden-nums] #student-table .barwrap,
+  :root[data-hidden-nums] #log .log-body,
+  :root[data-hidden-nums] #reminders,
+  :root[data-hidden-nums] #a-chart,
+  :root[data-hidden-nums] #a-stats .stat .n,
+  :root[data-hidden-nums] #a-table{
+    filter:blur(7px);
+    -webkit-user-select:none;user-select:none;pointer-events:none;
+    transition:filter .15s;
+  }
+  /* still tappable, just unreadable - she has to be able to work while it is on */
+  :root[data-hidden-nums] .s-cons{filter:blur(6px);transition:filter .15s}
+  :root[data-hidden-nums] .s-cons:hover,
+  :root[data-hidden-nums] .s-cons:focus-within{filter:none}
+  :root[data-hidden-nums] .count{opacity:.9}
+  @media(prefers-reduced-motion:reduce){ :root[data-hidden-nums] .count{transition:none} }
   .new-badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--blue);background:var(--blue-soft);border-radius:20px;padding:4px 11px}
   .new-list{list-style:none;margin:14px 0 4px;padding:0;text-align:left}
   .new-list li{display:flex;flex-direction:column;gap:1px;padding:9px 0;border-top:1px solid var(--line-soft);font-size:13.5px}
@@ -633,6 +662,11 @@
     <div class="roster-bar">
       <span class="section-title" style="margin:0">Roster</span>
       <div class="roster-bar-right">
+        <button class="btn btn-ghost btn-sm" id="privacy-btn" aria-pressed="false" title="Hide the numbers from anyone looking over your shoulder">
+          <svg class="pv-on" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M2 12s4-7 10-7 10 7 10 7-4 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg>
+          <svg class="pv-off" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M3 3l18 18"/><path d="M10.6 5.1A9.7 9.7 0 0 1 12 5c6 0 10 7 10 7a17 17 0 0 1-2.6 3.4M6.6 6.6A17 17 0 0 0 2 12s4 7 10 7a9.6 9.6 0 0 0 4.6-1.1"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/></svg>
+          <span id="privacy-label">Hide numbers</span>
+        </button>
         <button class="btn btn-ghost btn-sm" id="bulk-open">
           <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M9 12h6M9 16h6"/></svg>
           Add several
@@ -1512,7 +1546,8 @@ function giveStrike(id,reason){          // gives one mark in the CURRENT mode
   popCount(document.querySelector("#roster [data-strike='"+id+"']")?.closest(".student")?.querySelector(".count"));
   const r=reason&&reason.trim()?' — "'+reason.trim()+'"':"";
   const cons=triggered?" · "+triggered.label+" now due":"";
-  toastUndo(st.name+": "+plural(cntOf(st),w.n)+r+cons, ()=>{
+  const said = numsHidden() ? (st.name+" \u2014 "+w.n+" added"+r) : (st.name+": "+plural(cntOf(st),w.n)+r+cons);
+  toastUndo(said, ()=>{
     setCnt(st,Math.max(0,cntOf(st)-1)); setYear(st,Math.max(0,yearOf(st)-1)); syncDone(st); beep(hits?"add":"remove");
     const i=state.log.findIndex(l=>l.t===w.log&&l.id===id); if(i>-1) state.log.splice(i,1);
     save(); renderAll();
@@ -2724,7 +2759,7 @@ function toastUndo(msg,undo){ const t=$("#toast"); t.className="undo"; t.innerHT
 // modal
 let modalId=null;
 function openModal(id){ const st=state.students.find(x=>x.id===id); if(!st) return; modalId=id;
-  $("#modal-who").textContent=st.name+(st.cls?` · ${st.cls}`:"")+` · currently ${plural(cntOf(st),W().n)}`;
+  $("#modal-who").textContent=st.name+(st.cls?` · ${st.cls}`:"")+(numsHidden()?"":` · currently ${plural(cntOf(st),W().n)}`);
   $("#modal-reason").value=""; renderModalTags();
   $("#modal").classList.add("show"); setTimeout(()=>{ const m=$("#modal .modal"); if(m) m.focus(); },30); }
 function closeModal(){ $("#modal").classList.remove("show"); modalId=null; }
@@ -2987,6 +3022,20 @@ function toggleLayout(){
   const next=!newLayout();
   try{ next ? localStorage.removeItem("madeleine_layout") : localStorage.setItem("madeleine_layout","classic"); }catch(e){}
   applyLayout(); toast(next?"New layout":"Old layout");
+}
+function numsHidden(){ try{ return localStorage.getItem("madeleine_hidenums")==="1"; }catch(e){ return false; } }
+function applyHideNums(){
+  const on=numsHidden();
+  if(on) document.documentElement.setAttribute("data-hidden-nums",""); else document.documentElement.removeAttribute("data-hidden-nums");
+  const b=$("#privacy-btn"), l=$("#privacy-label");
+  if(l) l.textContent = on ? "Show numbers" : "Hide numbers";
+  if(b) b.setAttribute("aria-pressed", String(on));
+}
+function toggleHideNums(){
+  const next=!numsHidden();
+  try{ next ? localStorage.setItem("madeleine_hidenums","1") : localStorage.removeItem("madeleine_hidenums"); }catch(e){}
+  applyHideNums();
+  toast(next ? "Numbers hidden" : "Numbers showing");
 }
 function toggleTheme(){ const next=currentTheme()==="dark"?"light":"dark"; document.documentElement.setAttribute("data-theme",next); try{ localStorage.setItem("madeleine_theme",next); }catch(e){} updateThemeIcon(); }
 $("#theme-toggle").onclick=toggleTheme;
@@ -3339,6 +3388,7 @@ $("#ow-cancel").onclick=closeOwnerModal;
 $("#ow-input").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); tryOwnerCode(); } });
 $("#ow-input").addEventListener("input",()=>{ $("#ow-err").textContent=""; });
 $("#ow-modal").addEventListener("click",e=>{ if(e.target.id==="ow-modal") closeOwnerModal(); });
+$("#privacy-btn").onclick=toggleHideNums;
 $("#layout-switch").onclick=toggleLayout;
 $("#cls-go").onclick=tryClassCode;
 $("#cls-cancel").onclick=closeClassModal;
@@ -3404,6 +3454,7 @@ $("#photo-file").addEventListener("change",e=>{ const f=e.target.files&&e.target
 
 // boot
 setOwner(false);
+applyHideNums();
 upgradeCodes();
 const joinedByLink = applySetupLink() || applyBakedDb();
 applyLayout();
