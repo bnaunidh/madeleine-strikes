@@ -429,6 +429,18 @@
   :root[data-mode="strikes"] #tier-editor .ibtn.on{background:var(--red-soft);border-color:var(--red);color:var(--red-dark)}
   :root[data-mode="strikes"] #tier-editor .iconpick:hover,:root[data-mode="strikes"] #tier-editor .ibtn:hover{border-color:var(--red)}
   .ibtn[data-icon=""]{width:auto;padding:0 10px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
+  #slam{position:fixed;inset:0;z-index:95;display:none;place-items:center;pointer-events:none;background:rgba(16,22,34,.3);backdrop-filter:blur(1.5px)}
+  #slam.show{display:grid}
+  .slam-card{position:relative;z-index:1;background:var(--panel);border:1px solid var(--green-line);border-radius:20px;
+    box-shadow:0 18px 60px rgba(0,0,0,.3);padding:26px 38px;text-align:center;color:var(--green-dark)}
+  .slam-ico{color:var(--green)}
+  .slam-t{font-size:19px;font-weight:750;letter-spacing:-.01em;margin-top:6px;color:var(--ink)}
+  .slam-n{font-size:13.5px;color:var(--muted);margin-top:2px}
+  .slam-bits{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:2}
+  .slam-bit{position:absolute;width:8px;height:8px;border-radius:2px;background:var(--green);opacity:0}
+  .slam-bit:nth-child(3n){background:var(--amber)}
+  .slam-bit:nth-child(3n+1){background:var(--blue)}
+  :root[data-hidden-nums] #slam{display:none!important}
   .beta-tag{display:inline-block;margin-left:7px;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--amber-ink);background:var(--amber-soft);border:1px solid var(--amber-line);border-radius:20px;padding:2px 7px;vertical-align:1px}
   .chip[data-tint]{color:#fff;border:0}
   .chip[data-tint="c1"]{background:var(--c1)} .chip[data-tint="c2"]{background:var(--c2)} .chip[data-tint="c3"]{background:var(--c3)}
@@ -1235,6 +1247,15 @@
   </div>
 </div>
 
+<div id="slam" aria-live="polite">
+  <div class="slam-card">
+    <div class="slam-bits"><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i></div>
+    <svg class="slam-ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.5 5M17 6h2.5a2.5 2.5 0 0 1-2.5 5"/></svg>
+    <div class="slam-t">Grand slam</div>
+    <div class="slam-n" id="slam-who"></div>
+  </div>
+</div>
+
 <div id="toast"></div>
 
 <script>
@@ -1372,9 +1393,14 @@ function normalize(s){
   s.settings.tiers = s.settings.tiers.filter(x=>x && typeof x.label==="string" && Number.isFinite(+x.at)).map(x=>({at:+x.at,label:x.label,icon:typeof x.icon==="string"?x.icon:""}));
   s.settings.tiers.sort((a,b)=>a.at-b.at);
   if(!Array.isArray(s.settings.rewards))
-    s.settings.rewards=[{at:3,label:"Free choice time",icon:"star"},{at:5,label:"Note home",icon:"heart"},{at:10,label:"Prize box",icon:"gift"}];
+    s.settings.rewards=[{at:3,label:"Free choice time",icon:"star"},{at:4,label:"Grand slam",icon:"trophy"},{at:5,label:"Note home",icon:"heart"},{at:10,label:"Prize box",icon:"gift"}];
   s.settings.rewards = s.settings.rewards.filter(x=>x&&typeof x.label==="string"&&Number.isFinite(+x.at))
     .map(x=>({at:+x.at,label:x.label,icon:typeof x.icon==="string"?x.icon:"star"}));
+  if(!s.settings.slamAdded){                         // added once; delete the rung if you do not want it
+    s.settings.slamAdded=true;
+    if(!s.settings.rewards.some(r=>/slam/i.test(r.label)) && !s.settings.rewards.some(r=>+r.at===4))
+      s.settings.rewards.push({at:4,label:"Grand slam",icon:"trophy"});
+  }
   s.settings.rewards.sort((a,b)=>a.at-b.at);
   s.students.forEach(x=>{
     x.strikes ||= 0; x.total ??= x.strikes; x.hits ||= 0; x.hitTotal ??= (x.hits||0);
@@ -1557,6 +1583,7 @@ function giveStrike(id,reason){          // gives one mark in the CURRENT mode
   popCount(document.querySelector("#roster [data-strike='"+id+"']")?.closest(".student")?.querySelector(".count"));
   const r=reason&&reason.trim()?' — "'+reason.trim()+'"':"";
   const cons=triggered?" · "+triggered.label+" now due":"";
+  if(triggered && isHits() && /slam/i.test(triggered.label)) slamCelebrate(st.name);
   const said = numsHidden() ? (st.name+" \u2014 "+w.n+" added"+r) : (st.name+": "+plural(cntOf(st),w.n)+r+cons);
   toastUndo(said, ()=>{
     setCnt(st,Math.max(0,cntOf(st)-1)); setYear(st,Math.max(0,yearOf(st)-1)); syncDone(st); beep(hits?"add":"remove");
@@ -2760,6 +2787,27 @@ function zoomCropTo(z){
   c.ox=mid-(mid-c.ox)*(after/before);
   c.oy=mid-(mid-c.oy)*(after/before);
   c.zoom=z; paintCrop();
+}
+
+// a grand slam is worth more than a line of text going past
+function slamCelebrate(name){
+  const el=$("#slam"); if(!el) return;
+  $("#slam-who").textContent=name;
+  el.classList.add("show");
+  const done=()=>el.classList.remove("show");
+  clearTimeout(el._t); el._t=setTimeout(done,2200);
+  if(!motionOK()) return;
+  try{
+    const {animate,stagger}=window.Motion;
+    animate(el.querySelector(".slam-card"),{scale:[0.86,1],opacity:[0,1]},{duration:0.32,easing:[0.2,0.9,0.3,1]});
+    const bits=$$("#slam .slam-bit");
+    bits.forEach((b,i)=>{
+      const a=(i/bits.length)*Math.PI*2, d=70+((i*37)%50);
+      animate(b,{x:[0,Math.cos(a)*d],y:[0,Math.sin(a)*d-20],opacity:[1,0],scale:[0.6,1]},
+        {duration:1.1,delay:i*0.012,easing:"ease-out"});
+    });
+    setTimeout(()=>{ bits.forEach(b=>{ b.style.transform=""; b.style.opacity=""; }); },1500);   // never leave one stuck
+  }catch(e){}
 }
 
 // toast
