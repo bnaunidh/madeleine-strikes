@@ -350,7 +350,7 @@ function stripHeavy_(s) {
   if (!s) return {};
   var out = {};
   Object.keys(s).forEach(function (k) {
-    if (k === "soundAdd" || k === "soundRemove") return;
+    if (k === "soundAdd" || k === "soundRemove" || k === "soundSlam") return;
     if (typeof s[k] === "string" && s[k].length > 4000) return;
     out[k] = s[k];
   });

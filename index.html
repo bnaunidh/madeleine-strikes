@@ -430,16 +430,17 @@
   :root[data-mode="strikes"] #tier-editor .iconpick:hover,:root[data-mode="strikes"] #tier-editor .ibtn:hover{border-color:var(--red)}
   .ibtn[data-icon=""]{width:auto;padding:0 10px;font-size:11px;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
   #slam{position:fixed;inset:0;z-index:95;display:none;place-items:center;pointer-events:none;background:rgba(16,22,34,.3);backdrop-filter:blur(1.5px)}
+  #slam.show{pointer-events:auto;cursor:pointer}
+  .slam-x{font-size:11.5px;color:var(--muted);margin-top:10px;letter-spacing:.02em}
   #slam.show{display:grid}
   .slam-card{position:relative;z-index:1;background:var(--panel);border:1px solid var(--green-line);border-radius:20px;
     box-shadow:0 18px 60px rgba(0,0,0,.3);padding:26px 38px;text-align:center;color:var(--green-dark)}
   .slam-ico{color:var(--green)}
   .slam-t{font-size:19px;font-weight:750;letter-spacing:-.01em;margin-top:6px;color:var(--ink)}
   .slam-n{font-size:13.5px;color:var(--muted);margin-top:2px}
-  .slam-bits{position:absolute;inset:0;display:grid;place-items:center;pointer-events:none;z-index:2}
-  .slam-bit{position:absolute;width:8px;height:8px;border-radius:2px;background:var(--green);opacity:0}
-  .slam-bit:nth-child(3n){background:var(--amber)}
-  .slam-bit:nth-child(3n+1){background:var(--blue)}
+  .slam-bits{position:absolute;inset:0;overflow:hidden;pointer-events:none;z-index:3}
+  .slam-bit{position:absolute;top:-24px;width:11px;height:16px;border-radius:2px;opacity:0;will-change:transform}
+  .slam-bit.r{border-radius:50%;width:10px;height:10px}
   :root[data-hidden-nums] #slam{display:none!important}
   .beta-tag{display:inline-block;margin-left:7px;font-size:10px;font-weight:700;letter-spacing:.06em;color:var(--amber-ink);background:var(--amber-soft);border:1px solid var(--amber-line);border-radius:20px;padding:2px 7px;vertical-align:1px}
   .chip[data-tint]{color:#fff;border:0}
@@ -1009,6 +1010,18 @@
         <input type="file" id="file-remove" accept="audio/*" style="display:none">
       </div>
     </div>
+    <div class="set-row">
+      <div>
+        <div class="t">Sound for a grand slam</div>
+        <div class="d" id="status-slam">The built-in ding, three times, rising — upload a cheer if you have one</div>
+      </div>
+      <div class="ctl">
+        <button class="btn btn-ghost btn-sm" id="play-slam" title="Preview">▶</button>
+        <button class="btn btn-ghost btn-sm" id="upload-slam">Upload…</button>
+        <button class="btn btn-ghost btn-sm" id="reset-slam" style="display:none">Reset</button>
+        <input type="file" id="file-slam" accept="audio/*" style="display:none">
+      </div>
+    </div>
   </div>
 
   <div class="panel panel-pad" style="margin-top:18px">
@@ -1248,11 +1261,12 @@
 </div>
 
 <div id="slam" aria-live="polite">
+  <div class="slam-bits" id="slam-bits"></div>
   <div class="slam-card">
-    <div class="slam-bits"><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i><i class="slam-bit"></i></div>
     <svg class="slam-ico" width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0z"/><path d="M7 6H4.5a2.5 2.5 0 0 0 2.5 5M17 6h2.5a2.5 2.5 0 0 1-2.5 5"/></svg>
     <div class="slam-t">Grand slam</div>
     <div class="slam-n" id="slam-who"></div>
+    <div class="slam-x">tap anywhere to close</div>
   </div>
 </div>
 
@@ -1950,6 +1964,10 @@ function renderSettings(){
   $("#status-remove").textContent = state.settings.soundRemove ? ("Your file: "+(state.settings.soundRemoveName||"custom")) : "Built-in tap";
   $("#reset-add").style.display = state.settings.soundAdd ? "" : "none";
   $("#reset-remove").style.display = state.settings.soundRemove ? "" : "none";
+  { const st=$("#status-slam"), rs=$("#reset-slam");
+    if(st) st.textContent = state.settings.soundSlam ? ("Your file: "+(state.settings.soundSlamName||"custom"))
+      : "The built-in ding, three times, rising \u2014 upload a cheer if you have one";
+    if(rs) rs.style.display = state.settings.soundSlam ? "" : "none"; }
   const nt=state.settings.notify;
   $("#notify-switch").classList.toggle("on", nt.enabled);
   $("#notify-config").style.display = nt.enabled ? "" : "none";
@@ -2790,24 +2808,46 @@ function zoomCropTo(z){
 }
 
 // a grand slam is worth more than a line of text going past
+function slamClose(){
+  const el=$("#slam"); if(!el) return;
+  clearTimeout(el._t); el.classList.remove("show");
+  const bits=$("#slam-bits"); if(bits) bits.innerHTML="";      // closing early must take the confetti with it
+}
 function slamCelebrate(name){
   const el=$("#slam"); if(!el) return;
   $("#slam-who").textContent=name;
   el.classList.add("show");
-  const done=()=>el.classList.remove("show");
-  clearTimeout(el._t); el._t=setTimeout(done,2200);
-  if(!motionOK()) return;
+  clearTimeout(el._t); el._t=setTimeout(slamClose,3000);
+  slamSound();
+  const bits=$("#slam-bits");
+  if(!bits) return;
+  const COLS=["var(--green)","var(--blue)","var(--amber)","var(--red)","var(--c5)","var(--c6)"];
+  bits.innerHTML=Array.from({length:44},(_,i)=>
+    `<i class="slam-bit${i%3===0?" r":""}" style="left:${(i*2.27+Math.abs(Math.sin(i))*4)%100}%;background:${COLS[i%COLS.length]}"></i>`).join("");
+  const pieces=$$("#slam-bits .slam-bit");
+  const clear=()=>{ pieces.forEach(b=>{ b.style.transform=""; b.style.opacity=""; }); bits.innerHTML=""; };
+  if(!motionOK()){ clear(); return; }
   try{
-    const {animate,stagger}=window.Motion;
-    animate(el.querySelector(".slam-card"),{scale:[0.86,1],opacity:[0,1]},{duration:0.32,easing:[0.2,0.9,0.3,1]});
-    const bits=$$("#slam .slam-bit");
-    bits.forEach((b,i)=>{
-      const a=(i/bits.length)*Math.PI*2, d=70+((i*37)%50);
-      animate(b,{x:[0,Math.cos(a)*d],y:[0,Math.sin(a)*d-20],opacity:[1,0],scale:[0.6,1]},
-        {duration:1.1,delay:i*0.012,easing:"ease-out"});
+    const {animate}=window.Motion;
+    animate(el.querySelector(".slam-card"),{scale:[0.86,1],opacity:[0,1]},{duration:0.34,easing:[0.2,0.9,0.3,1]});
+    pieces.forEach((b,i)=>{
+      const drift=((i*53)%120)-60, spin=((i*97)%720)-360, dur=1.5+((i*17)%80)/100;
+      animate(b,{ y:[0, window.innerHeight+60], x:[0, drift], rotate:[0, spin], opacity:[1,1,0.2] },
+        { duration:dur, delay:(i%11)*0.045, easing:"ease-in" });
     });
-    setTimeout(()=>{ bits.forEach(b=>{ b.style.transform=""; b.style.opacity=""; }); },1500);   // never leave one stuck
-  }catch(e){}
+    setTimeout(clear,2900);                                  // never leave a piece stuck on screen
+  }catch(e){ clear(); }
+}
+
+// A flourish built from the ding that is already in the app, rising in pitch.
+// Settings can replace it with a real cheer.
+function slamSound(){
+  if(!state.settings.sound) return;
+  const src=state.settings.soundSlam || sfxSrc("add");
+  if(state.settings.soundSlam){ playSound(src,0.9); return; }
+  [1,1.26,1.5].forEach((rate,i)=>setTimeout(()=>{
+    try{ const a=new Audio(src); a.volume=0.75; a.playbackRate=rate; const p=a.play(); if(p&&p.catch) p.catch(()=>{}); }catch(e){}
+  }, i*110));
 }
 
 // toast
@@ -3030,6 +3070,7 @@ function readSound(file, key){
   const rd=new FileReader();
   rd.onload=()=>{
     if(key==="add"){ state.settings.soundAdd=rd.result; state.settings.soundAddName=file.name; }
+    else if(key==="slam"){ state.settings.soundSlam=rd.result; state.settings.soundSlamName=file.name; }
     else { state.settings.soundRemove=rd.result; state.settings.soundRemoveName=file.name; }
     save(); renderSettings(); playSound(rd.result, 0.9);
   };
@@ -3043,6 +3084,10 @@ $("#upload-remove").onclick=()=>$("#file-remove").click();
 $("#file-remove").addEventListener("change",e=>{ readSound(e.target.files&&e.target.files[0],"remove"); e.target.value=""; });
 $("#reset-remove").onclick=()=>{ delete state.settings.soundRemove; delete state.settings.soundRemoveName; save(); renderSettings(); };
 $("#play-remove").onclick=()=>playSound(sfxSrc("remove"),0.9);
+$("#upload-slam").onclick=()=>$("#file-slam").click();
+$("#file-slam").addEventListener("change",e=>{ readSound(e.target.files&&e.target.files[0],"slam"); e.target.value=""; });
+$("#reset-slam").onclick=()=>{ delete state.settings.soundSlam; delete state.settings.soundSlamName; save(); renderSettings(); };
+$("#play-slam").onclick=slamSound;
 $("#export-now").onclick=()=>exportData(false);
 $("#import-btn").onclick=()=>$("#import-file").click();
 $("#import-file").addEventListener("change",e=>{ const f=e.target.files&&e.target.files[0]; if(f) importData(f); e.target.value=""; });
@@ -3182,7 +3227,7 @@ document.addEventListener("keydown",e=>{
   if(!document.documentElement.hasAttribute("data-chosen") || !document.documentElement.hasAttribute("data-unlocked")) return;
   const tag=e.target.tagName||"";
   const typing = tag==="INPUT"||tag==="TEXTAREA"||tag==="SELECT"||e.target.isContentEditable;
-  if(e.key==="Escape"){ if($("#modal").classList.contains("show")) closeModal(); else if($("#cls-modal").classList.contains("show")) closeClassModal(); else if($("#bulk-modal").classList.contains("show")) closeBulk(); else closeMenus(); return; }
+  if(e.key==="Escape"){ if($("#slam").classList.contains("show")) slamClose(); else if($("#modal").classList.contains("show")) closeModal(); else if($("#cls-modal").classList.contains("show")) closeClassModal(); else if($("#bulk-modal").classList.contains("show")) closeBulk(); else closeMenus(); return; }
   if(typing || e.metaKey || e.ctrlKey || e.altKey) return;
   const modalOpen=$("#modal").classList.contains("show")||$("#cls-modal").classList.contains("show")||$("#ow-modal").classList.contains("show");
   const bulkOpen=$("#bulk-modal").classList.contains("show");
@@ -3447,6 +3492,7 @@ $("#ow-cancel").onclick=closeOwnerModal;
 $("#ow-input").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); tryOwnerCode(); } });
 $("#ow-input").addEventListener("input",()=>{ $("#ow-err").textContent=""; });
 $("#ow-modal").addEventListener("click",e=>{ if(e.target.id==="ow-modal") closeOwnerModal(); });
+$("#slam").onclick=slamClose;
 $("#privacy-btn").onclick=toggleHideNums;
 $("#layout-switch").onclick=toggleLayout;
 $("#cls-go").onclick=tryClassCode;
